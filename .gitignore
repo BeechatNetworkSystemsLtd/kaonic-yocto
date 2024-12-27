@@ -1,0 +1,13 @@
+mx/kaonic/**/*.dts.bak
+mx/kaonic/**/*.tmp
+mx/kaonic/CM4
+mx/kaonic/CA7
+mx/kaonic/**/.settings
+mx/kaonic/Common/System
+**/.DS_Store
+mx/kaonic/Drivers
+mx/kaonic/.project
+mx/kaonic/.osx.project
+mx/kaonic/.mxproject
+mx/kaonic/DeviceTree/kaonic/kernel/Makefile
+mx/kaonic/DeviceTree/kaonic/u-boot/Makefile
