@@ -2,6 +2,7 @@ mx/kaonic/**/*.dts.bak
 mx/kaonic/**/*.tmp
 mx/kaonic/CM4
 mx/kaonic/CA7
+!mx/kaonic/CA7/DeviceTree
 mx/kaonic/**/.settings
 mx/kaonic/Common/System
 **/.DS_Store
