@@ -20,6 +20,7 @@
 #include "stm32mp15-ddr.dtsi"
 
 /* USER CODE BEGIN includes */
+
 /* USER CODE END includes */
 
 / {
@@ -145,5 +146,6 @@
 };
 
 /* USER CODE BEGIN addons */
+
 /* USER CODE END addons */
 

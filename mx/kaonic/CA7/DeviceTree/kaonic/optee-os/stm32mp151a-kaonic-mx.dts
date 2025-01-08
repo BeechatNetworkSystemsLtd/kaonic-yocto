@@ -18,6 +18,7 @@
 #include "stm32mp15xxab-pinctrl.dtsi"
 
 /* USER CODE BEGIN includes */
+
 /* USER CODE END includes */
 
 / {
@@ -206,5 +207,6 @@
 };
 
 /* USER CODE BEGIN addons */
+
 /* USER CODE END addons */
 

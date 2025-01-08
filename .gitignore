@@ -2,8 +2,9 @@ mx/kaonic/**/*.dts.bak
 mx/kaonic/**/*.dtb
 mx/kaonic/**/*.tmp
 mx/kaonic/CM4
-mx/kaonic/CA7
-!mx/kaonic/CA7/DeviceTree
+mx/kaonic/CA7/.project
+mx/kaonic/CA7/manifest.prop
+# !mx/kaonic/CA7/DeviceTree
 mx/kaonic/**/.settings
 mx/kaonic/Common/System
 **/.DS_Store
@@ -13,4 +14,7 @@ mx/kaonic/.osx.project
 mx/kaonic/.mxproject
 mx/kaonic/DeviceTree/kaonic/kernel/Makefile
 mx/kaonic/DeviceTree/kaonic/u-boot/Makefile
-mx/kaonic/DeviceTree/kaonic/optee-os/conf.mk
+mx/kaonic/CA7/DeviceTree/kaonic/u-boot/Makefile
+mx/kaonic/CA7/DeviceTree/kaonic/**/*.dtb.cmd
+mx/kaonic/CA7/DeviceTree/kaonic/**/*.mk
+mx/kaonic/CA7/DeviceTree/kaonic/**/Makefile
