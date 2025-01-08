@@ -1,4 +1,5 @@
 mx/kaonic/**/*.dts.bak
+mx/kaonic/**/*.dtb
 mx/kaonic/**/*.tmp
 mx/kaonic/CM4
 mx/kaonic/CA7
@@ -12,3 +13,4 @@ mx/kaonic/.osx.project
 mx/kaonic/.mxproject
 mx/kaonic/DeviceTree/kaonic/kernel/Makefile
 mx/kaonic/DeviceTree/kaonic/u-boot/Makefile
+mx/kaonic/DeviceTree/kaonic/optee-os/conf.mk
