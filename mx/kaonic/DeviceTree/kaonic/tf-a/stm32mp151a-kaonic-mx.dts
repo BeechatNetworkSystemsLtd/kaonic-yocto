@@ -64,6 +64,16 @@
 }; /*root*/
 
 &pinctrl {
+	i2c4_pins_mx: i2c4_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 13, AF4)>, /* I2C4_SDA */
+					 <STM32_PINMUX('E', 2, AF4)>; /* I2C4_SCL */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
 	/* USER CODE BEGIN pinctrl */
 	/* USER CODE END pinctrl */
 };
@@ -71,6 +81,15 @@
 &pinctrl_z {
 	/* USER CODE BEGIN pinctrl_z */
 	/* USER CODE END pinctrl_z */
+};
+
+&i2c4 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c4_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN i2c4 */
+	/* USER CODE END i2c4 */
 };
 
 &rcc {
@@ -82,6 +101,7 @@
 	st,clksrc = <
 		CLK_CKPER_DISABLED
 		CLK_STGEN_HSI
+		CLK_I2C46_PCLK5
 		CLK_MPU_PLL1P
 		CLK_AXI_HSI
 		CLK_MCU_HSI

@@ -18,7 +18,6 @@
 
 /* USER CODE BEGIN includes */
 #include "stm32mp15-scmi.dtsi"
-#include "stm32mp15-scmi-u-boot.dtsi"
 /* USER CODE END includes */
 
 / {
@@ -54,6 +53,23 @@
 }; /*root*/
 
 &pinctrl {
+
+	i2c4_pins_mx: i2c4_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 13, AF4)>, /* I2C4_SDA */
+					 <STM32_PINMUX('E', 2, AF4)>; /* I2C4_SCL */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
+	i2c4_sleep_pins_mx: i2c4_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 13, ANALOG)>, /* I2C4_SDA */
+					 <STM32_PINMUX('E', 2, ANALOG)>; /* I2C4_SCL */
+		};
+	};
 
 	/* USER CODE BEGIN pinctrl */
 	/* USER CODE END pinctrl */
@@ -110,6 +126,16 @@
 	/* USER CODE END dmamux1 */
 };
 
+&i2c4 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&i2c4_pins_mx>;
+	pinctrl-1 = <&i2c4_sleep_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN i2c4 */
+	/* USER CODE END i2c4 */
+};
+
 &m4_dma2 {
 	status = "okay";
 
@@ -146,6 +172,7 @@
 };
 
 /* USER CODE BEGIN addons */
+
 &cpu0 {
 	clocks = <&scmi_clk CK_SCMI_MPU>;
 };
@@ -215,5 +242,6 @@
 &usart1 {
 	clocks = <&scmi_clk CK_SCMI_USART1>;
 };
+
 /* USER CODE END addons */
 
