@@ -82,6 +82,25 @@
 		};
 	};
 
+	sdmmc1_pins_mx: sdmmc1_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
+					 <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
+					 <STM32_PINMUX('C', 10, AF12)>, /* SDMMC1_D2 */
+					 <STM32_PINMUX('C', 11, AF12)>, /* SDMMC1_D3 */
+					 <STM32_PINMUX('D', 2, AF12)>; /* SDMMC1_CMD */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('C', 12, AF12)>; /* SDMMC1_CK */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <3>;
+		};
+	};
+
 	/* USER CODE BEGIN pinctrl */
 	/* USER CODE END pinctrl */
 };
@@ -219,6 +238,7 @@
 
 	st,clksrc = <
 		CLK_CKPER_DISABLED
+		CLK_SDMMC12_HCLK6
 		CLK_STGEN_HSI
 		CLK_I2C46_PCLK5
 		CLK_MPU_PLL1P
@@ -261,6 +281,19 @@
 		/* USER CODE END pll2 */
 	};
 
+};
+
+&sdmmc1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&sdmmc1_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN sdmmc1 */
+	disable-wp;
+	st,neg-edge;
+	bus-width = <4>;
+	vmmc-supply = <&v3v3>;
+	/* USER CODE END sdmmc1 */
 };
 
 /* USER CODE BEGIN addons */
