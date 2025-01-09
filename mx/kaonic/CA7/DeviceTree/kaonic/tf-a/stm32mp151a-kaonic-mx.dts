@@ -265,6 +265,7 @@
 		CLK_SDMMC12_HCLK6
 		CLK_STGEN_HSI
 		CLK_I2C46_PCLK5
+		CLK_USBO_PLL4R
 		CLK_UART24_PCLK1
 		CLK_UART6_PCLK2
 		CLK_MPU_PLL1P
@@ -292,6 +293,10 @@
 		pll3_vco_402Mhz: pll3-vco-402Mhz {
 			src = < CLK_PLL3_HSE >;
 			divmn = < 3 66 >;
+		};
+		pll4_vco_480Mhz: pll4-vco-480Mhz {
+			src = < CLK_PLL4_HSE >;
+			divmn = < 1 39 >;
 		};
 		/* USER CODE BEGIN rcc_st-pll_vco */
 		/* USER CODE END rcc_st-pll_vco */
@@ -325,6 +330,20 @@
 		/* USER CODE END pll3 */
 	};
 
+	pll4:st,pll@3 {
+		compatible = "st,stm32mp1-pll";
+		reg = <3>;
+
+		st,pll = < &pll4_cfg1 >;
+
+		pll4_cfg1: pll4_cfg1 {
+			st,pll_vco = < &pll4_vco_480Mhz >;
+			st,pll_div_pqr = < 2 1 24 >;
+		};
+		/* USER CODE BEGIN pll4 */
+		/* USER CODE END pll4 */
+	};
+
 };
 
 &sdmmc1 {
@@ -354,6 +373,34 @@
 
 	/* USER CODE BEGIN usart6 */
 	/* USER CODE END usart6 */
+};
+
+&usbotg_hs {
+	status = "okay";
+
+	/* USER CODE BEGIN usbotg_hs */
+	/* USER CODE END usbotg_hs */
+};
+
+&usbphyc {
+	status = "okay";
+
+	/* USER CODE BEGIN usbphyc */
+	/* USER CODE END usbphyc */
+};
+
+&usbphyc_port0 {
+	status = "okay";
+
+	/* USER CODE BEGIN usbphyc_port0 */
+	/* USER CODE END usbphyc_port0 */
+};
+
+&usbphyc_port1 {
+	status = "okay";
+
+	/* USER CODE BEGIN usbphyc_port1 */
+	/* USER CODE END usbphyc_port1 */
 };
 
 /* USER CODE BEGIN addons */

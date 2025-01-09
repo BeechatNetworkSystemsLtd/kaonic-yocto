@@ -600,6 +600,48 @@
 	/* USER CODE END usart6 */
 };
 
+&usbh_ehci {
+	status = "okay";
+
+	/* USER CODE BEGIN usbh_ehci */
+	/* USER CODE END usbh_ehci */
+};
+
+&usbh_ohci {
+	status = "okay";
+
+	/* USER CODE BEGIN usbh_ohci */
+	/* USER CODE END usbh_ohci */
+};
+
+&usbotg_hs {
+	status = "okay";
+
+	/* USER CODE BEGIN usbotg_hs */
+	/* USER CODE END usbotg_hs */
+};
+
+&usbphyc {
+	status = "okay";
+
+	/* USER CODE BEGIN usbphyc */
+	/* USER CODE END usbphyc */
+};
+
+&usbphyc_port0 {
+	status = "okay";
+
+	/* USER CODE BEGIN usbphyc_port0 */
+	/* USER CODE END usbphyc_port0 */
+};
+
+&usbphyc_port1 {
+	status = "okay";
+
+	/* USER CODE BEGIN usbphyc_port1 */
+	/* USER CODE END usbphyc_port1 */
+};
+
 /* USER CODE BEGIN addons */
 
 &cpu0 {
