@@ -47,7 +47,19 @@
 	};
 
 	/* USER CODE BEGIN root */
-	
+
+	aliases {
+		serial0 = &usart6;
+		serial1 = &usart2;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+	};
+
 	vin: vin {
 		compatible = "regulator-fixed";
 		regulator-name = "vin";
@@ -136,6 +148,36 @@
 					 <STM32_PINMUX('C', 11, ANALOG)>, /* SDMMC1_D3 */
 					 <STM32_PINMUX('C', 12, ANALOG)>, /* SDMMC1_CK */
 					 <STM32_PINMUX('D', 2, ANALOG)>; /* SDMMC1_CMD */
+		};
+	};
+
+	usart6_pins_mx: usart6_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('C', 6, AF7)>; /* USART6_TX */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('C', 7, AF7)>; /* USART6_RX */
+			bias-disable;
+		};
+	};
+
+	usart6_idle_pins_mx: usart6_idle_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('C', 6, ANALOG)>; /* USART6_TX */
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('C', 7, AF7)>; /* USART6_RX */
+			bias-disable;
+		};
+	};
+
+	usart6_sleep_pins_mx: usart6_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('C', 6, ANALOG)>, /* USART6_TX */
+					 <STM32_PINMUX('C', 7, ANALOG)>; /* USART6_RX */
 		};
 	};
 
@@ -383,6 +425,24 @@
 
 	/* USER CODE BEGIN tamp */
 	/* USER CODE END tamp */
+};
+
+&usart2 {
+	status = "okay";
+
+	/* USER CODE BEGIN usart2 */
+	/* USER CODE END usart2 */
+};
+
+&usart6 {
+	pinctrl-names = "default", "idle", "sleep";
+	pinctrl-0 = <&usart6_pins_mx>;
+	pinctrl-1 = <&usart6_idle_pins_mx>;
+	pinctrl-2 = <&usart6_sleep_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN usart6 */
+	/* USER CODE END usart6 */
 };
 
 /* USER CODE BEGIN addons */

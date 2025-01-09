@@ -35,6 +35,16 @@
 	};
 
 	/* USER CODE BEGIN root */
+
+	aliases {
+		serial0 = &usart6;
+		serial1 = &usart2;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
 	vin: vin {
 		compatible = "regulator-fixed";
 		regulator-name = "vin";
@@ -56,13 +66,14 @@
 			/* USER CODE END clk_hsi */
 		};
 		clk_lse: clk-lse {
-			status = "disabled";
+			clock-frequency = <32768>;
+			st,drive = < LSEDRV_MEDIUM_HIGH >;
 
 			/* USER CODE BEGIN clk_lse */
 			/* USER CODE END clk_lse */
 		};
 		clk_hse: clk-hse {
-			status = "disabled";
+			clock-frequency = <24000000>;
 
 			/* USER CODE BEGIN clk_hse */
 			/* USER CODE END clk_hse */
@@ -98,6 +109,19 @@
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <3>;
+		};
+	};
+
+	usart6_pins_mx: usart6_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('C', 6, AF7)>; /* USART6_TX */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('C', 7, AF7)>; /* USART6_RX */
+			bias-disable;
 		};
 	};
 
@@ -241,8 +265,10 @@
 		CLK_SDMMC12_HCLK6
 		CLK_STGEN_HSI
 		CLK_I2C46_PCLK5
+		CLK_UART24_PCLK1
+		CLK_UART6_PCLK2
 		CLK_MPU_PLL1P
-		CLK_AXI_HSI
+		CLK_AXI_HSE
 		CLK_MCU_HSI
 	>;
 	st,clkdiv = <
@@ -259,9 +285,9 @@
 		DIV(DIV_MCO2, 0)
 	>;
 	st,pll_vco {
-		pll2_vco_800Mhz: pll2-vco-800Mhz {
-			src = < CLK_PLL12_HSI >;
-			divmn = < 3 24 >;
+		pll2_vco_816Mhz: pll2-vco-816Mhz {
+			src = < CLK_PLL12_HSE >;
+			divmn = < 1 33 >;
 		};
 		/* USER CODE BEGIN rcc_st-pll_vco */
 		/* USER CODE END rcc_st-pll_vco */
@@ -274,7 +300,7 @@
 		st,pll = < &pll2_cfg1 >;
 
 		pll2_cfg1: pll2_cfg1 {
-			st,pll_vco = < &pll2_vco_800Mhz >;
+			st,pll_vco = < &pll2_vco_816Mhz >;
 			st,pll_div_pqr = < 1 1 0 >;
 		};
 		/* USER CODE BEGIN pll2 */
@@ -294,6 +320,22 @@
 	bus-width = <4>;
 	vmmc-supply = <&v3v3>;
 	/* USER CODE END sdmmc1 */
+};
+
+&usart2 {
+	status = "okay";
+
+	/* USER CODE BEGIN usart2 */
+	/* USER CODE END usart2 */
+};
+
+&usart6 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&usart6_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN usart6 */
+	/* USER CODE END usart6 */
 };
 
 /* USER CODE BEGIN addons */

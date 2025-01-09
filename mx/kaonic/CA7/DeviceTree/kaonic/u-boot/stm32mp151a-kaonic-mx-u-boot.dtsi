@@ -20,5 +20,10 @@
 }; /*root*/
 
 /* USER CODE BEGIN addons */
+
+&usart6{
+	u-boot,dm-pre-reloc;
+};
+
 /* USER CODE END addons */
 
