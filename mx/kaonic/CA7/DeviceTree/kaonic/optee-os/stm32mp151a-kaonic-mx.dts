@@ -129,6 +129,11 @@
 	DECPROT(STM32MP1_ETZPC_DMA1_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_DMAMUX_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_I2C4_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_QSPI_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_DLYBQ_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_SPI3_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_SPI4_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_SPI6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_USART2_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_USART6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	/*"Secured" peripherals*/
@@ -373,14 +378,18 @@
 
 	st,clksrc = <
 		CLK_CKPER_DISABLED
+		CLK_QSPI_ACLK
 		CLK_SDMMC12_HCLK6
 		CLK_STGEN_HSI
+		CLK_SPI2S23_PLL4P
+		CLK_SPI45_PCLK2
+		CLK_SPI6_PCLK5
 		CLK_I2C46_PCLK5
 		CLK_UART24_PCLK1
 		CLK_UART6_PCLK2
 		CLK_MPU_HSI
 		CLK_AXI_HSE
-		CLK_MCU_HSI
+		CLK_MCU_PLL3P
 		CLK_RTC_LSE
 		CLK_MCO1_DISABLED
 		CLK_MCO2_DISABLED
@@ -389,9 +398,9 @@
 		DIV(DIV_MPU, 1)
 		DIV(DIV_AXI, 0)
 		DIV(DIV_MCU, 0)
-		DIV(DIV_APB1, 0)
-		DIV(DIV_APB2, 0)
-		DIV(DIV_APB3, 0)
+		DIV(DIV_APB1, 1)
+		DIV(DIV_APB2, 1)
+		DIV(DIV_APB3, 1)
 		DIV(DIV_APB4, 0)
 		DIV(DIV_APB5, 0)
 		DIV(DIV_RTC, 0)
@@ -402,6 +411,14 @@
 		pll2_vco_816Mhz: pll2-vco-816Mhz {
 			src = < CLK_PLL12_HSE >;
 			divmn = < 1 33 >;
+		};
+		pll3_vco_402Mhz: pll3-vco-402Mhz {
+			src = < CLK_PLL3_HSE >;
+			divmn = < 3 66 >;
+		};
+		pll4_vco_400Mhz: pll4-vco-400Mhz {
+			src = < CLK_PLL4_HSE >;
+			divmn = < 2 49 >;
 		};
 		/* USER CODE BEGIN rcc_st-pll_vco */
 		/* USER CODE END rcc_st-pll_vco */
@@ -419,6 +436,34 @@
 		};
 		/* USER CODE BEGIN pll2 */
 		/* USER CODE END pll2 */
+	};
+
+	pll3:st,pll@2 {
+		compatible = "st,stm32mp1-pll";
+		reg = <2>;
+
+		st,pll = < &pll3_cfg1 >;
+
+		pll3_cfg1: pll3_cfg1 {
+			st,pll_vco = < &pll3_vco_402Mhz >;
+			st,pll_div_pqr = < 1 1 1 >;
+		};
+		/* USER CODE BEGIN pll3 */
+		/* USER CODE END pll3 */
+	};
+
+	pll4:st,pll@3 {
+		compatible = "st,stm32mp1-pll";
+		reg = <3>;
+
+		st,pll = < &pll4_cfg1 >;
+
+		pll4_cfg1: pll4_cfg1 {
+			st,pll_vco = < &pll4_vco_400Mhz >;
+			st,pll_div_pqr = < 1 1 1 >;
+		};
+		/* USER CODE BEGIN pll4 */
+		/* USER CODE END pll4 */
 	};
 
 };

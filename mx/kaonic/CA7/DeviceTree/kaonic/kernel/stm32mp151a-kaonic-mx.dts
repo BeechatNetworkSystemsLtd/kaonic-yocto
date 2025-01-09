@@ -51,6 +51,10 @@
 	aliases {
 		serial0 = &usart6;
 		serial1 = &usart2;
+		spi0 = &spi4;
+		spi1 = &spi6;
+		spi2 = &spi3;
+		spi3 = &qspi;
 	};
 
 	chosen {
@@ -148,6 +152,27 @@
 					 <STM32_PINMUX('C', 11, ANALOG)>, /* SDMMC1_D3 */
 					 <STM32_PINMUX('C', 12, ANALOG)>, /* SDMMC1_CK */
 					 <STM32_PINMUX('D', 2, ANALOG)>; /* SDMMC1_CMD */
+		};
+	};
+
+	spi4_pins_mx: spi4_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('E', 4, AF5)>, /* SPI4_NSS */
+					 <STM32_PINMUX('E', 5, AF5)>, /* SPI4_MISO */
+					 <STM32_PINMUX('E', 12, AF5)>, /* SPI4_SCK */
+					 <STM32_PINMUX('E', 14, AF5)>; /* SPI4_MOSI */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+	};
+
+	spi4_sleep_pins_mx: spi4_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('E', 4, ANALOG)>, /* SPI4_NSS */
+					 <STM32_PINMUX('E', 5, ANALOG)>, /* SPI4_MISO */
+					 <STM32_PINMUX('E', 12, ANALOG)>, /* SPI4_SCK */
+					 <STM32_PINMUX('E', 14, ANALOG)>; /* SPI4_MOSI */
 		};
 	};
 
@@ -390,6 +415,13 @@
 	/* USER CODE END mdma1 */
 };
 
+&qspi {
+	status = "okay";
+
+	/* USER CODE BEGIN qspi */
+	/* USER CODE END qspi */
+};
+
 &rcc {
 	status = "okay";
 
@@ -418,6 +450,30 @@
 	bus-width = <4>;
 	vmmc-supply = <&v3v3>;
 	/* USER CODE END sdmmc1 */
+};
+
+&spi3 {
+	status = "okay";
+
+	/* USER CODE BEGIN spi3 */
+	/* USER CODE END spi3 */
+};
+
+&spi4 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&spi4_pins_mx>;
+	pinctrl-1 = <&spi4_sleep_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN spi4 */
+	/* USER CODE END spi4 */
+};
+
+&spi6 {
+	status = "okay";
+
+	/* USER CODE BEGIN spi6 */
+	/* USER CODE END spi6 */
 };
 
 &tamp {
