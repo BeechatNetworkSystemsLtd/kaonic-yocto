@@ -54,6 +54,7 @@
 		spi0 = &spi4;
 		spi1 = &spi6;
 		spi2 = &spi3;
+		spi3 = &qspi;
 	};
 
 	chosen {
@@ -82,6 +83,23 @@
 }; /*root*/
 
 &pinctrl {
+
+	i2c2_pins_mx: i2c2_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 7, AF4)>, /* I2C2_SCL */
+					 <STM32_PINMUX('G', 15, AF4)>; /* I2C2_SDA */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
+	i2c2_sleep_pins_mx: i2c2_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 7, ANALOG)>, /* I2C2_SCL */
+					 <STM32_PINMUX('G', 15, ANALOG)>; /* I2C2_SDA */
+		};
+	};
 
 	i2c4_pins_mx: i2c4_mx-0 {
 		pins {
@@ -258,6 +276,23 @@
 
 	/* USER CODE BEGIN dmamux1 */
 	/* USER CODE END dmamux1 */
+};
+
+&i2c1 {
+	status = "okay";
+
+	/* USER CODE BEGIN i2c1 */
+	/* USER CODE END i2c1 */
+};
+
+&i2c2 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&i2c2_pins_mx>;
+	pinctrl-1 = <&i2c2_sleep_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN i2c2 */
+	/* USER CODE END i2c2 */
 };
 
 &i2c4 {
