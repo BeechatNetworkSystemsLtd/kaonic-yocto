@@ -83,16 +83,6 @@
 }; /*root*/
 
 &pinctrl {
-	i2c4_pins_mx: i2c4_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('D', 13, AF4)>, /* I2C4_SDA */
-					 <STM32_PINMUX('E', 2, AF4)>; /* I2C4_SCL */
-			bias-disable;
-			drive-open-drain;
-			slew-rate = <0>;
-		};
-	};
-
 	sdmmc1_pins_mx: sdmmc1_mx-0 {
 		pins1 {
 			pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
@@ -109,6 +99,19 @@
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <3>;
+		};
+	};
+
+	usart2_pins_mx: usart2_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('A', 2, AF7)>; /* USART2_TX */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('D', 6, AF7)>; /* USART2_RX */
+			bias-disable;
 		};
 	};
 
@@ -135,8 +138,6 @@
 };
 
 &i2c4 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&i2c4_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */
@@ -360,6 +361,8 @@
 };
 
 &usart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&usart2_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN usart2 */

@@ -103,8 +103,8 @@
 
 	i2c4_pins_mx: i2c4_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('D', 13, AF4)>, /* I2C4_SDA */
-					 <STM32_PINMUX('E', 2, AF4)>; /* I2C4_SCL */
+			pinmux = <STM32_PINMUX('B', 7, AF6)>, /* I2C4_SDA */
+					 <STM32_PINMUX('B', 8, AF6)>; /* I2C4_SCL */
 			bias-disable;
 			drive-open-drain;
 			slew-rate = <0>;
@@ -113,8 +113,38 @@
 
 	i2c4_sleep_pins_mx: i2c4_sleep_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('D', 13, ANALOG)>, /* I2C4_SDA */
-					 <STM32_PINMUX('E', 2, ANALOG)>; /* I2C4_SCL */
+			pinmux = <STM32_PINMUX('B', 7, ANALOG)>, /* I2C4_SDA */
+					 <STM32_PINMUX('B', 8, ANALOG)>; /* I2C4_SCL */
+		};
+	};
+
+	quadspi_pins_mx: quadspi_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('A', 1, AF9)>, /* QUADSPI_BK1_IO3 */
+					 <STM32_PINMUX('B', 6, AF10)>, /* QUADSPI_BK1_NCS */
+					 <STM32_PINMUX('F', 7, AF9)>, /* QUADSPI_BK1_IO2 */
+					 <STM32_PINMUX('F', 8, AF10)>, /* QUADSPI_BK1_IO0 */
+					 <STM32_PINMUX('F', 9, AF10)>; /* QUADSPI_BK1_IO1 */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('F', 10, AF9)>; /* QUADSPI_CLK */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <2>;
+		};
+	};
+
+	quadspi_sleep_pins_mx: quadspi_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('A', 1, ANALOG)>, /* QUADSPI_BK1_IO3 */
+					 <STM32_PINMUX('B', 6, ANALOG)>, /* QUADSPI_BK1_NCS */
+					 <STM32_PINMUX('F', 7, ANALOG)>, /* QUADSPI_BK1_IO2 */
+					 <STM32_PINMUX('F', 8, ANALOG)>, /* QUADSPI_BK1_IO0 */
+					 <STM32_PINMUX('F', 9, ANALOG)>, /* QUADSPI_BK1_IO1 */
+					 <STM32_PINMUX('F', 10, ANALOG)>; /* QUADSPI_CLK */
 		};
 	};
 
@@ -226,6 +256,27 @@
 		};
 	};
 
+	spi3_pins_mx: spi3_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('A', 8, AF5)>, /* SPI3_MOSI */
+					 <STM32_PINMUX('A', 10, AF5)>, /* SPI3_NSS */
+					 <STM32_PINMUX('D', 10, AF5)>, /* SPI3_MISO */
+					 <STM32_PINMUX('E', 0, AF5)>; /* SPI3_SCK */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+	};
+
+	spi3_sleep_pins_mx: spi3_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('A', 8, ANALOG)>, /* SPI3_MOSI */
+					 <STM32_PINMUX('A', 10, ANALOG)>, /* SPI3_NSS */
+					 <STM32_PINMUX('D', 10, ANALOG)>, /* SPI3_MISO */
+					 <STM32_PINMUX('E', 0, ANALOG)>; /* SPI3_SCK */
+		};
+	};
+
 	spi4_pins_mx: spi4_mx-0 {
 		pins {
 			pinmux = <STM32_PINMUX('E', 4, AF5)>, /* SPI4_NSS */
@@ -244,6 +295,57 @@
 					 <STM32_PINMUX('E', 5, ANALOG)>, /* SPI4_MISO */
 					 <STM32_PINMUX('E', 12, ANALOG)>, /* SPI4_SCK */
 					 <STM32_PINMUX('E', 14, ANALOG)>; /* SPI4_MOSI */
+		};
+	};
+
+	spi6_pins_mx: spi6_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('B', 5, AF8)>, /* SPI6_MOSI */
+					 <STM32_PINMUX('G', 8, AF5)>, /* SPI6_NSS */
+					 <STM32_PINMUX('G', 12, AF5)>, /* SPI6_MISO */
+					 <STM32_PINMUX('G', 13, AF5)>; /* SPI6_SCK */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+	};
+
+	spi6_sleep_pins_mx: spi6_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('B', 5, ANALOG)>, /* SPI6_MOSI */
+					 <STM32_PINMUX('G', 8, ANALOG)>, /* SPI6_NSS */
+					 <STM32_PINMUX('G', 12, ANALOG)>, /* SPI6_MISO */
+					 <STM32_PINMUX('G', 13, ANALOG)>; /* SPI6_SCK */
+		};
+	};
+
+	usart2_pins_mx: usart2_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('A', 2, AF7)>; /* USART2_TX */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('D', 6, AF7)>; /* USART2_RX */
+			bias-disable;
+		};
+	};
+
+	usart2_idle_pins_mx: usart2_idle_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('A', 2, ANALOG)>; /* USART2_TX */
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('D', 6, AF7)>; /* USART2_RX */
+			bias-disable;
+		};
+	};
+
+	usart2_sleep_pins_mx: usart2_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('A', 2, ANALOG)>, /* USART2_TX */
+					 <STM32_PINMUX('D', 6, ANALOG)>; /* USART2_RX */
 		};
 	};
 
@@ -330,13 +432,6 @@
 
 	/* USER CODE BEGIN dmamux1 */
 	/* USER CODE END dmamux1 */
-};
-
-&i2c1 {
-	status = "okay";
-
-	/* USER CODE BEGIN i2c1 */
-	/* USER CODE END i2c1 */
 };
 
 &i2c2 {
@@ -504,6 +599,9 @@
 };
 
 &qspi {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&quadspi_pins_mx>;
+	pinctrl-1 = <&quadspi_sleep_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN qspi */
@@ -552,6 +650,9 @@
 };
 
 &spi3 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&spi3_pins_mx>;
+	pinctrl-1 = <&spi3_sleep_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN spi3 */
@@ -569,6 +670,9 @@
 };
 
 &spi6 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&spi6_pins_mx>;
+	pinctrl-1 = <&spi6_sleep_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN spi6 */
@@ -583,6 +687,10 @@
 };
 
 &usart2 {
+	pinctrl-names = "default", "idle", "sleep";
+	pinctrl-0 = <&usart2_pins_mx>;
+	pinctrl-1 = <&usart2_idle_pins_mx>;
+	pinctrl-2 = <&usart2_sleep_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN usart2 */
