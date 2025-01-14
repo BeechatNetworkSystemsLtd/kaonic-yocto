@@ -83,6 +83,16 @@
 }; /*root*/
 
 &pinctrl {
+	i2c4_pins_mx: i2c4_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('B', 7, AF6)>, /* I2C4_SDA */
+					 <STM32_PINMUX('B', 8, AF6)>; /* I2C4_SCL */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
 	sdmmc1_pins_mx: sdmmc1_mx-0 {
 		pins1 {
 			pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
@@ -138,6 +148,8 @@
 };
 
 &i2c4 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c4_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */
@@ -396,6 +408,7 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port0 */
+	phy-supply = <&vdd_usb>;
 	/* USER CODE END usbphyc_port0 */
 };
 
@@ -403,10 +416,31 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port1 */
+	phy-supply = <&vdd_usb>;
 	/* USER CODE END usbphyc_port1 */
 };
 
 /* USER CODE BEGIN addons */
+
+&bsec{
+
+	board_id:board_id@ec{
+		reg = <0xec 0x4>;
+		st,non-secure-otp;
+	};
+};
+
+&cpu0{
+	cpu-supply = <&vddcore>;
+};
+
+&rng1{
+	status = "okay";
+};
+
+&rtc{
+	status = "okay";
+};
 
 /* USER CODE END addons */
 
