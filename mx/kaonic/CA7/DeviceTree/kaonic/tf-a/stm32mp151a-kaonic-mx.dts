@@ -226,10 +226,9 @@
 
 			vtt_ddr: ldo3 {
 				regulator-name = "vtt_ddr";
-				regulator-min-microvolt = <500000>;
-				regulator-max-microvolt = <750000>;
 				regulator-always-on;
 				regulator-over-current-protection;
+				st,regulator-sink-source;
 			};
 
 			vdd_usb: ldo4 {
@@ -240,10 +239,9 @@
 				regulator-name = "vdda";
 				regulator-min-microvolt = <2900000>;
 				regulator-max-microvolt = <2900000>;
-				regulator-boot-on;
 			};
 
-			vref_ddr: vref-ddr {
+			vref_ddr: vref_ddr {
 				regulator-name = "vref_ddr";
 				regulator-always-on;
 			};
@@ -252,11 +250,11 @@
 				regulator-name = "bst_out";
 			};
 
-			vbus_otg: pwr-sw1 {
+			vbus_otg: pwr_sw1 {
 				regulator-name = "vbus_otg";
 			};
 
-			vbus_sw: pwr-sw2 {
+			vbus_sw: pwr_sw2 {
 				regulator-name = "vbus_sw";
 				regulator-active-discharge = <1>;
 			};
@@ -299,9 +297,10 @@
 		DIV(DIV_MCO2, 0)
 	>;
 	st,pll_vco {
-		pll2_vco_816Mhz: pll2-vco-816Mhz {
+		pll2_vco_1066Mhz: pll2-vco-1066Mhz {
 			src = < CLK_PLL12_HSE >;
-			divmn = < 1 33 >;
+			divmn = < 2 65 >;
+			frac = < 0x1400 >;
 		};
 		pll3_vco_402Mhz: pll3-vco-402Mhz {
 			src = < CLK_PLL3_HSE >;
@@ -322,7 +321,7 @@
 		st,pll = < &pll2_cfg1 >;
 
 		pll2_cfg1: pll2_cfg1 {
-			st,pll_vco = < &pll2_vco_816Mhz >;
+			st,pll_vco = < &pll2_vco_1066Mhz >;
 			st,pll_div_pqr = < 1 1 0 >;
 		};
 		/* USER CODE BEGIN pll2 */
@@ -441,6 +440,19 @@
 &rtc{
 	status = "okay";
 };
+
+&ddr {
+	vdd-supply = <&vdd_ddr>;
+	vref-supply = <&vref_ddr>;
+	vtt-supply = <&vtt_ddr>;
+};
+
+&pwr_regulators {
+	status = "okay";
+
+	vdd-supply = <&vdd>;
+};
+
 
 /* USER CODE END addons */
 

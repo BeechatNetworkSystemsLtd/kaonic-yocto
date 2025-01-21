@@ -597,6 +597,14 @@
 	/* USER CODE END mdma1 */
 };
 
+&pwr_regulators {
+	status = "okay";
+
+	/* USER CODE BEGIN pwr_regulators */
+	vdd-supply = <&vdd>;
+	/* USER CODE END pwr_regulators */
+};
+
 &qspi {
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&quadspi_pins_mx>;
