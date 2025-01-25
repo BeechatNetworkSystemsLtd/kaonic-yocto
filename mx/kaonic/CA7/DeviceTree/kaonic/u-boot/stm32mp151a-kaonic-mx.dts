@@ -618,7 +618,7 @@
 	status = "okay";
 
 	/* USER CODE BEGIN sdmmc1 */
-	cd-gpios = <&gpioc 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+	cd-gpios = <&gpiog 14 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
 	disable-wp;
 	st,neg-edge;
 	bus-width = <4>;
