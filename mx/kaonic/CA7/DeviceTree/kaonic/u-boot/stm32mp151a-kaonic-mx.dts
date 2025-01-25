@@ -43,6 +43,10 @@
 		ranges;
 
 		/* USER CODE BEGIN reserved-memory */
+		optee@de000000 {
+			reg = <0xde000000 0x2000000>;
+			no-map;
+		};
 		/* USER CODE END reserved-memory */
 	};
 
@@ -319,36 +323,6 @@
 		};
 	};
 
-	usart2_pins_mx: usart2_mx-0 {
-		pins1 {
-			pinmux = <STM32_PINMUX('A', 2, AF7)>; /* USART2_TX */
-			bias-disable;
-			drive-push-pull;
-			slew-rate = <0>;
-		};
-		pins2 {
-			pinmux = <STM32_PINMUX('D', 6, AF7)>; /* USART2_RX */
-			bias-disable;
-		};
-	};
-
-	usart2_idle_pins_mx: usart2_idle_mx-0 {
-		pins1 {
-			pinmux = <STM32_PINMUX('A', 2, ANALOG)>; /* USART2_TX */
-		};
-		pins2 {
-			pinmux = <STM32_PINMUX('D', 6, AF7)>; /* USART2_RX */
-			bias-disable;
-		};
-	};
-
-	usart2_sleep_pins_mx: usart2_sleep_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('A', 2, ANALOG)>, /* USART2_TX */
-					 <STM32_PINMUX('D', 6, ANALOG)>; /* USART2_RX */
-		};
-	};
-
 	usart6_pins_mx: usart6_mx-0 {
 		pins1 {
 			pinmux = <STM32_PINMUX('C', 6, AF7)>; /* USART6_TX */
@@ -433,6 +407,13 @@
 
 	/* USER CODE BEGIN dmamux1 */
 	/* USER CODE END dmamux1 */
+};
+
+&hsem {
+	status = "okay";
+
+	/* USER CODE BEGIN hsem */
+	/* USER CODE END hsem */
 };
 
 &i2c2 {
@@ -691,17 +672,6 @@
 
 	/* USER CODE BEGIN tamp */
 	/* USER CODE END tamp */
-};
-
-&usart2 {
-	pinctrl-names = "default", "idle", "sleep";
-	pinctrl-0 = <&usart2_pins_mx>;
-	pinctrl-1 = <&usart2_idle_pins_mx>;
-	pinctrl-2 = <&usart2_sleep_pins_mx>;
-	status = "okay";
-
-	/* USER CODE BEGIN usart2 */
-	/* USER CODE END usart2 */
 };
 
 &usart6 {

@@ -40,6 +40,28 @@
 		ranges;
 
 		/* USER CODE BEGIN reserved-memory */
+		mcuram2:mcuram2@10000000{
+			compatible = "shared-dma-pool";
+			reg = <0x10000000 0x40000>;
+			no-map;
+		};
+
+		mcuram:mcuram@30000000{
+			compatible = "shared-dma-pool";
+			reg = <0x30000000 0x40000>;
+			no-map;
+		};
+
+		retram:retram@38000000{
+			compatible = "shared-dma-pool";
+			reg = <0x38000000 0x10000>;
+			no-map;
+		};
+
+		optee@de000000 {
+			reg = <0xde000000 0x2000000>;
+			no-map;
+		};
 		/* USER CODE END reserved-memory */
 	};
 
@@ -53,7 +75,6 @@
 	chosen {
 		stdout-path = "serial0:115200n8";
 	};
-
 
 	vin: vin {
 		compatible = "regulator-fixed";
@@ -144,7 +165,6 @@
 	DECPROT(STM32MP1_ETZPC_SPI3_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_SPI4_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_SPI6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_USART2_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_USART6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_OTG_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	/*"Secured" peripherals*/
@@ -182,6 +202,7 @@
 	pmic: stpmic@33 {
 		compatible = "st,stpmic1";
 		reg = <0x33>;
+		interrupts-extended = <&gpioa 0 IRQ_TYPE_EDGE_FALLING>;
 		interrupt-controller;
 		#interrupt-cells = <2>;
 		status = "okay";
@@ -214,6 +235,19 @@
 				regulator-always-on;
 				regulator-initial-mode = <0>;
 				regulator-over-current-protection;
+
+				lp-stop{
+					regulator-on-in-suspend;
+					regulator-suspend-microvolt = <1200000>;
+				};
+
+				standby-ddr-sr{
+					regulator-off-in-suspend;
+				};
+
+				standby-ddr-off{
+					regulator-off-in-suspend;
+				};
 			};
 
 			vdd_ddr: buck2 {
@@ -224,22 +258,17 @@
 				regulator-initial-mode = <0>;
 				regulator-over-current-protection;
 
-				lp-stop {
+				lp-stop{
 					regulator-suspend-microvolt = <1350000>;
 					regulator-on-in-suspend;
 				};
 
-				lplv-stop {
+				standby-ddr-sr{
 					regulator-suspend-microvolt = <1350000>;
 					regulator-on-in-suspend;
 				};
 
-				standby-ddr-sr {
-					regulator-suspend-microvolt = <1350000>;
-					regulator-on-in-suspend;
-				};
-
-				standby-ddr-off {
+				standby-ddr-off{
 					regulator-off-in-suspend;
 				};
 			};
@@ -253,22 +282,17 @@
 				regulator-initial-mode = <0>;
 				regulator-over-current-protection;
 
-				lp-stop {
+				lp-stop{
 					regulator-suspend-microvolt = <3300000>;
 					regulator-on-in-suspend;
 				};
 
-				lplv-stop {
+				standby-ddr-sr{
 					regulator-suspend-microvolt = <3300000>;
 					regulator-on-in-suspend;
 				};
 
-				standby-ddr-sr {
-					regulator-suspend-microvolt = <3300000>;
-					regulator-on-in-suspend;
-				};
-
-				standby-ddr-off {
+				standby-ddr-off{
 					regulator-suspend-microvolt = <3300000>;
 					regulator-on-in-suspend;
 				};
@@ -282,47 +306,48 @@
 				regulator-over-current-protection;
 				regulator-initial-mode = <0>;
 
-				standby-ddr-sr {
+				lp-stop{
+					regulator-suspend-microvolt = <3300000>;
+					regulator-on-in-suspend;
+				};
+
+				standby-ddr-sr{
 					regulator-off-in-suspend;
 				};
 
-				standby-ddr-off {
+				standby-ddr-off{
 					regulator-off-in-suspend;
 				};
 			};
 
 			vtt_ddr: ldo3 {
 				regulator-name = "vtt_ddr";
-				regulator-min-microvolt = <500000>;
-				regulator-max-microvolt = <750000>;
+				regulator-always-on;
 				regulator-over-current-protection;
 				st,regulator-sink-source;
 
-				lp-stop {
+				lp-stop{
 					regulator-off-in-suspend;
 				};
 
-				lplv-stop {
+				standby-ddr-sr{
 					regulator-off-in-suspend;
 				};
 
-				standby-ddr-sr {
-					regulator-off-in-suspend;
-				};
-
-				standby-ddr-off {
+				standby-ddr-off{
 					regulator-off-in-suspend;
 				};
 			};
 
 			vdd_usb: ldo4 {
 				regulator-name = "vdd_usb";
+				interrupts = <IT_CURLIM_LDO4 0>;
 
-				standby-ddr-sr {
+				standby-ddr-sr{
 					regulator-off-in-suspend;
 				};
 
-				standby-ddr-off {
+				standby-ddr-off{
 					regulator-off-in-suspend;
 				};
 			};
@@ -331,49 +356,48 @@
 				regulator-name = "vdda";
 				regulator-min-microvolt = <2900000>;
 				regulator-max-microvolt = <2900000>;
+				interrupts = <IT_CURLIM_LDO5 0>;
 				regulator-boot-on;
 
-				standby-ddr-sr {
+				standby-ddr-sr{
 					regulator-off-in-suspend;
 				};
 
-				standby-ddr-off {
+				standby-ddr-off{
 					regulator-off-in-suspend;
 				};
 			};
 
-			vref_ddr: vref-ddr {
+			vref_ddr: vref_ddr {
 				regulator-name = "vref_ddr";
 				regulator-always-on;
-				regulator-over-current-protection;
 
-				lp-stop {
+				lp-stop{
 					regulator-on-in-suspend;
 				};
 
-				lplv-stop {
+				standby-ddr-sr{
 					regulator-on-in-suspend;
 				};
 
-				standby-ddr-sr {
-					regulator-on-in-suspend;
-				};
-
-				standby-ddr-off {
+				standby-ddr-off{
 					regulator-off-in-suspend;
 				};
 			};
 
 			bst_out: boost {
 				regulator-name = "bst_out";
+				interrupts = <IT_OCP_BOOST 0>;
 			};
 
-			vbus_otg: pwr-sw1 {
+			vbus_otg: pwr_sw1 {
 				regulator-name = "vbus_otg";
+				interrupts = <IT_OCP_OTG 0>;
 			};
 
-			vbus_sw: pwr-sw2 {
+			vbus_sw: pwr_sw2 {
 				regulator-name = "vbus_sw";
+				interrupts = <IT_OCP_SWOUT 0>;
 				regulator-active-discharge = <1>;
 			};
 		};
@@ -393,6 +417,7 @@
 		STM32_PM_CSTOP_ALLOW_STANDBY_DDR_SR
 	>;
 	system_off_soc_mode = <STM32_PM_CSTOP_ALLOW_STANDBY_DDR_OFF>;
+
 	vdd-supply = <&vdd>;
 	/* USER CODE END pwr_regulators */
 };
@@ -414,9 +439,8 @@
 		CLK_I2C46_PCLK5
 		CLK_USBO_PLL4R
 		CLK_I2C12_PCLK1
-		CLK_UART24_PCLK1
 		CLK_UART6_PCLK2
-		CLK_MPU_HSI
+		CLK_MPU_PLL1P
 		CLK_AXI_HSE
 		CLK_MCU_PLL3P
 		CLK_RTC_LSE
@@ -437,6 +461,10 @@
 		DIV(DIV_MCO2, 0)
 	>;
 	st,pll_vco {
+		pll1_vco_816Mhz: pll1-vco-816Mhz {
+			src = < CLK_PLL12_HSE >;
+			divmn = < 1 33 >;
+		};
 		pll2_vco_1066Mhz: pll2-vco-1066Mhz {
 			src = < CLK_PLL12_HSE >;
 			divmn = < 2 65 >;
@@ -452,6 +480,20 @@
 		};
 		/* USER CODE BEGIN rcc_st-pll_vco */
 		/* USER CODE END rcc_st-pll_vco */
+	};
+
+	pll1:st,pll@0 {
+		compatible = "st,stm32mp1-pll";
+		reg = <0>;
+
+		st,pll = < &pll1_cfg1 >;
+
+		pll1_cfg1: pll1_cfg1 {
+			st,pll_vco = < &pll1_vco_816Mhz >;
+			st,pll_div_pqr = < 0 1 1 >;
+		};
+		/* USER CODE BEGIN pll1 */
+		/* USER CODE END pll1 */
 	};
 
 	pll2:st,pll@1 {
