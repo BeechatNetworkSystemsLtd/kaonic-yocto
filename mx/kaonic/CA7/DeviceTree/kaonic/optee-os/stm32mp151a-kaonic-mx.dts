@@ -62,6 +62,12 @@
 			reg = <0xde000000 0x2000000>;
 			no-map;
 		};
+
+		gpu_reserved: gpu@d4000000 {
+			reg = <0xd4000000 0x4000000>;
+			no-map;
+		};
+
 		/* USER CODE END reserved-memory */
 	};
 
@@ -432,7 +438,7 @@
 		CLK_CKPER_DISABLED
 		CLK_QSPI_ACLK
 		CLK_SDMMC12_HCLK6
-		CLK_STGEN_HSI
+		CLK_STGEN_HSE
 		CLK_SPI2S23_PLL4P
 		CLK_SPI45_PCLK2
 		CLK_SPI6_PCLK5
