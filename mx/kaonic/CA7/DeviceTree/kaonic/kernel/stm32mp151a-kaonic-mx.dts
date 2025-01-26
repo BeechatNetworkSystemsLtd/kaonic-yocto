@@ -70,6 +70,15 @@
 			no-map;
 		};
 
+		linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x8000000>;
+			alignment = <0x2000>;
+			linux,cma-default;
+		};
+
+
 		/* USER CODE END reserved-memory */
 	};
 
@@ -177,27 +186,7 @@
 
 	sdmmc1_pins_mx: sdmmc1_mx-0 {
 		pins1 {
-			pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
-					 <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
-					 <STM32_PINMUX('C', 10, AF12)>, /* SDMMC1_D2 */
-					 <STM32_PINMUX('C', 11, AF12)>, /* SDMMC1_D3 */
-					 <STM32_PINMUX('D', 2, AF12)>; /* SDMMC1_CMD */
-			bias-disable;
-			drive-push-pull;
-			slew-rate = <1>;
-		};
-		pins2 {
-			pinmux = <STM32_PINMUX('C', 12, AF12)>; /* SDMMC1_CK */
-			bias-disable;
-			drive-push-pull;
-			slew-rate = <3>;
-		};
-	};
-
-	sdmmc1_opendrain_pins_mx: sdmmc1_opendrain_mx-0 {
-		pins1 {
-			pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
-					 <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
+			pinmux = <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
 					 <STM32_PINMUX('C', 10, AF12)>, /* SDMMC1_D2 */
 					 <STM32_PINMUX('C', 11, AF12)>; /* SDMMC1_D3 */
 			bias-disable;
@@ -206,13 +195,43 @@
 		};
 		pins2 {
 			pinmux = <STM32_PINMUX('C', 12, AF12)>; /* SDMMC1_CK */
-			bias-disable;
+			bias-pull-up;
 			drive-push-pull;
 			slew-rate = <3>;
 		};
 		pins3 {
-			pinmux = <STM32_PINMUX('D', 2, AF12)>; /* SDMMC1_CMD */
+			pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
+					 <STM32_PINMUX('D', 2, AF12)>; /* SDMMC1_CMD */
+			bias-pull-up;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+	};
+
+	sdmmc1_opendrain_pins_mx: sdmmc1_opendrain_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
+					 <STM32_PINMUX('C', 10, AF12)>, /* SDMMC1_D2 */
+					 <STM32_PINMUX('C', 11, AF12)>; /* SDMMC1_D3 */
 			bias-disable;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('C', 12, AF12)>; /* SDMMC1_CK */
+			bias-pull-up;
+			drive-push-pull;
+			slew-rate = <3>;
+		};
+		pins3 {
+			pinmux = <STM32_PINMUX('C', 8, AF12)>; /* SDMMC1_D0 */
+			bias-pull-up;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+		pins4 {
+			pinmux = <STM32_PINMUX('D', 2, AF12)>; /* SDMMC1_CMD */
+			bias-pull-up;
 			drive-open-drain;
 			slew-rate = <1>;
 		};
@@ -387,6 +406,9 @@
 };
 
 &m4_rproc{
+	/*Restriction: "memory-region" property is not managed - please to use User-Section if needed*/
+	mboxes = <&ipcc 2>;
+	mbox-names = "shutdown";
 	status = "okay";
 
 	/* USER CODE BEGIN m4_rproc */
@@ -587,6 +609,13 @@
 	/* USER CODE END i2c4 */
 };
 
+&ipcc {
+	status = "okay";
+
+	/* USER CODE BEGIN ipcc */
+	/* USER CODE END ipcc */
+};
+
 &m4_dma2 {
 	status = "okay";
 
@@ -706,6 +735,9 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usart6 */
+	/delete-property/dmas;
+	/delete-property/dma-names;
+	u-boot,dm-pre-reloc;
 	/* USER CODE END usart6 */
 };
 
@@ -813,6 +845,11 @@
 
 &rtc {
 	clocks = <&scmi_clk CK_SCMI_RTCAPB>, <&scmi_clk CK_SCMI_RTC>;
+};
+
+&spi6 {
+	clocks = <&scmi_clk CK_SCMI_SPI6>;
+	resets = <&scmi_reset RST_SCMI_SPI6>;
 };
 
 &usart1 {

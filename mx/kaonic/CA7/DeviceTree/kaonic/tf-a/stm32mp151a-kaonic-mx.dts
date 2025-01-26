@@ -95,20 +95,25 @@
 
 	sdmmc1_pins_mx: sdmmc1_mx-0 {
 		pins1 {
-			pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
-					 <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
+			pinmux = <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
 					 <STM32_PINMUX('C', 10, AF12)>, /* SDMMC1_D2 */
-					 <STM32_PINMUX('C', 11, AF12)>, /* SDMMC1_D3 */
-					 <STM32_PINMUX('D', 2, AF12)>; /* SDMMC1_CMD */
+					 <STM32_PINMUX('C', 11, AF12)>; /* SDMMC1_D3 */
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <1>;
 		};
 		pins2 {
 			pinmux = <STM32_PINMUX('C', 12, AF12)>; /* SDMMC1_CK */
-			bias-disable;
+			bias-pull-up;
 			drive-push-pull;
 			slew-rate = <3>;
+		};
+		pins3 {
+			pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
+					 <STM32_PINMUX('D', 2, AF12)>; /* SDMMC1_CMD */
+			bias-pull-up;
+			drive-push-pull;
+			slew-rate = <1>;
 		};
 	};
 
@@ -260,13 +265,13 @@
 
 	st,clksrc = <
 		CLK_CKPER_DISABLED
-		CLK_SDMMC12_HCLK6
+		CLK_SDMMC12_HSI
 		CLK_STGEN_HSE
-		CLK_I2C46_PCLK5
+		CLK_I2C46_HSI
 		CLK_USBO_PLL4R
 		CLK_UART6_PCLK2
 		CLK_MPU_PLL1P
-		CLK_AXI_HSE
+		CLK_AXI_PLL2P
 		CLK_MCU_PLL3P
 	>;
 	st,clkdiv = <
@@ -276,21 +281,21 @@
 		DIV(DIV_APB1, 1)
 		DIV(DIV_APB2, 1)
 		DIV(DIV_APB3, 1)
-		DIV(DIV_APB4, 0)
-		DIV(DIV_APB5, 0)
+		DIV(DIV_APB4, 1)
+		DIV(DIV_APB5, 2)
 		DIV(DIV_RTC, 0)
 		DIV(DIV_MCO1, 0)
 		DIV(DIV_MCO2, 0)
 	>;
 	st,pll_vco {
-		pll1_vco_816Mhz: pll1-vco-816Mhz {
-			src = < CLK_PLL12_HSE >;
-			divmn = < 1 33 >;
+		pll1_vco_800Mhz: pll1-vco-800Mhz {
+			src = < CLK_PLL12_HSI >;
+			divmn = < 3 24 >;
 		};
 		pll2_vco_1066Mhz: pll2-vco-1066Mhz {
-			src = < CLK_PLL12_HSE >;
-			divmn = < 2 65 >;
-			frac = < 0x1400 >;
+			src = < CLK_PLL12_HSI >;
+			divmn = < 3 32 >;
+			frac = < 0xa00 >;
 		};
 		pll3_vco_402Mhz: pll3-vco-402Mhz {
 			src = < CLK_PLL3_HSE >;
@@ -311,7 +316,7 @@
 		st,pll = < &pll1_cfg1 >;
 
 		pll1_cfg1: pll1_cfg1 {
-			st,pll_vco = < &pll1_vco_816Mhz >;
+			st,pll_vco = < &pll1_vco_800Mhz >;
 			st,pll_div_pqr = < 0 1 1 >;
 		};
 		/* USER CODE BEGIN pll1 */
