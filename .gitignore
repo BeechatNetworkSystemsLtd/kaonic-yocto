@@ -4,10 +4,8 @@ mx/kaonic/**/*.tmp
 mx/kaonic/CM4
 mx/kaonic/CA7/.project
 mx/kaonic/CA7/manifest.prop
-# !mx/kaonic/CA7/DeviceTree
 mx/kaonic/**/.settings
 mx/kaonic/Common/System
-**/.DS_Store
 mx/kaonic/Drivers
 mx/kaonic/.project
 mx/kaonic/.osx.project
@@ -18,3 +16,8 @@ mx/kaonic/CA7/DeviceTree/kaonic/u-boot/Makefile
 mx/kaonic/CA7/DeviceTree/kaonic/**/*.dtb.cmd
 mx/kaonic/CA7/DeviceTree/kaonic/**/*.mk
 mx/kaonic/CA7/DeviceTree/kaonic/**/Makefile
+
+**/.DS_Store
+
+*.raw
+*.raw.xz
