@@ -1,0 +1,36 @@
+From d02b62cc0640fa1f8b61ddd3507a102f26fdb1e6 Mon Sep 17 00:00:00 2001
+From: Yocto Build <yocto-build@beechat.network>
+Date: Sun, 26 Jan 2025 13:39:22 +0000
+Subject: [PATCH] adjust uart console and gpioz for kaonic
+
+---
+ core/arch/arm/plat-stm32mp1/conf.mk            | 2 +-
+ core/arch/arm/plat-stm32mp1/shared_resources.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/core/arch/arm/plat-stm32mp1/conf.mk b/core/arch/arm/plat-stm32mp1/conf.mk
+index 2600f51c2..b4ffa3f40 100644
+--- a/core/arch/arm/plat-stm32mp1/conf.mk
++++ b/core/arch/arm/plat-stm32mp1/conf.mk
+@@ -499,7 +499,7 @@ endif
+ CFG_WITH_NSEC_GPIOS ?= y
+ CFG_WITH_NSEC_UARTS ?= y
+ # UART instance used for early console (0 disables early console)
+-CFG_STM32_EARLY_CONSOLE_UART ?= 4
++CFG_STM32_EARLY_CONSOLE_UART ?= 6
+ 
+ # CFG_STM32MP15_HUK enables use of a HUK read from BSEC fuses.
+ # Disable the HUK by default as it requires a product specific configuration.
+diff --git a/core/arch/arm/plat-stm32mp1/shared_resources.c b/core/arch/arm/plat-stm32mp1/shared_resources.c
+index b1d4951bf..15b0db0e8 100644
+--- a/core/arch/arm/plat-stm32mp1/shared_resources.c
++++ b/core/arch/arm/plat-stm32mp1/shared_resources.c
+@@ -134,7 +134,7 @@ static __maybe_unused const char *shres2str_state(enum shres_state id)
+ 
+ /* GPIOZ bank pin count depends on SoC variants */
+ /* A light count routine for unpaged context to not depend on DTB support */
+-static int gpioz_nbpin = -1;
++static int gpioz_nbpin = 0;
+ 
+ static unsigned int get_gpioz_nbpin(void)
+ {
