@@ -32,6 +32,7 @@ RUN apt-get update && apt-get install -y \
             bc \
             bsdmainutils \
             libegl1-mesa libgmp-dev libmpc-dev libsdl1.2-dev libssl-dev \
+            gcc-arm-linux-gnueabihf \
             && rm -rf /var/lib/apt/lists/* \
             && mkdir -p /opt/ \
             && dpkg-reconfigure locales \
