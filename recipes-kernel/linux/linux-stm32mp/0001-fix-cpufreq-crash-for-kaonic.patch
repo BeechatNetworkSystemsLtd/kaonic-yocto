@@ -1,0 +1,21 @@
+From 7fcdda69982100985f386ee2508ad1220bf0df59 Mon Sep 17 00:00:00 2001
+From: Yocto Build <yocto-build@beechat.network>
+Date: Thu, 30 Jan 2025 21:04:19 +0000
+Subject: [PATCH] fix cpufreq crash for kaonic
+
+---
+ drivers/cpufreq/cpufreq-dt-platdev.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/cpufreq/cpufreq-dt-platdev.c b/drivers/cpufreq/cpufreq-dt-platdev.c
+index 3c99e4959..0cbd7c424 100644
+--- a/drivers/cpufreq/cpufreq-dt-platdev.c
++++ b/drivers/cpufreq/cpufreq-dt-platdev.c
+@@ -170,6 +170,7 @@ static const struct of_device_id blocklist[] __initconst = {
+ 	{ .compatible = "st,stih410", },
+ 	{ .compatible = "st,stih418", },
+ 	{ .compatible = "st,stm32mp157", },
++	{ .compatible = "st,stm32mp151", },
+ 
+ 	{ .compatible = "ti,am33xx", },
+ 	{ .compatible = "ti,am43", },
