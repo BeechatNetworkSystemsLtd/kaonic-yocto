@@ -1,6 +1,5 @@
-# Kaonic Image
+# <img src="./.github/assets/kaonic-logo.png" height="20pt"/> Kaonic Image
 
-![Kaonic Logo](./.github/assets/kaonic-logo.png | width=100)
 
 ## Overview
 
