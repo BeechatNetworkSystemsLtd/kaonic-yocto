@@ -1,4 +1,5 @@
-# Kaonic Image
+# <img src="./.github/assets/kaonic-logo.png" height="20pt"/> Kaonic Image
+
 
 ## Overview
 
@@ -17,4 +18,8 @@
 
 ## More information
 
-https://wiki.st.com/stm32mpu/wiki/STM32MPU_Distribution_Package
+STM32MP Wiki
+* [Distribution Package](https://wiki.st.com/stm32mpu/wiki/STM32MPU_Distribution_Package)
+* [WLAN and Bluetooth](https://wiki.st.com/stm32mpu/wiki/WLAN_and_Bluetooth_hardware_component)
+* [WLAN Device Tree](https://wiki.st.com/stm32mpu/wiki/WLAN_device_tree_configuration#cite_note-3)
+* [SDMMC Device Tree](https://wiki.st.com/stm32mpu/wiki/SDMMC_device_tree_configuration)
