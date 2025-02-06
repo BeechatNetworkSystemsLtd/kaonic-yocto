@@ -166,11 +166,10 @@
 	DECPROT(STM32MP1_ETZPC_DMAMUX_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_I2C2_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_I2C4_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_QSPI_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_DLYBQ_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_SPI3_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_SPI4_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_SPI6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_USART1_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_USART6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_OTG_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	/*"Secured" peripherals*/
@@ -425,6 +424,7 @@
 	system_off_soc_mode = <STM32_PM_CSTOP_ALLOW_STANDBY_DDR_OFF>;
 
 	vdd-supply = <&vdd>;
+	vdd_3v3_usbfs-supply = <&vdd_usb>;
 	/* USER CODE END pwr_regulators */
 };
 
@@ -436,8 +436,7 @@
 
 	st,clksrc = <
 		CLK_CKPER_DISABLED
-		CLK_QSPI_PLL4P
-		CLK_SDMMC12_HSI
+		CLK_SDMMC12_PLL4P
 		CLK_STGEN_HSE
 		CLK_SPI2S23_PLL4P
 		CLK_SPI45_PCLK2
@@ -445,6 +444,7 @@
 		CLK_I2C46_HSI
 		CLK_USBO_PLL4R
 		CLK_I2C12_PCLK1
+		CLK_UART1_PCLK5
 		CLK_UART6_PCLK2
 		CLK_MPU_PLL1P
 		CLK_AXI_PLL2P
@@ -564,6 +564,30 @@
 
 &cpu0{
 	cpu-supply = <&vddcore>;
+};
+
+&usbphyc_port0{
+	phy-supply = <&vdd_usb>;
+	st,tune-hs-dc-level = <2>;
+	st,enable-fs-rftime-tuning;
+	st,enable-hs-rftime-reduction;
+	st,trim-hs-current = <15>;
+	st,trim-hs-impedance = <1>;
+	st,tune-squelch-level = <3>;
+	st,tune-hs-rx-offset = <2>;
+	st,no-lsfs-sc;
+};
+
+&usbphyc_port1{
+	phy-supply = <&vdd_usb>;
+	st,tune-hs-dc-level = <2>;
+	st,enable-fs-rftime-tuning;
+	st,enable-hs-rftime-reduction;
+	st,trim-hs-current = <15>;
+	st,trim-hs-impedance = <1>;
+	st,tune-squelch-level = <3>;
+	st,tune-hs-rx-offset = <2>;
+	st,no-lsfs-sc;
 };
 
 /* USER CODE END addons */

@@ -265,7 +265,7 @@
 
 	st,clksrc = <
 		CLK_CKPER_DISABLED
-		CLK_SDMMC12_HSI
+		CLK_SDMMC12_PLL4P
 		CLK_STGEN_HSE
 		CLK_I2C46_HSI
 		CLK_USBO_PLL4R
@@ -393,6 +393,9 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbotg_hs */
+	phys = <&usbphyc_port1 0>;
+	phy-names = "usb2-phy";
+	usb-role-switch;
 	/* USER CODE END usbotg_hs */
 };
 
@@ -451,6 +454,7 @@
 	status = "okay";
 
 	vdd-supply = <&vdd>;
+	vdd_3v3_usbfs-supply = <&vdd_usb>;
 };
 
 

@@ -107,7 +107,12 @@
 		regulator-max-microvolt = <5000000>;
 		regulator-always-on;
 	};
-	
+
+	wifi_pwrseq: wifi-pwrseq {
+		compatible = "mmc-pwrseq-simple";
+		reset-gpios = <&gpiog 7 GPIO_ACTIVE_LOW>;
+	};
+
 	/* USER CODE END root */
 
 	clocks{
@@ -151,36 +156,6 @@
 		pins {
 			pinmux = <STM32_PINMUX('B', 7, ANALOG)>, /* I2C4_SDA */
 					 <STM32_PINMUX('B', 8, ANALOG)>; /* I2C4_SCL */
-		};
-	};
-
-	quadspi_pins_mx: quadspi_mx-0 {
-		pins1 {
-			pinmux = <STM32_PINMUX('A', 1, AF9)>, /* QUADSPI_BK1_IO3 */
-					 <STM32_PINMUX('B', 6, AF10)>, /* QUADSPI_BK1_NCS */
-					 <STM32_PINMUX('F', 7, AF9)>, /* QUADSPI_BK1_IO2 */
-					 <STM32_PINMUX('F', 8, AF10)>, /* QUADSPI_BK1_IO0 */
-					 <STM32_PINMUX('F', 9, AF10)>; /* QUADSPI_BK1_IO1 */
-			bias-disable;
-			drive-push-pull;
-			slew-rate = <1>;
-		};
-		pins2 {
-			pinmux = <STM32_PINMUX('F', 10, AF9)>; /* QUADSPI_CLK */
-			bias-disable;
-			drive-push-pull;
-			slew-rate = <2>;
-		};
-	};
-
-	quadspi_sleep_pins_mx: quadspi_sleep_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('A', 1, ANALOG)>, /* QUADSPI_BK1_IO3 */
-					 <STM32_PINMUX('B', 6, ANALOG)>, /* QUADSPI_BK1_NCS */
-					 <STM32_PINMUX('F', 7, ANALOG)>, /* QUADSPI_BK1_IO2 */
-					 <STM32_PINMUX('F', 8, ANALOG)>, /* QUADSPI_BK1_IO0 */
-					 <STM32_PINMUX('F', 9, ANALOG)>, /* QUADSPI_BK1_IO1 */
-					 <STM32_PINMUX('F', 10, ANALOG)>; /* QUADSPI_CLK */
 		};
 	};
 
@@ -255,7 +230,7 @@
 					 <STM32_PINMUX('B', 15, AF9)>, /* SDMMC2_D1 */
 					 <STM32_PINMUX('E', 6, AF7)>, /* SDMMC2_D0 */
 					 <STM32_PINMUX('G', 6, AF10)>; /* SDMMC2_CMD */
-			bias-disable;
+			bias-pull-up;
 			drive-push-pull;
 			slew-rate = <1>;
 		};
@@ -273,7 +248,7 @@
 					 <STM32_PINMUX('B', 4, AF9)>, /* SDMMC2_D3 */
 					 <STM32_PINMUX('B', 15, AF9)>, /* SDMMC2_D1 */
 					 <STM32_PINMUX('E', 6, AF7)>; /* SDMMC2_D0 */
-			bias-disable;
+			bias-pull-up;
 			drive-push-pull;
 			slew-rate = <1>;
 		};
@@ -285,7 +260,7 @@
 		};
 		pins3 {
 			pinmux = <STM32_PINMUX('G', 6, AF10)>; /* SDMMC2_CMD */
-			bias-disable;
+			bias-pull-up;
 			drive-open-drain;
 			slew-rate = <1>;
 		};
@@ -304,8 +279,8 @@
 
 	spi3_pins_mx: spi3_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('A', 8, AF5)>, /* SPI3_MOSI */
-					 <STM32_PINMUX('A', 10, AF5)>, /* SPI3_NSS */
+			pinmux = <STM32_PINMUX('A', 10, AF5)>, /* SPI3_NSS */
+					 <STM32_PINMUX('D', 6, AF5)>, /* SPI3_MOSI */
 					 <STM32_PINMUX('D', 10, AF5)>, /* SPI3_MISO */
 					 <STM32_PINMUX('E', 0, AF5)>; /* SPI3_SCK */
 			bias-disable;
@@ -316,8 +291,8 @@
 
 	spi3_sleep_pins_mx: spi3_sleep_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('A', 8, ANALOG)>, /* SPI3_MOSI */
-					 <STM32_PINMUX('A', 10, ANALOG)>, /* SPI3_NSS */
+			pinmux = <STM32_PINMUX('A', 10, ANALOG)>, /* SPI3_NSS */
+					 <STM32_PINMUX('D', 6, ANALOG)>, /* SPI3_MOSI */
 					 <STM32_PINMUX('D', 10, ANALOG)>, /* SPI3_MISO */
 					 <STM32_PINMUX('E', 0, ANALOG)>; /* SPI3_SCK */
 		};
@@ -362,6 +337,47 @@
 					 <STM32_PINMUX('G', 8, ANALOG)>, /* SPI6_NSS */
 					 <STM32_PINMUX('G', 12, ANALOG)>, /* SPI6_MISO */
 					 <STM32_PINMUX('G', 13, ANALOG)>; /* SPI6_SCK */
+		};
+	};
+
+	usart1_pins_mx: usart1_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('A', 11, AF7)>, /* USART1_CTS */
+					 <STM32_PINMUX('B', 2, AF4)>; /* USART1_RX */
+			bias-disable;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('A', 9, AF7)>, /* USART1_TX */
+					 <STM32_PINMUX('A', 12, AF7)>; /* USART1_RTS */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+	};
+
+	usart1_idle_pins_mx: usart1_idle_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('A', 9, ANALOG)>, /* USART1_TX */
+					 <STM32_PINMUX('A', 11, ANALOG)>; /* USART1_CTS */
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('A', 12, AF7)>; /* USART1_RTS */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+		pins3 {
+			pinmux = <STM32_PINMUX('B', 2, AF4)>; /* USART1_RX */
+			bias-disable;
+		};
+	};
+
+	usart1_sleep_pins_mx: usart1_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('A', 9, ANALOG)>, /* USART1_TX */
+					 <STM32_PINMUX('A', 11, ANALOG)>, /* USART1_CTS */
+					 <STM32_PINMUX('A', 12, ANALOG)>, /* USART1_RTS */
+					 <STM32_PINMUX('B', 2, ANALOG)>; /* USART1_RX */
 		};
 	};
 
@@ -635,17 +651,8 @@
 
 	/* USER CODE BEGIN pwr_regulators */
 	vdd-supply = <&vdd>;
+	vdd_3v3_usbfs-supply = <&vdd_usb>;
 	/* USER CODE END pwr_regulators */
-};
-
-&qspi {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&quadspi_pins_mx>;
-	pinctrl-1 = <&quadspi_sleep_pins_mx>;
-	status = "okay";
-
-	/* USER CODE BEGIN qspi */
-	/* USER CODE END qspi */
 };
 
 &rcc {
@@ -687,6 +694,21 @@
 	status = "okay";
 
 	/* USER CODE BEGIN sdmmc2 */
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	/* arm,primecell-periphid = <0x10153180>; */
+	non-removable;
+	st,neg-edge;
+	cap-sdio-irq;
+	bus-width = <4>;
+	vmmc-supply = <&v3v3>;
+	mmc-pwrseq = <&wifi_pwrseq>;
+
+	brcmf: bcrmf@1 {
+		reg = <1>;
+		compatible = "brcm,bcm4329-fmac";
+	};
 	/* USER CODE END sdmmc2 */
 };
 
@@ -727,6 +749,26 @@
 	/* USER CODE END tamp */
 };
 
+&usart1 {
+	pinctrl-names = "default", "idle", "sleep";
+	pinctrl-0 = <&usart1_pins_mx>;
+	pinctrl-1 = <&usart1_idle_pins_mx>;
+	pinctrl-2 = <&usart1_sleep_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN usart1 */
+	uart-has-rtscts;
+
+	bluetooth {
+		shutdown-gpios = <&gpioa 3 GPIO_ACTIVE_HIGH>;
+		compatible = "brcm,bcm43438-bt";
+		max-speed = <3000000>;
+		vbat-supply = <&v3v3>;
+		vddio-supply = <&v3v3>;
+	};
+	/* USER CODE END usart1 */
+};
+
 &usart6 {
 	pinctrl-names = "default", "idle", "sleep";
 	pinctrl-0 = <&usart6_pins_mx>;
@@ -745,6 +787,15 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbh_ehci */
+	phys = <&usbphyc_port0>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	hub@1{
+		compatible = "usb424,2514";
+		reg = <1>;
+		vdd-supply = <&v3v3>;
+	};
 	/* USER CODE END usbh_ehci */
 };
 
@@ -759,6 +810,8 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbotg_hs */
+	phys = <&usbphyc_port1 0>;
+	phy-names = "usb2-phy";
 	/* USER CODE END usbotg_hs */
 };
 
@@ -773,6 +826,15 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port0 */
+	phy-supply = <&vdd_usb>;
+	st,tune-hs-dc-level = <2>;
+	st,enable-fs-rftime-tuning;
+	st,enable-hs-rftime-reduction;
+	st,trim-hs-current = <15>;
+	st,trim-hs-impedance = <1>;
+	st,tune-squelch-level = <3>;
+	st,tune-hs-rx-offset = <2>;
+	st,no-lsfs-sc;
 	/* USER CODE END usbphyc_port0 */
 };
 
@@ -780,6 +842,15 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port1 */
+	phy-supply = <&vdd_usb>;
+	st,tune-hs-dc-level = <2>;
+	st,enable-fs-rftime-tuning;
+	st,enable-hs-rftime-reduction;
+	st,trim-hs-current = <15>;
+	st,trim-hs-impedance = <1>;
+	st,tune-squelch-level = <3>;
+	st,tune-hs-rx-offset = <2>;
+	st,no-lsfs-sc;
 	/* USER CODE END usbphyc_port1 */
 };
 
