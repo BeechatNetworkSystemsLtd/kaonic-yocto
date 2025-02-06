@@ -57,7 +57,7 @@ RUN git config --global user.email "yocto-build@beechat.network" && git config -
     && mkdir /home/builduser/yocto && mkdir /home/builduser/bin && cd /home/builduser/yocto \
     && curl https://storage.googleapis.com/git-repo-downloads/repo > /home/builduser/bin/repo \
     && chmod +x /home/builduser/bin/repo \
-    && /home/builduser/bin/repo init -u https://github.com/STMicroelectronics/oe-manifest.git -b refs/tags/openstlinux-6.6-yocto-scarthgap-mpu-v24.11.06 \
+    && /home/builduser/bin/repo init -u https://github.com/STMicroelectronics/oe-manifest.git -b refs/tags/openstlinux-6.1-yocto-mickledore-mpu-v24.11.21 \
     && /home/builduser/bin/repo sync
 
 CMD ["/bin/bash"]

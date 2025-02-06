@@ -26,7 +26,7 @@
 /* USER CODE END includes */
 
 / {
-	model = "STMicroelectronics custom STM32CubeMX board - openstlinux-6.6-yocto-scarthgap-mpu-v24.11.06";
+	model = "STMicroelectronics custom STM32CubeMX board - openstlinux-6.1-yocto-mickledore-mpu-v24.06.26";
 	compatible = "st,stm32mp151a-kaonic-mx", "st,stm32mp151";
 
 	memory@c0000000 {
@@ -438,7 +438,7 @@
 	};
 };
 
-&bsec {
+&bsec{
 	status = "okay";
 
 	/* USER CODE BEGIN bsec */
@@ -446,21 +446,21 @@
 	/* USER CODE END bsec */
 };
 
-&dma1 {
+&dma1{
 	status = "okay";
 
 	/* USER CODE BEGIN dma1 */
 	/* USER CODE END dma1 */
 };
 
-&dma2 {
+&dma2{
 	status = "disabled";
 
 	/* USER CODE BEGIN dma2 */
 	/* USER CODE END dma2 */
 };
 
-&dmamux1 {
+&dmamux1{
 	status = "okay";
 
 	dma-masters = <&dma1>;
@@ -470,14 +470,14 @@
 	/* USER CODE END dmamux1 */
 };
 
-&hsem {
+&hsem{
 	status = "okay";
 
 	/* USER CODE BEGIN hsem */
 	/* USER CODE END hsem */
 };
 
-&i2c2 {
+&i2c2{
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&i2c2_pins_mx>;
 	pinctrl-1 = <&i2c2_sleep_pins_mx>;
@@ -487,7 +487,7 @@
 	/* USER CODE END i2c2 */
 };
 
-&i2c4 {
+&i2c4{
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&i2c4_pins_mx>;
 	pinctrl-1 = <&i2c4_sleep_pins_mx>;
@@ -625,28 +625,28 @@
 	/* USER CODE END i2c4 */
 };
 
-&ipcc {
+&ipcc{
 	status = "okay";
 
 	/* USER CODE BEGIN ipcc */
 	/* USER CODE END ipcc */
 };
 
-&m4_dma2 {
+&m4_dma2{
 	status = "okay";
 
 	/* USER CODE BEGIN m4_dma2 */
 	/* USER CODE END m4_dma2 */
 };
 
-&mdma1 {
+&mdma1{
 	status = "okay";
 
 	/* USER CODE BEGIN mdma1 */
 	/* USER CODE END mdma1 */
 };
 
-&pwr_regulators {
+&pwr_regulators{
 	status = "okay";
 
 	/* USER CODE BEGIN pwr_regulators */
@@ -655,21 +655,21 @@
 	/* USER CODE END pwr_regulators */
 };
 
-&rcc {
+&rcc{
 	status = "okay";
 
 	/* USER CODE BEGIN rcc */
 	/* USER CODE END rcc */
 };
 
-&rtc {
+&rtc{
 	status = "okay";
 
 	/* USER CODE BEGIN rtc */
 	/* USER CODE END rtc */
 };
 
-&sdmmc1 {
+&sdmmc1{
 	pinctrl-names = "default", "opendrain", "sleep";
 	pinctrl-0 = <&sdmmc1_pins_mx>;
 	pinctrl-1 = <&sdmmc1_opendrain_pins_mx>;
@@ -686,7 +686,7 @@
 	/* USER CODE END sdmmc1 */
 };
 
-&sdmmc2 {
+&sdmmc2{
 	pinctrl-names = "default", "opendrain", "sleep";
 	pinctrl-0 = <&sdmmc2_pins_mx>;
 	pinctrl-1 = <&sdmmc2_opendrain_pins_mx>;
@@ -712,7 +712,7 @@
 	/* USER CODE END sdmmc2 */
 };
 
-&spi3 {
+&spi3{
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&spi3_pins_mx>;
 	pinctrl-1 = <&spi3_sleep_pins_mx>;
@@ -722,7 +722,7 @@
 	/* USER CODE END spi3 */
 };
 
-&spi4 {
+&spi4{
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&spi4_pins_mx>;
 	pinctrl-1 = <&spi4_sleep_pins_mx>;
@@ -732,7 +732,7 @@
 	/* USER CODE END spi4 */
 };
 
-&spi6 {
+&spi6{
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&spi6_pins_mx>;
 	pinctrl-1 = <&spi6_sleep_pins_mx>;
@@ -742,14 +742,14 @@
 	/* USER CODE END spi6 */
 };
 
-&tamp {
+&tamp{
 	status = "okay";
 
 	/* USER CODE BEGIN tamp */
 	/* USER CODE END tamp */
 };
 
-&usart1 {
+&usart1{
 	pinctrl-names = "default", "idle", "sleep";
 	pinctrl-0 = <&usart1_pins_mx>;
 	pinctrl-1 = <&usart1_idle_pins_mx>;
@@ -769,7 +769,7 @@
 	/* USER CODE END usart1 */
 };
 
-&usart6 {
+&usart6{
 	pinctrl-names = "default", "idle", "sleep";
 	pinctrl-0 = <&usart6_pins_mx>;
 	pinctrl-1 = <&usart6_idle_pins_mx>;
@@ -783,7 +783,7 @@
 	/* USER CODE END usart6 */
 };
 
-&usbh_ehci {
+&usbh_ehci{
 	status = "okay";
 
 	/* USER CODE BEGIN usbh_ehci */
@@ -799,14 +799,14 @@
 	/* USER CODE END usbh_ehci */
 };
 
-&usbh_ohci {
+&usbh_ohci{
 	status = "okay";
 
 	/* USER CODE BEGIN usbh_ohci */
 	/* USER CODE END usbh_ohci */
 };
 
-&usbotg_hs {
+&usbotg_hs{
 	status = "okay";
 
 	/* USER CODE BEGIN usbotg_hs */
@@ -815,14 +815,14 @@
 	/* USER CODE END usbotg_hs */
 };
 
-&usbphyc {
+&usbphyc{
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc */
 	/* USER CODE END usbphyc */
 };
 
-&usbphyc_port0 {
+&usbphyc_port0{
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port0 */
@@ -838,7 +838,7 @@
 	/* USER CODE END usbphyc_port0 */
 };
 
-&usbphyc_port1 {
+&usbphyc_port1{
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port1 */
