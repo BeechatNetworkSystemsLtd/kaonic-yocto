@@ -87,6 +87,7 @@
 	aliases {
 		serial0 = &usart6;
 		serial1 = &usart2;
+		serial2 = &usart1;
 		spi0 = &spi4;
 		spi1 = &spi6;
 		spi2 = &spi3;
@@ -812,6 +813,7 @@
 	/* USER CODE BEGIN usbotg_hs */
 	phys = <&usbphyc_port1 0>;
 	phy-names = "usb2-phy";
+
 	/* USER CODE END usbotg_hs */
 };
 

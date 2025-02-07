@@ -268,7 +268,6 @@
 		CLK_SDMMC12_PLL4P
 		CLK_STGEN_HSE
 		CLK_I2C46_HSI
-		CLK_USBO_PLL4R
 		CLK_UART6_PCLK2
 		CLK_MPU_PLL1P
 		CLK_AXI_PLL2P
@@ -387,39 +386,6 @@
 
 	/* USER CODE BEGIN usart6 */
 	/* USER CODE END usart6 */
-};
-
-&usbotg_hs {
-	status = "okay";
-
-	/* USER CODE BEGIN usbotg_hs */
-	phys = <&usbphyc_port1 0>;
-	phy-names = "usb2-phy";
-	usb-role-switch;
-	/* USER CODE END usbotg_hs */
-};
-
-&usbphyc {
-	status = "okay";
-
-	/* USER CODE BEGIN usbphyc */
-	/* USER CODE END usbphyc */
-};
-
-&usbphyc_port0 {
-	status = "okay";
-
-	/* USER CODE BEGIN usbphyc_port0 */
-	phy-supply = <&vdd_usb>;
-	/* USER CODE END usbphyc_port0 */
-};
-
-&usbphyc_port1 {
-	status = "okay";
-
-	/* USER CODE BEGIN usbphyc_port1 */
-	phy-supply = <&vdd_usb>;
-	/* USER CODE END usbphyc_port1 */
 };
 
 /* USER CODE BEGIN addons */
