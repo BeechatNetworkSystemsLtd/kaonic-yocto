@@ -14,7 +14,7 @@
 * Initialize build environment
     * `cd ~/yocto/`
     * `source ./layers/meta-st/scripts/envsetup.sh`
-    * `bitbake st-image-core`
+    * `bitbake kaonic-st-image-core`
 
 ## More information
 
