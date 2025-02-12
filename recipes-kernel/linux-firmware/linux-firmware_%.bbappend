@@ -1,3 +1,4 @@
+
 FILESEXTRAPATHS:prepend:stm32mpcommon := "${THISDIR}/${PN}:"
 
 # Add calibration file
@@ -8,11 +9,16 @@ SRCREV_murata = "c85ec7bb4e8a8a113d458d2869dd0ef7b3136069"
 SRCREV_FORMAT = "linux-firmware-murata"
 
 do_install:append:stm32mpcommon() {
-   # ---- 43439-----
+
    # Install calibration file
    install -m 0644 ${WORKDIR}/nvram-murata-master/cyfmac43439-sdio.1YN.txt ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43439-sdio.txt
+
    # disable Wakeup on WLAN
    sed -i "s/muxenab=\(.*\)$/#muxenab=\1/g" ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43439-sdio.txt
+
+   # Change crystal frequency to 26MHz
+   sed -i 's/xtalfreq=[0-9]\+/xtalfreq=26000/g' ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43439-sdio.txt
+
    # Install calibration file
    install -m 0644 ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43439-sdio.txt ${D}${nonarch_base_libdir}/firmware/brcm/brcmfmac43439-sdio.st,stm32mp151a-kaonic-mx.txt
 
