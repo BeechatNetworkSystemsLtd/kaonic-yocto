@@ -88,10 +88,10 @@
 		serial0 = &usart6;
 		serial1 = &usart2;
 		serial2 = &usart1;
-		spi0 = &spi4;
-		spi1 = &spi6;
-		spi2 = &spi3;
-		spi3 = &qspi;
+		spi4 = &spi4;
+		spi6 = &spi6;
+		spi3 = &spi3;
+		spi0 = &qspi;
 	};
 
 	chosen {
@@ -720,6 +720,13 @@
 	status = "okay";
 
 	/* USER CODE BEGIN spi3 */
+	cs-gpios= <&gpioa 10 0>;
+	spidev0: spidev@0 {
+		compatible = "rohm,dh2228fv";
+        reg = <0>;
+        spi-max-frequency = <64000000>;
+        status = "okay";
+    };
 	/* USER CODE END spi3 */
 };
 
@@ -740,6 +747,13 @@
 	status = "okay";
 
 	/* USER CODE BEGIN spi6 */
+	cs-gpios= <&gpiog 8 0>;
+	spidev1: spidev@0 {
+		compatible = "rohm,dh2228fv";
+        reg = <0>;
+        spi-max-frequency = <64000000>;
+        status = "okay";
+    };
 	/* USER CODE END spi6 */
 };
 
@@ -813,6 +827,9 @@
 	/* USER CODE BEGIN usbotg_hs */
 	phys = <&usbphyc_port1 0>;
 	phy-names = "usb2-phy";
+
+	/* usb-role-switch; */
+	dr_mode = "peripheral";
 
 	/* USER CODE END usbotg_hs */
 };
