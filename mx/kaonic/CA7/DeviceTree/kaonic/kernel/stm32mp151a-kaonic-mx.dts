@@ -109,6 +109,28 @@
 		regulator-always-on;
 	};
 
+	vrf_3v3: vrf-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "VRF 3v3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+		gpio = <&gpio_exp0 4 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+
+	vrf_pa: vrf-pa {
+		compatible = "regulator-fixed";
+		regulator-name = "VRF PA";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		regulator-boot-on;
+		gpio = <&gpio_exp0 5 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+
 	wifi_pwrseq: wifi-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		reset-gpios = <&gpiog 7 GPIO_ACTIVE_LOW>;
@@ -280,7 +302,7 @@
 
 	spi3_pins_mx: spi3_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('D', 6, AF5)>, /* SPI3_MOSI */
+			pinmux = <STM32_PINMUX('A', 8, AF5)>, /* SPI3_MOSI */
 					 <STM32_PINMUX('D', 10, AF5)>, /* SPI3_MISO */
 					 <STM32_PINMUX('E', 0, AF5)>; /* SPI3_SCK */
 			bias-disable;
@@ -291,7 +313,7 @@
 
 	spi3_sleep_pins_mx: spi3_sleep_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('D', 6, ANALOG)>, /* SPI3_MOSI */
+			pinmux = <STM32_PINMUX('A', 8, ANALOG)>, /* SPI3_MOSI */
 					 <STM32_PINMUX('D', 10, ANALOG)>, /* SPI3_MISO */
 					 <STM32_PINMUX('E', 0, ANALOG)>; /* SPI3_SCK */
 		};
@@ -481,6 +503,16 @@
 	status = "okay";
 
 	/* USER CODE BEGIN i2c2 */
+
+	gpio_exp0: gpio@21 {
+		compatible = "ti,tca9539";
+		reg = <0x21>;
+
+		#gpio-cells = <2>;
+		gpio-controller;
+		status = "okay";
+	};
+
 	/* USER CODE END i2c2 */
 };
 
