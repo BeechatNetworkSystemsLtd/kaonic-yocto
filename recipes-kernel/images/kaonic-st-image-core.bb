@@ -12,7 +12,8 @@ IMAGE_FEATURES += "\
     ssh-server-dropbear \
     "
 
-IMAGE_INSTALL:append = " hostapd iw dnsmasq"
+IMAGE_INSTALL:append = " hostapd iw dnsmasq spidev-test"
+IMAGE_INSTALL:append = " kaonic-comm"
 
 #
 # INSTALL addons
