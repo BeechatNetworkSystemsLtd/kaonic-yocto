@@ -20,12 +20,12 @@ EXTRA_OECMAKE += ' \
     -DKAONIC_RFA_GPIO_RST_LINE="8" \
     -DKAONIC_RFA_GPIO_IRQ_CHIP="/dev/gpiochip3" \
     -DKAONIC_RFA_GPIO_IRQ_LINE="9" \
-    -DKAONIC_RFA_SPI_PATH="/dev/spidev3.0" \
+    -DKAONIC_RFA_SPI_PATH="/dev/spidev6.0" \
     -DKAONIC_RFB_GPIO_RST_CHIP="/dev/gpiochip4" \
     -DKAONIC_RFB_GPIO_RST_LINE="13" \
     -DKAONIC_RFB_GPIO_IRQ_CHIP="/dev/gpiochip4" \
     -DKAONIC_RFB_GPIO_IRQ_LINE="15" \
-    -DKAONIC_RFB_SPI_PATH="/dev/spidev6.0" \
+    -DKAONIC_RFB_SPI_PATH="/dev/spidev3.0" \
     -DKAONIC_SERIAL_TTY_PATH="/dev/ttyGS0" \
 '
 
