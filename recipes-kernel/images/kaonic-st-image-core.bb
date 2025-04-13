@@ -15,6 +15,7 @@ IMAGE_FEATURES += "\
 IMAGE_INSTALL:append = " hostapd iw dnsmasq spidev-test"
 IMAGE_INSTALL:append = " kaonic-comm"
 IMAGE_INSTALL:append = " grpc protobuf"
+IMAGE_INSTALL:append = " python3 python3-pip"
 
 #
 # INSTALL addons
