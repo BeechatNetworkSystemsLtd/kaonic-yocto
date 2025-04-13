@@ -14,6 +14,7 @@ IMAGE_FEATURES += "\
 
 IMAGE_INSTALL:append = " hostapd iw dnsmasq spidev-test"
 IMAGE_INSTALL:append = " kaonic-comm"
+IMAGE_INSTALL:append = " grpc protobuf"
 
 #
 # INSTALL addons

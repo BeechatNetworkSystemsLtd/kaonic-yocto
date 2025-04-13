@@ -749,7 +749,7 @@
 
 	/* USER CODE BEGIN spi3 */
 	cs-gpios= <&gpioa 10 0>;
-	spidev0: spidev@0 {
+	spidev0: spidev0@0 {
 		compatible = "rohm,dh2228fv";
         reg = <0>;
         spi-max-frequency = <64000000>;
@@ -776,7 +776,7 @@
 
 	/* USER CODE BEGIN spi6 */
 	cs-gpios= <&gpiog 8 0>;
-	spidev1: spidev@0 {
+	spidev1: spidev1@0 {
 		compatible = "rohm,dh2228fv";
         reg = <0>;
         spi-max-frequency = <64000000>;
