@@ -748,7 +748,9 @@
 	status = "okay";
 
 	/* USER CODE BEGIN spi3 */
+
 	cs-gpios= <&gpioa 10 0>;
+
 	spidev0: spidev0@0 {
 		compatible = "rohm,dh2228fv";
         reg = <0>;
