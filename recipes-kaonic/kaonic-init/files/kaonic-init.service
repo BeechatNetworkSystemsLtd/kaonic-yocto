@@ -1,0 +1,13 @@
+[Unit]
+Description=Kaonic Init Service
+Before=hostapd.service kanoic-commd.service
+After=local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/python3 /usr/bin/kaonic-init.py
+
+[Install]
+WantedBy=multi-user.target
+
