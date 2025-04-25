@@ -1,0 +1,17 @@
+[Unit]
+Description=Kaonic Comm
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/kaonic-commd
+WorkingDirectory=/home/root/
+Restart=always
+RestartSec=5
+User=root
+Group=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
