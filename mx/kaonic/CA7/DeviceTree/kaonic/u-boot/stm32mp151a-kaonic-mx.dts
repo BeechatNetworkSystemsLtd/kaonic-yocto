@@ -133,7 +133,7 @@
 
 	wifi_pwrseq: wifi-pwrseq {
 		compatible = "mmc-pwrseq-simple";
-		reset-gpios = <&gpiog 7 GPIO_ACTIVE_LOW>;
+		reset-gpios = <&gpio_exp1 6 GPIO_ACTIVE_LOW>;
 	};
 
 	/* USER CODE END root */
@@ -503,6 +503,14 @@
 	status = "okay";
 
 	/* USER CODE BEGIN i2c1 */
+	gpio_exp1: gpio@20 {
+		compatible = "ti,tca6408";
+		reg = <0x20>;
+
+		#gpio-cells = <2>;
+		gpio-controller;
+		status = "okay";
+	};
 	/* USER CODE END i2c1 */
 };
 
