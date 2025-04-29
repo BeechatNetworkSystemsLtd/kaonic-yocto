@@ -133,7 +133,7 @@
 
 	wifi_pwrseq: wifi-pwrseq {
 		compatible = "mmc-pwrseq-simple";
-		reset-gpios = <&gpio_exp1 6 GPIO_ACTIVE_LOW>;
+		reset-gpios = <&gpiog 7 (GPIO_ACTIVE_LOW | GPIO_OPEN_DRAIN)>;
 	};
 
 	/* USER CODE END root */
