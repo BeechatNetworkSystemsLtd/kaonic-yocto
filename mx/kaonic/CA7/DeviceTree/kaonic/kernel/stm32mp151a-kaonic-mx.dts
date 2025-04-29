@@ -148,6 +148,23 @@
 
 &pinctrl {
 
+	i2c1_pins_mx: i2c1_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('B', 7, AF4)>, /* I2C1_SDA */
+					 <STM32_PINMUX('B', 8, AF4)>; /* I2C1_SCL */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
+	i2c1_sleep_pins_mx: i2c1_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('B', 7, ANALOG)>, /* I2C1_SDA */
+					 <STM32_PINMUX('B', 8, ANALOG)>; /* I2C1_SCL */
+		};
+	};
+
 	i2c2_pins_mx: i2c2_mx-0 {
 		pins {
 			pinmux = <STM32_PINMUX('D', 7, AF4)>, /* I2C2_SCL */
@@ -162,23 +179,6 @@
 		pins {
 			pinmux = <STM32_PINMUX('D', 7, ANALOG)>, /* I2C2_SCL */
 					 <STM32_PINMUX('G', 15, ANALOG)>; /* I2C2_SDA */
-		};
-	};
-
-	i2c4_pins_mx: i2c4_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('B', 7, AF6)>, /* I2C4_SDA */
-					 <STM32_PINMUX('B', 8, AF6)>; /* I2C4_SCL */
-			bias-disable;
-			drive-open-drain;
-			slew-rate = <0>;
-		};
-	};
-
-	i2c4_sleep_pins_mx: i2c4_sleep_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('B', 7, ANALOG)>, /* I2C4_SDA */
-					 <STM32_PINMUX('B', 8, ANALOG)>; /* I2C4_SCL */
 		};
 	};
 
@@ -496,6 +496,16 @@
 	/* USER CODE END hsem */
 };
 
+&i2c1 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&i2c1_pins_mx>;
+	pinctrl-1 = <&i2c1_sleep_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN i2c1 */
+	/* USER CODE END i2c1 */
+};
+
 &i2c2 {
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&i2c2_pins_mx>;
@@ -517,9 +527,6 @@
 };
 
 &i2c4 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&i2c4_pins_mx>;
-	pinctrl-1 = <&i2c4_sleep_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */
