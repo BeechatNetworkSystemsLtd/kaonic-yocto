@@ -14,7 +14,7 @@ inherit pkgconfig cmake systemd
 
 PR = "r0" 
 SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-comm.git;protocol=https;branch=main;"
-SRCREV = "260db9e93f3f600884f1c0a7f5576c63aeb89db6"
+SRCREV = "c262d6d7281f75e32459fcbb07304cc1cc9a7e22"
 
 SRC_URI += " \
     file://wifi_connect.sh \
