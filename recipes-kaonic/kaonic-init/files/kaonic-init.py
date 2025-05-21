@@ -83,14 +83,19 @@ def save_serial(serial: str):
         f.write(serial)
 
 def main():
-    # TODO: check hash
-    if os.path.exists(SERIAL_FILE):
-        return
 
     serial = create_serial()
 
-    update_hostapd_conf(f"Kaonic /{serial.split('-')[1]}/")
+    if os.path.exists(SERIAL_FILE):
+        with open(SERIAL_FILE, "r") as f:
+            current_serial = f.read()
+            if current_serial == serial:
+                print("Kaonic serial file - ok")
+                return
 
+    print("Update kaonic serial")
+
+    update_hostapd_conf(f"Kaonic /{serial.split('-')[1]}/")
     save_serial(serial)
 
 if __name__ == "__main__":
