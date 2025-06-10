@@ -22,3 +22,5 @@ mx/kaonic/CA7/DeviceTree/kaonic/**/Makefile
 *.raw
 *.raw.xz
 scripts-local
+deploy
+
