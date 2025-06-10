@@ -424,7 +424,6 @@
 	system_off_soc_mode = <STM32_PM_CSTOP_ALLOW_STANDBY_DDR_OFF>;
 
 	vdd-supply = <&vdd>;
-	vdd_3v3_usbfs-supply = <&vdd_usb>;
 	/* USER CODE END pwr_regulators */
 };
 
@@ -567,7 +566,7 @@
 };
 
 &usbphyc_port0{
-	phy-supply = <&vdd_usb>;
+	phy-supply = <&vdd>;
 	st,tune-hs-dc-level = <2>;
 	st,enable-fs-rftime-tuning;
 	st,enable-hs-rftime-reduction;
@@ -579,7 +578,7 @@
 };
 
 &usbphyc_port1{
-	phy-supply = <&vdd_usb>;
+	phy-supply = <&vdd>;
 	st,tune-hs-dc-level = <2>;
 	st,enable-fs-rftime-tuning;
 	st,enable-hs-rftime-reduction;
