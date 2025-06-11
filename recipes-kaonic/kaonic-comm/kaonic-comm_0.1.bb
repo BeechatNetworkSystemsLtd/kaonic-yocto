@@ -14,7 +14,7 @@ inherit pkgconfig cmake systemd
 
 PR = "r0" 
 SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-comm.git;protocol=https;branch=main;"
-SRCREV = "c262d6d7281f75e32459fcbb07304cc1cc9a7e22"
+SRCREV = "e3871b8d25a601bb1dffd5ca9027971142615cce"
 
 SRC_URI += " \
     file://wifi_connect.sh \
@@ -47,4 +47,8 @@ do_install:append() {
     # Help scripts
     install -d ${D}/home/root
     install -m 0755  ${WORKDIR}/wifi_connect.sh ${D}/home/root/wifi_connect.sh
+
+    install -d ${D}/etc/kaonic
+    echo ${MACHINE} > ${D}/etc/kaonic/kaonic_machine
 }
+
