@@ -2,7 +2,7 @@
 import os
 import hashlib
 
-SERIAL_FILE = "/etc/kaonic_serial"
+SERIAL_FILE = "/etc/kaonic/kaonic_serial"
 HOSTAPD_CONF = "/etc/hostapd.conf"
 OTP_NVMEM_FILE = "/sys/bus/nvmem/devices/stm32-romem0/nvmem"
 
