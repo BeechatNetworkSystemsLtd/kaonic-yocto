@@ -35,10 +35,10 @@ set -e
 ROOT_DIR=$HOME/yocto
 KAONIC_REPO=$ROOT_DIR/layers/meta-st/meta-kaonic
 KAONIC_DEPLOY_DIR=$KAONIC_REPO/deploy
+KAONIC_MACHINE_DEPLOY_DIR=$KAONIC_DEPLOY_DIR/${MACHINE}
 KAONIC_BUILD_DIR_NAME=build-${MACHINE}-image
 KAONIC_BUILD_DIR=$ROOT_DIR/$KAONIC_BUILD_DIR_NAME
 IMAGE_DIR=$KAONIC_BUILD_DIR/tmp-glibc/deploy/images/$MACHINE
-SDK_DIR=$KAONIC_BUILD_DIR/tmp-glibc/deploy/sdk
 
 #*****************************************************************************#
 
@@ -47,8 +47,6 @@ cd $KAONIC_REPO
 git config --global --add safe.directory $KAONIC_REPO
 
 KAONIC_VERSION=$(git describe --tags | cut -d '-' -f1 | sed 's/^v//')
-
-mkdir -p $KAONIC_DEPLOY_DIR
 
 echo "Kaonic machine: $MACHINE"
 echo "Kaonic version: $KAONIC_VERSION"
@@ -66,9 +64,6 @@ EOF
 echo "Build image"
 bitbake kaonic-st-image-core
 
-echo "Build SDK"
-bitbake kaonic-st-image-core -c populate_sdk
-
 #*****************************************************************************#
 
 echo "Generate bootable image"
@@ -83,17 +78,19 @@ mv FlashLayout_sdcard_stm32mp151a-kaonic-mx-opteemin.raw ./${IMAGE_FILENAME}
 sha256sum ${IMAGE_FILENAME} > ${IMAGE_FILENAME}.sha256
 
 rm -f ${IMAGE_FILENAME}.xz
-xz -z -v ${IMAGE_FILENAME}
+xz -z -v -k ${IMAGE_FILENAME}
 
 #*****************************************************************************#
 
 echo "Deploy artifacts"
-cp ${IMAGE_FILENAME} $KAONIC_DEPLOY_DIR/
-cp ${IMAGE_FILENAME}.xz $KAONIC_DEPLOY_DIR/
-cp ${IMAGE_FILENAME}.sha256 $KAONIC_DEPLOY_DIR/
+mkdir -p ${KAONIC_DEPLOY_DIR}
+mkdir -p ${KAONIC_MACHINE_DEPLOY_DIR}
 
-cd $SDK_DIR
-cp kaonic-st-image-core-openstlinux-weston-${MACHINE}.rootfs-$(eval "uname -m")-toolchain-5.0.3-snapshot.sh $KAONIC_DEPLOY_DIR/${MACHINE}-v${KAONIC_VERSION}-sdk-$(eval "uname -m").sh
+rm -rf $KAONIC_MACHINE_DEPLOY_DIR/${IMAGE_FILENAME}
+
+cp ${IMAGE_FILENAME} $KAONIC_MACHINE_DEPLOY_DIR/
+cp ${IMAGE_FILENAME}.xz $KAONIC_MACHINE_DEPLOY_DIR/
+cp ${IMAGE_FILENAME}.sha256 $KAONIC_MACHINE_DEPLOY_DIR/
 
 #*****************************************************************************#
 
