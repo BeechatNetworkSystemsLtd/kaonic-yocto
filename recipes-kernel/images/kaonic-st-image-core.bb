@@ -17,6 +17,13 @@ IMAGE_INSTALL:append = " kaonic-init kaonic-comm"
 IMAGE_INSTALL:append = " grpc protobuf"
 IMAGE_INSTALL:append = " python3 python3-pip"
 
+TOOLCHAIN_HOST_TASK += "\
+    nativesdk-grpc \
+    nativesdk-grpc-dev \
+"
+
+TOOLCHAIN_TARGET_TASK += "protobuf-staticdev"
+
 #
 # INSTALL addons
 #
