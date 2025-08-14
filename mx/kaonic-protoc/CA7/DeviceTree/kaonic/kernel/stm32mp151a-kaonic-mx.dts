@@ -714,6 +714,7 @@
 
 	/* USER CODE BEGIN pwr_regulators */
 	vdd-supply = <&vdd>;
+	vdd_3v3_usbfs-supply = <&vdd_usb>;
 	/* USER CODE END pwr_regulators */
 };
 
@@ -908,7 +909,7 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port0 */
-	phy-supply = <&vdd>;
+	phy-supply = <&vdd_usb>;
 	st,tune-hs-dc-level = <2>;
 	st,enable-fs-rftime-tuning;
 	st,enable-hs-rftime-reduction;
@@ -924,7 +925,7 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port1 */
-	phy-supply = <&vdd>;
+    phy-supply = <&vdd_usb>;
 	st,tune-hs-dc-level = <2>;
 	st,enable-fs-rftime-tuning;
 	st,enable-hs-rftime-reduction;
