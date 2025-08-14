@@ -13,8 +13,9 @@
     * `docker run -it -v ./:/home/builduser/yocto/layers/meta-st/meta-kaonic --name kaonic-yocto kaonic-yocto`
 * Initialize build environment
     * `cd ~/yocto/`
-    * `source ./layers/meta-st/scripts/envsetup.sh`
-    * `bitbake kaonic-st-image-core`
+    * `./layers/meta-st/meta-kaonic/scripts/build-image.sh --machine stm32mp1-kaonic-protoa`
+    * `./layers/meta-st/meta-kaonic/scripts/build-image.sh --machine stm32mp1-kaonic-protob`
+    * `./layers/meta-st/meta-kaonic/scripts/build-image.sh --machine stm32mp1-kaonic-protoc`
 
 ## More information
 
