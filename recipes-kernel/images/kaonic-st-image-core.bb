@@ -12,10 +12,26 @@ IMAGE_FEATURES += "\
     ssh-server-dropbear \
     "
 
-IMAGE_INSTALL:append = " hostapd iw dnsmasq spidev-test"
-IMAGE_INSTALL:append = " kaonic-init kaonic-comm kaonic-factory"
+# Networking
+IMAGE_INSTALL:append = " hostapd iw dnsmasq"
 IMAGE_INSTALL:append = " grpc protobuf"
+
+# Testing, Development and Runtime
+IMAGE_INSTALL:append = " spidev-test devmem2"
 IMAGE_INSTALL:append = " python3 python3-pip"
+IMAGE_INSTALL:append = " \
+    x264 \
+    gstreamer1.0 \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-python \
+    gstreamer1.0-rtsp-server \
+"
+
+# Kaonic Applications
+IMAGE_INSTALL:append = " kaonic-init kaonic-comm kaonic-factory"
 
 TOOLCHAIN_HOST_TASK += "\
     nativesdk-grpc \
