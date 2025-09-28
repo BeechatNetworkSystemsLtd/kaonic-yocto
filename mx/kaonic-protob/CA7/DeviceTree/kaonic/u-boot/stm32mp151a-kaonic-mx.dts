@@ -148,6 +148,43 @@
 
 &pinctrl {
 
+	fmc_pins_mx: fmc_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('D', 0, AF12)>, /* FMC_DA2 */
+					 <STM32_PINMUX('D', 1, AF12)>, /* FMC_DA3 */
+					 <STM32_PINMUX('D', 4, AF12)>, /* FMC_NOE */
+					 <STM32_PINMUX('D', 5, AF12)>, /* FMC_NWE */
+					 <STM32_PINMUX('D', 14, AF12)>, /* FMC_DA0 */
+					 <STM32_PINMUX('D', 15, AF12)>, /* FMC_DA1 */
+					 <STM32_PINMUX('E', 7, AF12)>, /* FMC_DA4 */
+					 <STM32_PINMUX('E', 8, AF12)>, /* FMC_DA5 */
+					 <STM32_PINMUX('E', 9, AF12)>, /* FMC_DA6 */
+					 <STM32_PINMUX('E', 10, AF12)>; /* FMC_DA7 */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('G', 9, AF12)>; /* FMC_NE2 */
+		};
+	};
+
+	fmc_sleep_pins_mx: fmc_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 0, ANALOG)>, /* FMC_DA2 */
+					 <STM32_PINMUX('D', 1, ANALOG)>, /* FMC_DA3 */
+					 <STM32_PINMUX('D', 4, ANALOG)>, /* FMC_NOE */
+					 <STM32_PINMUX('D', 5, ANALOG)>, /* FMC_NWE */
+					 <STM32_PINMUX('D', 14, ANALOG)>, /* FMC_DA0 */
+					 <STM32_PINMUX('D', 15, ANALOG)>, /* FMC_DA1 */
+					 <STM32_PINMUX('E', 7, ANALOG)>, /* FMC_DA4 */
+					 <STM32_PINMUX('E', 8, ANALOG)>, /* FMC_DA5 */
+					 <STM32_PINMUX('E', 9, ANALOG)>, /* FMC_DA6 */
+					 <STM32_PINMUX('E', 10, ANALOG)>, /* FMC_DA7 */
+					 <STM32_PINMUX('G', 9, ANALOG)>; /* FMC_NE2 */
+		};
+	};
+
 	i2c1_pins_mx: i2c1_mx-0 {
 		pins {
 			pinmux = <STM32_PINMUX('B', 7, AF4)>, /* I2C1_SDA */
@@ -179,6 +216,23 @@
 		pins {
 			pinmux = <STM32_PINMUX('D', 7, ANALOG)>, /* I2C2_SCL */
 					 <STM32_PINMUX('G', 15, ANALOG)>; /* I2C2_SDA */
+		};
+	};
+
+	i2c4_pins_mx: i2c4_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 13, AF4)>, /* I2C4_SDA */
+					 <STM32_PINMUX('E', 2, AF4)>; /* I2C4_SCL */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
+	i2c4_sleep_pins_mx: i2c4_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 13, ANALOG)>, /* I2C4_SDA */
+					 <STM32_PINMUX('E', 2, ANALOG)>; /* I2C4_SCL */
 		};
 	};
 
@@ -505,6 +559,28 @@
 	/* USER CODE END dmamux1 */
 };
 
+&fmc {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&fmc_pins_mx>;
+	pinctrl-1 = <&fmc_sleep_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN fmc */
+
+	psram@1,0 {
+        compatible = "mtd-ram";
+        reg = <1 0x00000000 0x100000>;
+        bank-width = <1>;
+
+        st,fmc2-ebi-cs-transaction-type = <1>;
+        st,fmc2-ebi-cs-address-setup-ns = <60>;
+        st,fmc2-ebi-cs-data-setup-ns = <30>;
+        st,fmc2-ebi-cs-bus-turnaround-ns = <5>;
+    };
+
+	/* USER CODE END fmc */
+};
+
 &hsem {
 	status = "okay";
 
@@ -551,6 +627,9 @@
 };
 
 &i2c4 {
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&i2c4_pins_mx>;
+	pinctrl-1 = <&i2c4_sleep_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */

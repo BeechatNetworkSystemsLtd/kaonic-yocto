@@ -83,6 +83,16 @@
 }; /*root*/
 
 &pinctrl {
+	i2c4_pins_mx: i2c4_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 13, AF4)>, /* I2C4_SDA */
+					 <STM32_PINMUX('E', 2, AF4)>; /* I2C4_SCL */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
 	sdmmc1_pins_mx: sdmmc1_mx-0 {
 		pins1 {
 			pinmux = <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
@@ -146,6 +156,8 @@
 };
 
 &i2c4 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c4_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */
