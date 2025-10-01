@@ -1,8 +1,10 @@
 
 import os
 import hashlib
+import subprocess
 
 SERIAL_FILE = "/etc/kaonic/kaonic_serial"
+MACHINE_FILE = "/etc/kaonic/kaonic_machine"
 HOSTAPD_CONF = "/etc/hostapd.conf"
 OTP_NVMEM_FILE = "/sys/bus/nvmem/devices/stm32-romem0/nvmem"
 
@@ -86,17 +88,32 @@ def main():
 
     serial = create_serial()
 
+    should_update_serial = True
     if os.path.exists(SERIAL_FILE):
         with open(SERIAL_FILE, "r") as f:
             current_serial = f.read()
             if current_serial == serial:
+                should_update_serial = False
                 print("Kaonic serial file - ok")
-                return
 
-    print("Update kaonic serial")
+    if should_update_serial:
+        print("Update kaonic serial")
+        update_hostapd_conf(f"Kaonic /{serial.split('-')[1]}/")
+        save_serial(serial)
 
-    update_hostapd_conf(f"Kaonic /{serial.split('-')[1]}/")
-    save_serial(serial)
+    with open(MACHINE_FILE, "r") as f:
+        machine = f.read().strip()
+        print(f"Kaonic Machine = {machine}")
+
+        if machine == "stm32mp1-kaonic-protob" or machine == "stm32mp1-kaonic-protoc":
+
+            print("> Enable Integrated WiFi Antenna", flush=True)
+
+            cmd = ['gpioset', '-z', '-c', '9', '0=0']
+            try:
+                subprocess.run(cmd, check=True)
+            except subprocess.CalledProcessError:
+                print("GPIO is already consumed")
 
 if __name__ == "__main__":
     main()
