@@ -136,6 +136,16 @@
 		reset-gpios = <&gpiog 7 GPIO_ACTIVE_LOW>;
 	};
 
+	usb_phy_tuning: usb-phy-tuning {
+		st,hs-dc-level = <2>;
+		st,fs-rftime-tuning;
+		st,hs-rftime-reduction;
+		st,hs-current-trim = <15>;
+		st,hs-impedance-trim = <1>;
+		st,squelch-level = <3>;
+		st,hs-rx-offset = <2>;
+		st,no-lsfs-sc;
+	};
 	/* USER CODE END root */
 
 	clocks{
@@ -451,6 +461,36 @@
 					 <STM32_PINMUX('A', 11, ANALOG)>, /* USART1_CTS */
 					 <STM32_PINMUX('A', 12, ANALOG)>, /* USART1_RTS */
 					 <STM32_PINMUX('B', 2, ANALOG)>; /* USART1_RX */
+		};
+	};
+
+	usart2_pins_mx: usart2_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('A', 2, AF7)>; /* USART2_TX */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('D', 6, AF7)>; /* USART2_RX */
+			bias-disable;
+		};
+	};
+
+	usart2_idle_pins_mx: usart2_idle_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('A', 2, ANALOG)>; /* USART2_TX */
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('D', 6, AF7)>; /* USART2_RX */
+			bias-disable;
+		};
+	};
+
+	usart2_sleep_pins_mx: usart2_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('A', 2, ANALOG)>, /* USART2_TX */
+					 <STM32_PINMUX('D', 6, ANALOG)>; /* USART2_RX */
 		};
 	};
 
@@ -926,6 +966,17 @@
 	/* USER CODE END usart1 */
 };
 
+&usart2 {
+	pinctrl-names = "default", "idle", "sleep";
+	pinctrl-0 = <&usart2_pins_mx>;
+	pinctrl-1 = <&usart2_idle_pins_mx>;
+	pinctrl-2 = <&usart2_sleep_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN usart2 */
+	/* USER CODE END usart2 */
+};
+
 &usart6 {
 	pinctrl-names = "default", "idle", "sleep";
 	pinctrl-0 = <&usart6_pins_mx>;
@@ -945,6 +996,10 @@
 
 	/* USER CODE BEGIN usbh_ehci */
 	phys = <&usbphyc_port0>;
+	phy-names = "usb";
+
+	vbus-supply = <&vbus_sw>;
+
 	#address-cells = <1>;
 	#size-cells = <0>;
 
@@ -980,6 +1035,7 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc */
+	vdd3v3-supply = <&vdd_usb>;
 	/* USER CODE END usbphyc */
 };
 
@@ -987,7 +1043,6 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port0 */
-	phy-supply = <&vdd>;
 	st,tune-hs-dc-level = <2>;
 	st,enable-fs-rftime-tuning;
 	st,enable-hs-rftime-reduction;
@@ -996,6 +1051,16 @@
 	st,tune-squelch-level = <3>;
 	st,tune-hs-rx-offset = <2>;
 	st,no-lsfs-sc;
+
+	st,phy-tuning = <&usb_phy_tuning>;
+
+	phy-supply = <&vdd_usb>;
+    vbus-supply = <&vbus_sw>;
+
+	connector {
+		compatible = "usb-a-connector";
+		vbus-supply = <&vbus_sw>;
+	};
 	/* USER CODE END usbphyc_port0 */
 };
 

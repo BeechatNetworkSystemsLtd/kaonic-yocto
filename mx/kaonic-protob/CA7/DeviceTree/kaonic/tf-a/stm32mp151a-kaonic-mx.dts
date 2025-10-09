@@ -117,6 +117,19 @@
 		};
 	};
 
+	usart2_pins_mx: usart2_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('A', 2, AF7)>; /* USART2_TX */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('D', 6, AF7)>; /* USART2_RX */
+			bias-disable;
+		};
+	};
+
 	usart6_pins_mx: usart6_mx-0 {
 		pins1 {
 			pinmux = <STM32_PINMUX('C', 6, AF7)>; /* USART6_TX */
@@ -287,6 +300,7 @@
 		CLK_SDMMC12_PLL4P
 		CLK_STGEN_HSE
 		CLK_I2C46_HSI
+		CLK_UART24_PCLK1
 		CLK_UART6_PCLK2
 		CLK_MPU_PLL1P
 		CLK_AXI_PLL2P
@@ -396,6 +410,15 @@
 	bus-width = <4>;
 	vmmc-supply = <&v3v3>;
 	/* USER CODE END sdmmc1 */
+};
+
+&usart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&usart2_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN usart2 */
+	/* USER CODE END usart2 */
 };
 
 &usart6 {
