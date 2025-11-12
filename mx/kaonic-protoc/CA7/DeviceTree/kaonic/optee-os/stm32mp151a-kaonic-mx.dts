@@ -121,6 +121,16 @@
 
 /*Warning: the configuration of the secured GPIOs should be added in (addons) User Section*/
 &pinctrl {
+	i2c4_pins_mx: i2c4_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 13, AF4)>, /* I2C4_SDA */
+					 <STM32_PINMUX('E', 2, AF4)>; /* I2C4_SCL */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
 	/* USER CODE BEGIN pinctrl */
 	i2c4_pins_mx: i2c4_mx-0 {
 		pins {
@@ -180,6 +190,7 @@
 	DECPROT(STM32MP1_ETZPC_SPI4_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_SPI6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_USART1_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
+	DECPROT(STM32MP1_ETZPC_USART2_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_USART6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	DECPROT(STM32MP1_ETZPC_OTG_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
 	/*"Secured" peripherals*/
@@ -202,6 +213,8 @@
 };
 
 &i2c4 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c4_pins_mx>;
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */
@@ -457,6 +470,7 @@
 		CLK_USBO_PLL4R
 		CLK_I2C12_PCLK1
 		CLK_UART1_PCLK5
+		CLK_UART24_PCLK1
 		CLK_UART6_PCLK2
 		CLK_MPU_PLL1P
 		CLK_AXI_PLL2P
