@@ -434,8 +434,13 @@
 
 &bsec{
 
-	board_id:board_id@ec{
+	board_id: board_id@ec {
 		reg = <0xec 0x4>;
+		st,non-secure-otp;
+	};
+
+	kaonic_date_otp: kaonic-date-otp@f0 {
+		reg = <0xf0 0x4>;
 		st,non-secure-otp;
 	};
 };
