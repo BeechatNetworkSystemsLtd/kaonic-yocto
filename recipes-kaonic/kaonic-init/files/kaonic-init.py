@@ -109,7 +109,7 @@ def main():
 
             print("> Enable Integrated WiFi Antenna", flush=True)
 
-            cmd = ['gpioset', '-z', '-c', '9', '0=0']
+            cmd = ['gpioset', '-z', '-c', '8', '0=0']
             try:
                 subprocess.run(cmd, check=True)
             except subprocess.CalledProcessError:
