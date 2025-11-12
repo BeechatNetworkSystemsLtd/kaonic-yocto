@@ -13,7 +13,7 @@ IMAGE_FEATURES += "\
     "
 
 # Networking
-IMAGE_INSTALL:append = " hostapd iw dnsmasq"
+IMAGE_INSTALL:append = " hostapd iw dnsmasq rsync"
 IMAGE_INSTALL:append = " grpc protobuf"
 
 # Testing, Development and Runtime
