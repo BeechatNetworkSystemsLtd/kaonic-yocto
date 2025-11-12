@@ -36,6 +36,7 @@ IMAGE_INSTALL:append = " kaonic-init kaonic-comm kaonic-factory"
 TOOLCHAIN_HOST_TASK += "\
     nativesdk-grpc \
     nativesdk-grpc-dev \
+    python3-cryptography \
 "
 
 TOOLCHAIN_TARGET_TASK += "protobuf-staticdev"

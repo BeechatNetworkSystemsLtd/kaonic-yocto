@@ -3,18 +3,19 @@ DESCRIPTION = "Kaonic Comm"
 SECTION = "kaonic"
 LICENSE = "MIT"
 
-LIC_FILES_CHKSUM = "file://LICENSE;md5=70eac050876ed2e265e3deee01ec75cd"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=f978e2caad0e533cf3b63ddb6d8dec6f"
 
 DEPENDS:append = " libgpiod protobuf protobuf-native grpc grpc-native"
+DEPENDS:append = " python3-cryptography-native"
 RDEPENDS:${PN} += "systemd python3-cryptography python3-flask"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-inherit pkgconfig cmake systemd
+inherit cargo systemd cargo-update-recipe-crates pkgconfig
 
 PR = "r0" 
-SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-comm.git;protocol=https;branch=main;"
-SRCREV = "9afea3804ceb131f51f4b812bd0b6c9ac632ec8d"
+SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-radio.git;protocol=https;branch=main;"
+SRCREV = "520a59bc2d225341fefb738eff88a93e307e0812"
 
 SRC_URI += " \
     file://wifi_connect.sh \
@@ -37,16 +38,19 @@ FILES:${PN} += " \
 
 S = "${WORKDIR}/git"
 
+require ${BPN}-crates.inc
+
 do_compile:append() {
     cd ${S}
     mkdir -p ${B}/deploy
-    python3 ${S}/scripts/create-ota.py -b ${B} -o ${B}/deploy -k
+    export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1
+    python3 ${S}/scripts/create-ota.py -b ${B}/target/armv7-ostl-linux-gnueabihf/release -o ${B}/deploy -k
 }
 
 do_install:append() {
     # Kaonic commd
     install -d ${D}${bindir}
-    install -m 0755 ${B}/bin/kaonic-commd ${D}${bindir}/kaonic-commd
+    install -m 0755 ${B}/target/${CARGO_TARGET_SUBDIR}/kaonic-commd ${D}${bindir}/kaonic-commd
     install -m 0755 ${S}/ota/kaonic-ota.py ${D}${bindir}/kaonic-ota.py
 
     # Kaonic systemd service
