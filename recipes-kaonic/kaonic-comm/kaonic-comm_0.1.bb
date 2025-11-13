@@ -36,6 +36,8 @@ FILES:${PN} += " \
     ${systemd_system_unitdir}/kaonic-ota.service \
 "
 
+CARGO_SRC_DIR = "kaonic-commd"
+
 S = "${WORKDIR}/git"
 
 require ${BPN}-crates.inc
@@ -44,7 +46,7 @@ do_compile:append() {
     cd ${S}
     mkdir -p ${B}/deploy
     export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1
-    python3 ${S}/scripts/create-ota.py -b ${B}/target/armv7-ostl-linux-gnueabihf/release -o ${B}/deploy -k
+    python3 ${S}/scripts/create-ota.py -b ${B}/target/${CARGO_TARGET_SUBDIR} -o ${B}/deploy -k
 }
 
 do_install:append() {
