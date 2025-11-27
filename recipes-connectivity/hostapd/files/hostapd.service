@@ -1,6 +1,8 @@
 [Unit]
 Description=Hostapd IEEE 802.11 Access Point
-Wants=network.target
+Wants=systemd-networkd.service
+Before=systemd-networkd.service
+Before=systemd-networkd-wait-online.service
 Before=network.target
 BindsTo=sys-subsystem-net-devices-wlan0.device
 After=sys-subsystem-net-devices-wlan0.device
@@ -8,7 +10,6 @@ After=sys-subsystem-net-devices-wlan0.device
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStartPre=/sbin/ip link set wlan0 up
 ExecStart=/usr/sbin/hostapd /etc/hostapd.conf -P /run/hostapd.pid -B
 
 [Install]

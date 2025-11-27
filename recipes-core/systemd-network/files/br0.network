@@ -1,0 +1,13 @@
+[Match]
+Name=br0
+
+[Network]
+Address=192.168.10.1/24
+DHCPServer=yes
+IPMasquerade=yes   # If your board has internet upstream to share
+
+[DHCPServer]
+PoolOffset=10
+PoolSize=100
+EmitDNS=yes
+EmitRouter=yes

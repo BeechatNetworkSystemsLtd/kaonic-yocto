@@ -33,6 +33,8 @@ IMAGE_INSTALL:append = " \
 # Kaonic Applications
 IMAGE_INSTALL:append = " kaonic-init kaonic-comm kaonic-factory"
 
+IMAGE_INSTALL:remove = "st-hostname"
+
 TOOLCHAIN_HOST_TASK += "\
     nativesdk-grpc \
     nativesdk-grpc-dev \

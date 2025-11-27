@@ -1,0 +1,6 @@
+[Match]
+Name=usb0
+Type=gadget
+
+[Network]
+Bridge=br0
