@@ -14,7 +14,7 @@ inherit cargo systemd cargo-update-recipe-crates pkgconfig
 
 PR = "r0" 
 SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-radio.git;protocol=https;branch=main;"
-SRCREV = "ca1288e93f5cd32dbcd69b542aee3e159ad3ee0b"
+SRCREV = "69649f0f49b1081321b332288d225df2104c53d0"
 
 SRC_URI += " \
     file://kaonic-factory.service \
