@@ -1,5 +1,12 @@
 #!/usr/bin/sh
 
+systemctl stop hostapd
+systemctl stop systemd-networkd.socket
+systemctl stop systemd-networkd
+
+ip link set wlan0 nomaster
+ip link set wlan0 down
+
 # Set WiFi link Up
 ip link set wlan0 up
 
