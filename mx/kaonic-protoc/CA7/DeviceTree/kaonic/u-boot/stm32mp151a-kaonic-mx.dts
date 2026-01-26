@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: (GPL-2.0-or-later OR BSD-3-Clause)
 /*
- * Copyright (C) 2025, STMicroelectronics - All Rights Reserved
+ * Copyright (C) 2026, STMicroelectronics - All Rights Reserved
  * Author: STM32CubeMX code generation for STMicroelectronics.
  */
 
@@ -373,7 +373,7 @@
 					 <STM32_PINMUX('E', 0, AF5)>; /* SPI3_SCK */
 			bias-disable;
 			drive-push-pull;
-			slew-rate = <1>;
+			slew-rate = <3>;
 		};
 	};
 
@@ -393,7 +393,7 @@
 					 <STM32_PINMUX('E', 14, AF5)>; /* SPI4_MOSI */
 			bias-disable;
 			drive-push-pull;
-			slew-rate = <1>;
+			slew-rate = <3>;
 		};
 	};
 
@@ -413,7 +413,7 @@
 					 <STM32_PINMUX('G', 13, AF5)>; /* SPI6_SCK */
 			bias-disable;
 			drive-push-pull;
-			slew-rate = <1>;
+			slew-rate = <3>;
 		};
 	};
 

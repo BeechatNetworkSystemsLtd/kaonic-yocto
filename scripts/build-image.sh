@@ -62,14 +62,19 @@ EOF
 #*****************************************************************************#
 
 echo "Update crates"
-bitbake -c update_crates kaonic-factory
-bitbake -c update_crates kaonic-comm
+
+# bitbake -c update_crates kaonic-factory
+# bitbake -c update_crates kaonic-comm
+bitbake -c cleansstate kaonic-comm
+bitbake -c cleansstate kaonic-factory
+
+# bitbake -c cleanall kaonic-st-image-core
 
 echo "Recompile DeviceTree"
-bitbake -c compile -f tf-a-stm32mp
-bitbake -c compile -f optee-os-stm32mp
-bitbake -c compile -f u-boot
-bitbake -c compile -f virtual/kernel
+# bitbake -c compile -f tf-a-stm32mp
+# bitbake -c compile -f optee-os-stm32mp
+# bitbake -c compile -f u-boot
+# bitbake -c compile -f virtual/kernel
 
 echo "Build image"
 bitbake kaonic-st-image-core 
