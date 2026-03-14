@@ -147,6 +147,23 @@
 		st,no-lsfs-sc;
 	};
 
+	sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,name = "Kaonic WM8960 Audio";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,bitclock-master = <&cpu_dai>;
+		simple-audio-card,frame-master = <&cpu_dai>;
+		status = "okay";
+
+		cpu_dai: simple-audio-card,cpu {
+			sound-dai = <&i2s2>;
+		};
+
+		codec_dai: simple-audio-card,codec {
+			sound-dai = <&wm8960>;
+		};
+	};
+
 
 	/* USER CODE END root */
 
@@ -581,13 +598,6 @@
 
 	/* USER CODE BEGIN m4_rproc */
 	/* USER CODE END m4_rproc */
-
-	m4_system_resources{
-		status = "okay";
-
-		/* USER CODE BEGIN m4_system_resources */
-		/* USER CODE END m4_system_resources */
-	};
 };
 
 &bsec {
@@ -606,7 +616,7 @@
 };
 
 &dma2 {
-	status = "disabled";
+	status = "okay";
 
 	/* USER CODE BEGIN dma2 */
 	/* USER CODE END dma2 */
@@ -615,8 +625,8 @@
 &dmamux1 {
 	status = "okay";
 
-	dma-masters = <&dma1>;
-	dma-channels = <8>;
+	dma-masters = <&dma1 &dma2>;
+	dma-channels = <16>;
 
 	/* USER CODE BEGIN dmamux1 */
 	/* USER CODE END dmamux1 */
@@ -653,6 +663,23 @@
 		#gpio-cells = <2>;
 		gpio-controller;
 		status = "okay";
+	};
+
+
+	wm8960: codec@1a {
+		compatible = "wlf,wm8960";
+		reg = <0x1a>;
+		#sound-dai-cells = <0>;
+		AVDD-supply = <&v3v3>;
+		IOVDD-supply = <&v3v3>;
+		DCVDD-supply = <&v3v3>;
+		DBVDD-supply = <&v3v3>;
+
+		port {
+			wm8960_endpoint: endpoint {
+				remote-endpoint = <&i2s2_endpoint>;
+			};
+		};
 	};
 	/* USER CODE END i2c1 */
 };
@@ -825,6 +852,17 @@
 	status = "okay";
 
 	/* USER CODE BEGIN i2s2 */
+	clocks = <&rcc SPI2>, <&rcc SPI2_K>, <&rcc PLL3_Q>, <&rcc PLL3_R>;
+	clock-names = "pclk", "i2sclk", "x8k", "x11k";
+
+	i2s2_port: port {
+		i2s2_endpoint: endpoint {
+			remote-endpoint = <&wm8960_endpoint>;
+			format = "i2s";
+			mclk-fs = <256>;
+		};
+	};
+
 	/* USER CODE END i2s2 */
 };
 
@@ -833,13 +871,6 @@
 
 	/* USER CODE BEGIN ipcc */
 	/* USER CODE END ipcc */
-};
-
-&m4_dma2 {
-	status = "okay";
-
-	/* USER CODE BEGIN m4_dma2 */
-	/* USER CODE END m4_dma2 */
 };
 
 &mdma1 {

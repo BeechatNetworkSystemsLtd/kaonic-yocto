@@ -16,6 +16,14 @@ IMAGE_FEATURES += "\
 IMAGE_INSTALL:append = " hostapd iw dnsmasq rsync"
 IMAGE_INSTALL:append = " grpc protobuf"
 
+# Audio
+IMAGE_INSTALL:append = " \
+    alsa-lib \
+    alsa-utils \
+    alsa-state \
+    alsa-plugins \
+"
+
 # Testing, Development and Runtime
 IMAGE_INSTALL:append = " spidev-test devmem2"
 IMAGE_INSTALL:append = " python3 python3-pip"
