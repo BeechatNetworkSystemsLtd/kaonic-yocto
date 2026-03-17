@@ -51,14 +51,14 @@ RUN groupadd builduser -g 1000 \
 USER builduser
 
 ENV DISTRO=openstlinux-weston
-# ENV MACHINE=stm32mp1
 
 RUN git config --global user.email "yocto-build@beechat.network" && git config --global user.name "Yocto Build" \
     && mkdir /home/builduser/yocto && mkdir /home/builduser/bin && cd /home/builduser/yocto \
     && curl https://storage.googleapis.com/git-repo-downloads/repo > /home/builduser/bin/repo \
     && chmod +x /home/builduser/bin/repo \
     && /home/builduser/bin/repo init -u https://github.com/STMicroelectronics/oe-manifest.git -b refs/tags/openstlinux-6.6-yocto-scarthgap-mpu-v24.11.06 \
-    && /home/builduser/bin/repo sync
+    && /home/builduser/bin/repo sync \
+    && cd /home/builduser/yocto/layers/st-meta/ && git clone https://github.com/rust-embedded/meta-rust-bin.git
 
 CMD ["/bin/bash"]
 

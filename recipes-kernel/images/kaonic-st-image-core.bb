@@ -25,7 +25,7 @@ IMAGE_INSTALL:append = " \
 "
 
 # Testing, Development and Runtime
-IMAGE_INSTALL:append = " spidev-test devmem2 evtest"
+IMAGE_INSTALL:append = " spidev-test devmem2 evtest sqlite3"
 IMAGE_INSTALL:append = " python3 python3-pip"
 IMAGE_INSTALL:append = " \
     x264 \
@@ -39,7 +39,7 @@ IMAGE_INSTALL:append = " \
 "
 
 # Kaonic Applications
-IMAGE_INSTALL:append = " kaonic-init kaonic-comm kaonic-factory"
+IMAGE_INSTALL:append = " kaonic-init kaonic-comm"
 
 IMAGE_INSTALL:remove = "st-hostname"
 

@@ -1,4 +1,4 @@
-DESCRIPTION = "Kaonic Comm" 
+DESCRIPTION = "Kaonic Radio Package" 
 
 SECTION = "kaonic"
 LICENSE = "MIT"
@@ -6,26 +6,31 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=f978e2caad0e533cf3b63ddb6d8dec6f"
 
 DEPENDS:append = " libgpiod protobuf protobuf-native grpc grpc-native"
-DEPENDS:append = " python3-cryptography-native"
-RDEPENDS:${PN} += "systemd python3-cryptography python3-flask"
+RDEPENDS:${PN} += "systemd"
+
+DEPENDS += "cargo-bin-cross-${TARGET_ARCH}"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-inherit cargo systemd cargo-update-recipe-crates pkgconfig
+INSANE_SKIP:${PN} += "already-stripped"
+
+inherit cargo_bin systemd pkgconfig
 
 PR = "r0" 
 SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-radio.git;protocol=https;branch=main;"
-SRCREV = "1f9c3db1ff83530bfd27e8f48065417e600197ee"
+SRCREV = "0439489a542e9815e0a3cd6bfea25502909013fa"
 
 SRC_URI += " \
     file://wifi_connect.sh \
     file://kaonic-commd.service \
-    file://kaonic-ota.service \
+    file://kaonic-factory.service \
 "
+
+do_compile[network] = "1"
 
 # Systemd
 SYSTEMD_PACKAGES = "${PN}"
-SYSTEMD_SERVICE:${PN} = "kaonic-commd.service kaonic-ota.service"
+SYSTEMD_SERVICE:${PN} = "kaonic-commd.service kaonic-factory.service"
 
 SYSTEMD_AUTO_ENABLE:${PN} = "enable"
 
@@ -33,32 +38,21 @@ SYSTEMD_AUTO_ENABLE:${PN} = "enable"
 FILES:${PN} += " \
     /home/root/wifi_connect.sh \
     ${systemd_system_unitdir}/kaonic-commd.service \
-    ${systemd_system_unitdir}/kaonic-ota.service \
+    ${systemd_system_unitdir}/kaonic-factory.service \
 "
-
-CARGO_SRC_DIR = "kaonic-commd"
 
 S = "${WORKDIR}/git"
 
-require ${BPN}-crates.inc
-
-do_compile:append() {
-    cd ${S}
-    mkdir -p ${B}/deploy
-    export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1
-    python3 ${S}/scripts/create-ota.py -b ${B}/target/${CARGO_TARGET_SUBDIR} -o ${B}/deploy -k
-}
-
-do_install:append() {
+do_install() {
     # Kaonic commd
     install -d ${D}${bindir}
-    install -m 0755 ${B}/target/${CARGO_TARGET_SUBDIR}/kaonic-commd ${D}${bindir}/kaonic-commd
-    install -m 0755 ${S}/ota/kaonic-ota.py ${D}${bindir}/kaonic-ota.py
+    install -m 0755 ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-commd ${D}${bindir}/kaonic-commd
+    install -m 0755 ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-factory ${D}${bindir}/kaonic-factory
 
     # Kaonic systemd service
     install -d ${D}${systemd_system_unitdir}/
     install -m 0644 ${WORKDIR}/kaonic-commd.service ${D}${systemd_system_unitdir}
-    install -m 0644 ${WORKDIR}/kaonic-ota.service ${D}${systemd_system_unitdir}
+    install -m 0644 ${WORKDIR}/kaonic-factory.service ${D}${systemd_system_unitdir}
 
     # Help scripts
     install -d ${D}/home/root
@@ -68,8 +62,14 @@ do_install:append() {
 
     echo ${MACHINE} > ${D}/etc/kaonic/kaonic_machine
 
-    install -m 0755  ${B}/deploy/kaonic-comm-ota/kaonic-commd.version ${D}/etc/kaonic/
-    install -m 0755  ${B}/deploy/kaonic-comm-ota/kaonic-commd.sha256 ${D}/etc/kaonic/
-    install -m 0755  ${S}/certs/beechat-ota.pub.pem ${D}/etc/kaonic/
+    # Write version from git tag (falls back to SRCREV short hash if no tag)
+    cd ${S}
+    GIT_VERSION=$(git describe --tags --always 2>/dev/null || echo "${SRCREV}" | cut -c1-8)
+    echo "${GIT_VERSION}" > ${D}/etc/kaonic/kaonic-commd.version
+
+    # Write sha256 of the installed binary
+    sha256sum ${D}${bindir}/kaonic-commd | awk '{print $1}' > ${D}/etc/kaonic/kaonic-commd.sha256
+
+    install -m 0644 ${S}/certs/beechat-ota.pub.pem ${D}/etc/kaonic/
 }
 
