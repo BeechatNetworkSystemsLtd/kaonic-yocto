@@ -22,6 +22,7 @@
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/mfd/st,stpmic1.h>
+#include <dt-bindings/input/input.h>
 
 /* USER CODE END includes */
 
@@ -834,7 +835,9 @@
 			interrupts = <IT_PONKEY_F 0>, <IT_PONKEY_R 0>;
 			interrupt-names = "onkey-falling", "onkey-rising";
 			power-off-time-sec = <10>;
-			status = "disabled";
+			st,onkey-key-code = <KEY_POWER>;
+			linux,can-disable;
+			status = "okay";
 		};
 
 		watchdog {

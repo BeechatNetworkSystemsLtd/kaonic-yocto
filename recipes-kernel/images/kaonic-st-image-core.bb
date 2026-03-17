@@ -25,7 +25,7 @@ IMAGE_INSTALL:append = " \
 "
 
 # Testing, Development and Runtime
-IMAGE_INSTALL:append = " spidev-test devmem2"
+IMAGE_INSTALL:append = " spidev-test devmem2 evtest"
 IMAGE_INSTALL:append = " python3 python3-pip"
 IMAGE_INSTALL:append = " \
     x264 \
