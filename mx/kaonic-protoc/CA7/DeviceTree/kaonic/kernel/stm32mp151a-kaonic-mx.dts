@@ -156,6 +156,14 @@
 		simple-audio-card,frame-master = <&cpu_dai>;
 		status = "okay";
 
+		simple-audio-card,widgets =
+			"Microphone", "Mic Jack";
+
+		simple-audio-card,routing =
+			"Mic Jack", "MICB",
+			"LINPUT2", "Mic Jack",
+			"LINPUT3", "Mic Jack";
+
 		cpu_dai: simple-audio-card,cpu {
 			sound-dai = <&i2s2>;
 		};
@@ -164,7 +172,6 @@
 			sound-dai = <&wm8960>;
 		};
 	};
-
 
 	/* USER CODE END root */
 
