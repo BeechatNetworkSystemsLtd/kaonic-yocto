@@ -1,0 +1,13 @@
+[Unit]
+Description=Apply persisted Kaonic WiFi mode
+Wants=sys-subsystem-net-devices-wlan0.device systemd-networkd.service
+After=local-fs.target kaonic-init.service sys-subsystem-net-devices-wlan0.device systemd-networkd.service
+Before=kaonic-commd.service kaonic-factory.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/kaonic-wifi-mode apply
+
+[Install]
+WantedBy=multi-user.target

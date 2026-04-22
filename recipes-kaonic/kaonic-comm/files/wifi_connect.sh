@@ -1,19 +1,10 @@
-#!/usr/bin/sh
+#!/bin/sh
 
-systemctl stop hostapd
-systemctl stop systemd-networkd.socket
-systemctl stop systemd-networkd
+set -eu
 
-ip link set wlan0 nomaster
-ip link set wlan0 down
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <ssid> <passphrase>" >&2
+    exit 1
+fi
 
-# Set WiFi link Up
-ip link set wlan0 up
-
-wpa_passphrase $1 $2 >> /etc/wpa_supplicant.conf
-wpa_supplicant -B -iwlan0 -c /etc/wpa_supplicant.conf
-
-iw wlan0 link
-
-udhcpc -i wlan0
-
+exec /usr/bin/kaonic-wifi-mode sta "$1" "$2"
