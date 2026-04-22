@@ -2,6 +2,7 @@
 Name=br0
 
 [Network]
+ConfigureWithoutCarrier=yes
 Address=192.168.10.1/24
 DHCPServer=yes
 IPMasquerade=yes   # If your board has internet upstream to share
