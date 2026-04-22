@@ -84,6 +84,27 @@ def save_serial(serial: str):
     with open(SERIAL_FILE, "w") as f:
         f.write(serial)
 
+def update_hostname(hostname: str):
+    try:
+        with open("/etc/hostname", "r") as f:
+            current = f.read().strip()
+    except FileNotFoundError:
+        current = ""
+
+    if current == hostname:
+        print("Kaonic hostname - ok")
+        return
+
+    print(f"Update kaonic hostname: {hostname}")
+
+    with open("/etc/hostname", "w") as f:
+        f.write(f"{hostname}\n")
+
+    try:
+        subprocess.run(["hostname", hostname], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to apply hostname: {e}")
+
 def main():
 
     serial = create_serial()
@@ -96,10 +117,14 @@ def main():
                 should_update_serial = False
                 print("Kaonic serial file - ok")
 
+    serial_suffix = serial.split('-')[1]
+
     if should_update_serial:
         print("Update kaonic serial")
-        update_hostapd_conf(f"Kaonic /{serial.split('-')[1]}/")
+        update_hostapd_conf(f"Kaonic /{serial_suffix}/")
         save_serial(serial)
+
+    update_hostname(f"kaonic1s-{serial_suffix}")
 
     with open(MACHINE_FILE, "r") as f:
         machine = f.read().strip()
