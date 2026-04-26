@@ -5,6 +5,8 @@ include recipes-st/images/st-image.inc
 
 inherit core-image
 
+ROOTFS_POSTPROCESS_COMMAND += "kaonic_install_alsa_state; "
+
 IMAGE_LINGUAS = "en-us"
 
 IMAGE_FEATURES += "\
@@ -13,7 +15,8 @@ IMAGE_FEATURES += "\
     "
 
 # Networking
-IMAGE_INSTALL:append = " hostapd iw dnsmasq rsync"
+IMAGE_INSTALL:append = " hostapd iw dnsmasq rsync iproute2 iptables iputils procps net-tools"
+IMAGE_INSTALL:append = " avahi-daemon"
 IMAGE_INSTALL:append = " grpc protobuf"
 
 # Audio
@@ -39,7 +42,8 @@ IMAGE_INSTALL:append = " \
 "
 
 # Kaonic Applications
-IMAGE_INSTALL:append = " kaonic-init kaonic-comm"
+IMAGE_INSTALL:append = " kaonic-init kaonic-comm kaonic-gateway"
+IMAGE_INSTALL:append:stm32mp1-kaonic-protoc = " kaonic-audio-defaults"
 
 IMAGE_INSTALL:remove = "st-hostname"
 
@@ -63,5 +67,14 @@ CORE_IMAGE_EXTRA_INSTALL += " \
     \
     ${@bb.utils.contains('COMBINED_FEATURES', 'optee', 'packagegroup-optee-core', '', d)}   \
     ${@bb.utils.contains('COMBINED_FEATURES', 'optee', 'packagegroup-optee-test', '', d)}   \
+    kernel-modules \
     tcpdump \
     "
+
+kaonic_install_alsa_state() {
+    if [ -f ${IMAGE_ROOTFS}${sysconfdir}/alsa/kaonic-asound.state ]; then
+        install -d ${IMAGE_ROOTFS}${localstatedir}/lib/alsa
+        install -m 0644 ${IMAGE_ROOTFS}${sysconfdir}/alsa/kaonic-asound.state \
+            ${IMAGE_ROOTFS}${localstatedir}/lib/alsa/asound.state
+    fi
+}
