@@ -148,29 +148,36 @@
 		st,no-lsfs-sc;
 	};
 
+	wm8960_mclk: wm8960-mclk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <24000000>;
+	};
+
 	sound {
+
 		compatible = "simple-audio-card";
 		simple-audio-card,name = "Kaonic WM8960 Audio";
 		simple-audio-card,format = "i2s";
 		simple-audio-card,bitclock-master = <&cpu_dai>;
 		simple-audio-card,frame-master = <&cpu_dai>;
 		status = "okay";
-
 		simple-audio-card,widgets =
-			"Microphone", "Mic Jack";
-
+			"Microphone", "Mic Jack",
+			"Headphone", "Mono Out";
 		simple-audio-card,routing =
 			"Mic Jack", "MICB",
-			"LINPUT2", "Mic Jack",
-			"LINPUT3", "Mic Jack";
-
+			"LINPUT3", "Mic Jack",
+			"Mono Out", "HP_L",
+			"Mono Out", "HP_R";
 		cpu_dai: simple-audio-card,cpu {
 			sound-dai = <&i2s2>;
 		};
-
 		codec_dai: simple-audio-card,codec {
 			sound-dai = <&wm8960>;
+			system-clock-frequency = <24000000>;
 		};
+
 	};
 
 	/* USER CODE END root */
@@ -678,6 +685,9 @@
 		compatible = "wlf,wm8960";
 		reg = <0x1a>;
 		#sound-dai-cells = <0>;
+		clocks = <&wm8960_mclk>;
+		clock-names = "mclk";
+		wlf,shared-lrclk;
 		AVDD-supply = <&v3v3>;
 		IOVDD-supply = <&v3v3>;
 		DCVDD-supply = <&v3v3>;
