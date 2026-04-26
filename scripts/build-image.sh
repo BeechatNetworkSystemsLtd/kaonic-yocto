@@ -33,7 +33,7 @@ while [[ $# -gt 0 ]]; do
             CLEAN_PACKAGES="${CLEAN_PACKAGES} $2"
             shift 2
             ;;
-        --xz)
+        --gz)
             COMPRESS_IMAGE=true
             shift
             ;;
@@ -48,14 +48,14 @@ while [[ $# -gt 0 ]]; do
             echo "  --dts                   Recompile DeviceTree (tf-a, optee, u-boot, kernel)"
             echo "  --clean                 Clean image before building"
             echo "  --clean-package <pkg>   Clean specific package (can be used multiple times)"
-            echo "  --xz                    Compress final image with xz"
+            echo "  --gz                    Compress final image with gzip (Etcher-compatible)"
             echo "  -h, --help              Show this help message"
             echo ""
             echo "Examples:"
             echo "  $0 --machine stm32mp1-kaonic-protoc"
             echo "  $0 --machine stm32mp1-kaonic-protoc --rust --dts"
-            echo "  $0 --machine stm32mp1-kaonic-protoc --xz"
-            echo "  $0 --machine stm32mp1-kaonic-protoc --clean-package kaonic-comm --xz"
+            echo "  $0 --machine stm32mp1-kaonic-protoc --gz"
+            echo "  $0 --machine stm32mp1-kaonic-protoc --clean-package kaonic-comm --gz"
             exit 0
             ;;
         *)
@@ -84,6 +84,25 @@ KAONIC_BUILD_DIR_NAME=build-${MACHINE}-image
 KAONIC_BUILD_DIR=$ROOT_DIR/$KAONIC_BUILD_DIR_NAME
 IMAGE_DIR=$KAONIC_BUILD_DIR/tmp-glibc/deploy/images/$MACHINE
 
+find_meta_rust_bin_dir() {
+    local candidates=(
+        "${META_RUST_BIN_DIR:-}"
+        "$ROOT_DIR/layers/meta-rust-bin"
+        "$ROOT_DIR/layers/meta-st/meta-rust-bin"
+        "$ROOT_DIR/layers/meta-openembedded/meta-rust-bin"
+    )
+
+    local candidate
+    for candidate in "${candidates[@]}"; do
+        if [[ -n "$candidate" && -f "$candidate/conf/layer.conf" ]]; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 #*****************************************************************************#
 
 cd $KAONIC_REPO
@@ -102,6 +121,20 @@ y
 n
 y
 EOF
+
+if ! bitbake-layers show-layers | grep -q 'meta-rust-bin'; then
+    META_RUST_BIN_PATH="$(find_meta_rust_bin_dir)" || {
+        echo "Error: meta-rust-bin is required by meta-kaonic but was not enabled by envsetup.sh." >&2
+        echo "Set META_RUST_BIN_DIR or place the layer in one of:" >&2
+        echo "  $ROOT_DIR/layers/meta-rust-bin" >&2
+        echo "  $ROOT_DIR/layers/meta-st/meta-rust-bin" >&2
+        echo "  $ROOT_DIR/layers/meta-openembedded/meta-rust-bin" >&2
+        exit 1
+    }
+
+    echo "Adding meta-rust-bin from: $META_RUST_BIN_PATH"
+    bitbake-layers add-layer "$META_RUST_BIN_PATH"
+fi
 
 #*****************************************************************************#
 
@@ -151,11 +184,11 @@ mv FlashLayout_sdcard_stm32mp151a-kaonic-mx-opteemin.raw ./${IMAGE_FILENAME}
 sha256sum ${IMAGE_FILENAME} > ${IMAGE_FILENAME}.sha256
 
 if [ "$COMPRESS_IMAGE" = true ]; then
-    echo "Compressing image with xz..."
-    rm -f ${IMAGE_FILENAME}.xz
-    xz -z -v -k ${IMAGE_FILENAME}
+    echo "Compressing image with gzip..."
+    rm -f ${IMAGE_FILENAME}.gz
+    gzip -v -k ${IMAGE_FILENAME}
 else
-    echo "Skipping compression (use --xz to enable)"
+    echo "Skipping compression (use --gz to enable)"
 fi
 
 #*****************************************************************************#
@@ -168,11 +201,12 @@ rm -rf $KAONIC_MACHINE_DEPLOY_DIR/${IMAGE_FILENAME}*
 
 cp ${IMAGE_FILENAME} $KAONIC_MACHINE_DEPLOY_DIR/
 cp ${IMAGE_FILENAME}.sha256 $KAONIC_MACHINE_DEPLOY_DIR/
+cp ./u-boot/u-boot-stm32mp151a-kaonic-mx.dtb $KAONIC_MACHINE_DEPLOY_DIR/
+cp ./kernel/stm32mp151a-kaonic-mx.dtb $KAONIC_MACHINE_DEPLOY_DIR/
 
-if [ "$COMPRESS_IMAGE" = true ] && [ -f ${IMAGE_FILENAME}.xz ]; then
-    cp ${IMAGE_FILENAME}.xz $KAONIC_MACHINE_DEPLOY_DIR/
-    echo "Deployed compressed image: ${IMAGE_FILENAME}.xz"
+if [ "$COMPRESS_IMAGE" = true ] && [ -f ${IMAGE_FILENAME}.gz ]; then
+    cp ${IMAGE_FILENAME}.gz $KAONIC_MACHINE_DEPLOY_DIR/
+    echo "Deployed compressed image: ${IMAGE_FILENAME}.gz"
 fi
 
 #*****************************************************************************#
-
