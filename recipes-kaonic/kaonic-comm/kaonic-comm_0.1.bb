@@ -16,16 +16,14 @@ INSANE_SKIP:${PN} += "already-stripped"
 
 inherit cargo_bin systemd pkgconfig
 
-PR = "r0" 
+PR = "r2" 
 SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-radio.git;protocol=https;branch=main;"
-SRCREV = "6c8a67ac8893dc4db3105721dd6b60e66cf66267"
+SRCREV = "3abf34ec5c4a57bdaa41c3b9ab12df7db03496a0"
 
 SRC_URI += " \
     file://wifi_connect.sh \
     file://wifi_mode.sh \
     file://kaonic-wifi-mode.service \
-    file://kaonic-commd.service \
-    file://kaonic-factory.service \
 "
 
 do_compile[network] = "1"
@@ -45,9 +43,10 @@ FILES:${PN} += " \
     ${systemd_system_unitdir}/kaonic-commd.service \
     ${systemd_system_unitdir}/kaonic-factory.service \
     /etc/kaonic/kaonic_machine \
-    /etc/kaonic/kaonic-commd.version \
-    /etc/kaonic/kaonic-commd.sha256 \
     /etc/kaonic/beechat-ota.pub.pem \
+    /etc/kaonic/plugins \
+    /etc/kaonic/plugins/kaonic-commd \
+    /etc/kaonic/plugins/kaonic-factory \
 "
 
 S = "${WORKDIR}/git"
@@ -55,14 +54,12 @@ S = "${WORKDIR}/git"
 do_install() {
     # Kaonic commd
     install -d ${D}${bindir}
-    install -m 0755 ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-commd ${D}${bindir}/kaonic-commd
-    install -m 0755 ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-factory ${D}${bindir}/kaonic-factory
 
     # Kaonic systemd service
     install -d ${D}${systemd_system_unitdir}/
     install -m 0644 ${WORKDIR}/kaonic-wifi-mode.service ${D}${systemd_system_unitdir}
-    install -m 0644 ${WORKDIR}/kaonic-commd.service ${D}${systemd_system_unitdir}
-    install -m 0644 ${WORKDIR}/kaonic-factory.service ${D}${systemd_system_unitdir}
+    install -m 0644 ${S}/kaonic-commd/kaonic-commd.service ${D}${systemd_system_unitdir}
+    install -m 0644 ${S}/kaonic-factory/kaonic-factory.service ${D}${systemd_system_unitdir}
 
     # Help scripts
     install -d ${D}${bindir}
@@ -73,16 +70,23 @@ do_install() {
     install -m 0755  ${WORKDIR}/wifi_mode.sh ${D}/home/root/wifi_mode.sh
 
     install -d ${D}/etc/kaonic
+    install -d ${D}/etc/kaonic/plugins
+    install -d ${D}/etc/kaonic/plugins/kaonic-commd/current
+    install -d ${D}/etc/kaonic/plugins/kaonic-factory/current
 
     echo ${MACHINE} > ${D}/etc/kaonic/kaonic_machine
 
-    # Write version from git tag (falls back to v0.0.0 if no tag)
-    cd ${S}
-    GIT_VERSION=$(git describe --tags --exact-match 2>/dev/null || echo "v0.0.0")
-    echo "${GIT_VERSION}" > ${D}/etc/kaonic/kaonic-commd.version
+    install -m 0644 ${S}/kaonic-commd/kaonic-plugin.toml ${D}/etc/kaonic/plugins/kaonic-commd/kaonic-plugin.toml
+    install -m 0644 ${S}/kaonic-commd/kaonic-commd.service ${D}/etc/kaonic/plugins/kaonic-commd/kaonic-commd.service
+    install -m 0755 ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-commd ${D}/etc/kaonic/plugins/kaonic-commd/current/kaonic-commd
+    sha256sum ${D}/etc/kaonic/plugins/kaonic-commd/current/kaonic-commd | awk '{print $1}' > ${D}/etc/kaonic/plugins/kaonic-commd/kaonic-commd.sha256
+    ln -sf /etc/kaonic/plugins/kaonic-commd/current/kaonic-commd ${D}${bindir}/kaonic-commd
 
-    # Write sha256 of the installed binary
-    sha256sum ${D}${bindir}/kaonic-commd | awk '{print $1}' > ${D}/etc/kaonic/kaonic-commd.sha256
+    install -m 0644 ${S}/kaonic-factory/kaonic-plugin.toml ${D}/etc/kaonic/plugins/kaonic-factory/kaonic-plugin.toml
+    install -m 0644 ${S}/kaonic-factory/kaonic-factory.service ${D}/etc/kaonic/plugins/kaonic-factory/kaonic-factory.service
+    install -m 0755 ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-factory ${D}/etc/kaonic/plugins/kaonic-factory/current/kaonic-factory
+    sha256sum ${D}/etc/kaonic/plugins/kaonic-factory/current/kaonic-factory | awk '{print $1}' > ${D}/etc/kaonic/plugins/kaonic-factory/kaonic-factory.sha256
+    ln -sf /etc/kaonic/plugins/kaonic-factory/current/kaonic-factory ${D}${bindir}/kaonic-factory
 
     install -m 0644 ${S}/certs/beechat-ota.pub.pem ${D}/etc/kaonic/
 }
