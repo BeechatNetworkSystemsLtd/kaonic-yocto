@@ -130,15 +130,5 @@ def main():
         machine = f.read().strip()
         print(f"Kaonic Machine = {machine}")
 
-        if machine == "stm32mp1-kaonic-protob" or machine == "stm32mp1-kaonic-protoc":
-
-            print("> Enable Integrated WiFi Antenna", flush=True)
-
-            cmd = ['gpioset', '-z', '-c', '8', '0=0']
-            try:
-                subprocess.run(cmd, check=True)
-            except subprocess.CalledProcessError:
-                print("GPIO is already consumed")
-
 if __name__ == "__main__":
     main()

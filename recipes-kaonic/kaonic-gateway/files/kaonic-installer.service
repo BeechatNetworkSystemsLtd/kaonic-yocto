@@ -1,0 +1,16 @@
+[Unit]
+Description=Kaonic Installer Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/kaonic-installer
+WorkingDirectory=/home/root/
+Restart=always
+RestartSec=5
+User=root
+Group=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
