@@ -10,7 +10,6 @@ do_install:append () {
 SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE:${PN} = "hostapd.service"
 
-SYSTEMD_AUTO_ENABLE:${PN} = "enable"
+SYSTEMD_AUTO_ENABLE:${PN} = "disable"
 
 FILES_${PN} += "${systemd_system_unitdir}/hostapd.service"
-
