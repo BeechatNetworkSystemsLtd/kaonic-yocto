@@ -12,10 +12,12 @@
 
 #include <dt-bindings/pinctrl/stm32-pinfunc.h>
 #include <dt-bindings/clock/stm32mp1-clksrc.h>
-#include <dt-bindings/soc/stm32mp15-etzpc.h>
+#include "stm32mp15-mx.dtsi"
+
 #include "stm32mp151.dtsi"
 #include "stm32mp15xa.dtsi"
 #include "stm32mp15xxab-pinctrl.dtsi"
+#include "stm32mp15-ddr.dtsi"
 
 /* USER CODE BEGIN includes */
 /* USER CODE END includes */
@@ -30,15 +32,6 @@
 
 		/* USER CODE BEGIN memory */
 		/* USER CODE END memory */
-	};
-
-	reserved-memory {
-		#address-cells = <1>;
-		#size-cells = <1>;
-		ranges;
-
-		/* USER CODE BEGIN reserved-memory */
-		/* USER CODE END reserved-memory */
 	};
 
 	/* USER CODE BEGIN root */
@@ -71,7 +64,6 @@
 
 }; /*root*/
 
-/*Warning: the configuration of the secured GPIOs should be added in (addons) User Section*/
 &pinctrl {
 	i2c4_pins_mx: i2c4_mx-0 {
 		pins {
@@ -80,6 +72,75 @@
 			bias-disable;
 			drive-open-drain;
 			slew-rate = <0>;
+		};
+	};
+
+	quadspi_pins_mx: quadspi_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('A', 1, AF9)>, /* QUADSPI_BK1_IO3 */
+					 <STM32_PINMUX('B', 6, AF10)>, /* QUADSPI_BK1_NCS */
+					 <STM32_PINMUX('F', 7, AF9)>, /* QUADSPI_BK1_IO2 */
+					 <STM32_PINMUX('F', 8, AF10)>, /* QUADSPI_BK1_IO0 */
+					 <STM32_PINMUX('F', 9, AF10)>; /* QUADSPI_BK1_IO1 */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('F', 10, AF9)>; /* QUADSPI_CLK */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <2>;
+		};
+	};
+
+	sdmmc1_pins_mx: sdmmc1_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('C', 9, AF12)>, /* SDMMC1_D1 */
+					 <STM32_PINMUX('C', 10, AF12)>, /* SDMMC1_D2 */
+					 <STM32_PINMUX('C', 11, AF12)>; /* SDMMC1_D3 */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('C', 12, AF12)>; /* SDMMC1_CK */
+			bias-pull-up;
+			drive-push-pull;
+			slew-rate = <3>;
+		};
+		pins3 {
+			pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDMMC1_D0 */
+					 <STM32_PINMUX('D', 2, AF12)>; /* SDMMC1_CMD */
+			bias-pull-up;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+	};
+
+	usart3_pins_mx: usart3_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('B', 10, AF7)>; /* USART3_TX */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('B', 11, AF7)>; /* USART3_RX */
+			bias-disable;
+		};
+	};
+
+	usart6_pins_mx: usart6_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('C', 6, AF7)>; /* USART6_TX */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <0>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('C', 7, AF7)>; /* USART6_RX */
+			bias-disable;
 		};
 	};
 
@@ -92,52 +153,6 @@
 	/* USER CODE END pinctrl_z */
 };
 
-&bsec {
-	status = "okay";
-
-	/* USER CODE BEGIN bsec */
-	/* USER CODE END bsec */
-};
-
-&etzpc {
-	status = "okay";
-	st,decprot = <
-	/*"NS_R S_W" peripherals*/
-	DECPROT(STM32MP1_ETZPC_DDRCTRL_ID, DECPROT_NS_R_S_W, DECPROT_LOCK)
-	DECPROT(STM32MP1_ETZPC_DDRPHYC_ID, DECPROT_NS_R_S_W, DECPROT_LOCK)
-	/*"Non Secured" peripherals*/
-	DECPROT(STM32MP1_ETZPC_DMA1_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_DMA2_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_DMAMUX_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_FMC_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_I2C1_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_I2C2_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_I2C4_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_SPI2_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_SPI3_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_SPI4_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_SPI6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_USART1_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_USART2_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_USART6_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	DECPROT(STM32MP1_ETZPC_OTG_ID, DECPROT_NS_RW, DECPROT_UNLOCK)
-	/*"Secured" peripherals*/
-	DECPROT(STM32MP1_ETZPC_STGENC_ID, DECPROT_S_RW, DECPROT_UNLOCK)
-
-	/*Restriction: following IDs are not managed  - please to use User-Section if needed:
-		  STM32MP1_ETZPC_SRAMx_ID  STM32MP1_ETZPC_RETRAM_ID  STM32MP1_ETZPC_BKPSRAM_ID*/
-
-	/* USER CODE BEGIN etzpc_decprot */
-		/*STM32CubeMX generates a basic and standard configuration for ETZPC.
-		Additional device configurations can be added here if needed.
-		"etzpc" node could be also overloaded in "addons" User-Section.*/
-	/* USER CODE END etzpc_decprot */
-	>;
-
-	/* USER CODE BEGIN etzpc */
-	/* USER CODE END etzpc */
-};
-
 &i2c4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c4_pins_mx>;
@@ -147,11 +162,13 @@
 	/* USER CODE END i2c4 */
 };
 
-&pwr_regulators {
+&qspi {
+	pinctrl-names = "default";
+	pinctrl-0 = <&quadspi_pins_mx>;
 	status = "okay";
 
-	/* USER CODE BEGIN pwr_regulators */
-	/* USER CODE END pwr_regulators */
+	/* USER CODE BEGIN qspi */
+	/* USER CODE END qspi */
 };
 
 &rcc {
@@ -162,24 +179,15 @@
 
 	st,clksrc = <
 		CLK_CKPER_HSI
-		CLK_FMC_ACLK
+		CLK_QSPI_PLL4P
 		CLK_SDMMC12_PLL4P
 		CLK_STGEN_HSE
-		CLK_SPI2S23_CKPER
-		CLK_SPI45_PCLK2
-		CLK_SPI6_HSI
 		CLK_I2C46_HSI
-		CLK_USBO_PLL4R
-		CLK_I2C12_PCLK1
-		CLK_UART1_PCLK5
-		CLK_UART24_PCLK1
+		CLK_UART35_PCLK1
 		CLK_UART6_PCLK2
 		CLK_MPU_PLL1P
 		CLK_AXI_PLL2P
 		CLK_MCU_PLL3P
-		CLK_RTC_LSE
-		CLK_MCO1_DISABLED
-		CLK_MCO2_DISABLED
 	>;
 	st,clkdiv = <
 		DIV(DIV_MPU, 1)
@@ -274,18 +282,31 @@
 
 };
 
-&rtc {
+&sdmmc1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&sdmmc1_pins_mx>;
 	status = "okay";
 
-	/* USER CODE BEGIN rtc */
-	/* USER CODE END rtc */
+	/* USER CODE BEGIN sdmmc1 */
+	/* USER CODE END sdmmc1 */
 };
 
-&tamp {
+&usart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&usart3_pins_mx>;
 	status = "okay";
 
-	/* USER CODE BEGIN tamp */
-	/* USER CODE END tamp */
+	/* USER CODE BEGIN usart3 */
+	/* USER CODE END usart3 */
+};
+
+&usart6 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&usart6_pins_mx>;
+	status = "okay";
+
+	/* USER CODE BEGIN usart6 */
+	/* USER CODE END usart6 */
 };
 
 /* USER CODE BEGIN addons */

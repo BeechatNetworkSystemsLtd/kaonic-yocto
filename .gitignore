@@ -10,12 +10,12 @@ mx/kaonic*/Drivers
 mx/kaonic*/.project
 mx/kaonic*/.osx.project
 mx/kaonic*/.mxproject
-mx/kaonic*/DeviceTree/kaonic/kernel/Makefile
-mx/kaonic*/DeviceTree/kaonic/u-boot/Makefile
-mx/kaonic*/CA7/DeviceTree/kaonic/u-boot/Makefile
-mx/kaonic*/CA7/DeviceTree/kaonic/**/*.dtb.cmd
-mx/kaonic*/CA7/DeviceTree/kaonic/**/*.mk
-mx/kaonic*/CA7/DeviceTree/kaonic/**/Makefile
+mx/kaonic*/DeviceTree/kaonic*/kernel/Makefile
+mx/kaonic*/DeviceTree/kaonic*/u-boot/Makefile
+mx/kaonic*/CA7/DeviceTree/kaonic*/u-boot/Makefile
+mx/kaonic*/CA7/DeviceTree/kaonic*/**/*.dtb.cmd
+mx/kaonic*/CA7/DeviceTree/kaonic*/**/*.mk
+mx/kaonic*/CA7/DeviceTree/kaonic*/**/Makefile
 
 **/.DS_Store
 
