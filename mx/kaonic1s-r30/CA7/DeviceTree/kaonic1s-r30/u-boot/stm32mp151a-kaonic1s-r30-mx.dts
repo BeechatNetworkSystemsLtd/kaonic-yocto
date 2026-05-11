@@ -17,6 +17,13 @@
 #include "stm32mp15-m4-srm.dtsi"
 
 /* USER CODE BEGIN includes */
+
+#include "stm32mp15-scmi.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/mfd/st,stpmic1.h>
+#include <dt-bindings/input/input.h>
+
 /* USER CODE END includes */
 
 / {
@@ -37,10 +44,142 @@
 		ranges;
 
 		/* USER CODE BEGIN reserved-memory */
+		mcuram2:mcuram2@10000000{
+			compatible = "shared-dma-pool";
+			reg = <0x10000000 0x40000>;
+			no-map;
+		};
+
+		mcuram:mcuram@30000000{
+			compatible = "shared-dma-pool";
+			reg = <0x30000000 0x40000>;
+			no-map;
+		};
+
+		retram:retram@38000000{
+			compatible = "shared-dma-pool";
+			reg = <0x38000000 0x10000>;
+			no-map; };
+
+		optee@de000000 {
+			reg = <0xde000000 0x2000000>;
+			no-map;
+		};
+
+		gpu_reserved: gpu@d4000000 {
+			reg = <0xd4000000 0x4000000>;
+			no-map;
+		};
+
+		linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x8000000>;
+			alignment = <0x2000>;
+			linux,cma-default;
+		};
+
+
 		/* USER CODE END reserved-memory */
 	};
 
 	/* USER CODE BEGIN root */
+
+	aliases {
+		serial0 = &usart6;
+		serial1 = &usart2;
+		serial2 = &usart1;
+		spi4 = &spi4;
+		spi6 = &spi6;
+		spi3 = &spi3;
+		spi0 = &qspi;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+	};
+
+	vin: vin {
+		compatible = "regulator-fixed";
+		regulator-name = "vin";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+	};
+
+	vrf_3v3: vrf-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "VRF 3v3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+		gpio = <&gpio_exp0 4 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+
+	vrf_pa: vrf-pa {
+		compatible = "regulator-fixed";
+		regulator-name = "VRF PA";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		regulator-boot-on;
+		gpio = <&gpio_exp0 5 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+
+	wifi_pwrseq: wifi-pwrseq {
+		compatible = "mmc-pwrseq-simple";
+		reset-gpios = <&gpiog 7 GPIO_ACTIVE_LOW>;
+	};
+
+	usb_phy_tuning: usb-phy-tuning {
+		st,hs-dc-level = <2>;
+		st,fs-rftime-tuning;
+		st,hs-rftime-reduction;
+		st,hs-current-trim = <15>;
+		st,hs-impedance-trim = <1>;
+		st,squelch-level = <3>;
+		st,hs-rx-offset = <2>;
+		st,no-lsfs-sc;
+	};
+
+	wm8960_mclk: wm8960-mclk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <24000000>;
+	};
+
+	sound {
+
+		compatible = "simple-audio-card";
+		simple-audio-card,name = "Kaonic WM8960 Audio";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,bitclock-master = <&cpu_dai>;
+		simple-audio-card,frame-master = <&cpu_dai>;
+		status = "okay";
+		simple-audio-card,widgets =
+			"Microphone", "Mic Jack",
+			"Headphone", "Mono Out";
+		simple-audio-card,routing =
+			"Mic Jack", "MICB",
+			"LINPUT3", "Mic Jack",
+			"Mono Out", "HP_L",
+			"Mono Out", "HP_R";
+		cpu_dai: simple-audio-card,cpu {
+			sound-dai = <&i2s2>;
+		};
+		codec_dai: simple-audio-card,codec {
+			sound-dai = <&wm8960>;
+			system-clock-frequency = <24000000>;
+		};
+
+	};
+
 	/* USER CODE END root */
 
 	clocks{
@@ -526,6 +665,22 @@
 	};
 
 	/* USER CODE BEGIN pinctrl */
+	i2c4_pins_mx: i2c4_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 13, AF4)>, /* I2C4_SDA */
+					 <STM32_PINMUX('E', 2, AF4)>; /* I2C4_SCL */
+			bias-disable;
+			drive-open-drain;
+			slew-rate = <0>;
+		};
+	};
+
+	i2c4_sleep_pins_mx: i2c4_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 13, ANALOG)>, /* I2C4_SDA */
+					 <STM32_PINMUX('E', 2, ANALOG)>; /* I2C4_SCL */
+		};
+	};
 	/* USER CODE END pinctrl */
 };
 
@@ -549,6 +704,7 @@
 	status = "okay";
 
 	/* USER CODE BEGIN bsec */
+
 	/* USER CODE END bsec */
 };
 
@@ -600,6 +756,34 @@
 	status = "okay";
 
 	/* USER CODE BEGIN i2c1 */
+	gpio_exp1: gpio@20 {
+		compatible = "ti,tca6408";
+		reg = <0x20>;
+
+		#gpio-cells = <2>;
+		gpio-controller;
+		status = "okay";
+	};
+
+
+	wm8960: codec@1a {
+		compatible = "wlf,wm8960";
+		reg = <0x1a>;
+		#sound-dai-cells = <0>;
+		clocks = <&wm8960_mclk>;
+		clock-names = "mclk";
+		wlf,shared-lrclk;
+		AVDD-supply = <&v3v3>;
+		IOVDD-supply = <&v3v3>;
+		DCVDD-supply = <&v3v3>;
+		DBVDD-supply = <&v3v3>;
+
+		port {
+			wm8960_endpoint: endpoint {
+				remote-endpoint = <&i2s2_endpoint>;
+			};
+		};
+	};
 	/* USER CODE END i2c1 */
 };
 
@@ -610,6 +794,16 @@
 	status = "okay";
 
 	/* USER CODE BEGIN i2c2 */
+
+	gpio_exp0: gpio@21 {
+		compatible = "ti,tca9539";
+		reg = <0x21>;
+
+		#gpio-cells = <2>;
+		gpio-controller;
+		status = "okay";
+	};
+
 	/* USER CODE END i2c2 */
 };
 
@@ -620,6 +814,139 @@
 	status = "okay";
 
 	/* USER CODE BEGIN i2c4 */
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&i2c4_pins_mx>;
+	pinctrl-1 = <&i2c4_sleep_pins_mx>;
+	i2c-scl-rising-time-ns = <185>;
+	i2c-scl-falling-time-ns = <20>;
+	clock-frequency = <400000>;
+	/delete-property/ dmas;
+	/delete-property/ dma-names;
+
+	pmic: stpmic@33 {
+		compatible = "st,stpmic1";
+		reg = <0x33>;
+		interrupts-extended = <&gpioa 0 IRQ_TYPE_EDGE_FALLING>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+		status = "okay";
+
+		regulators {
+			compatible = "st,stpmic1-regulators";
+
+			buck1-supply = <&vin>;
+			buck2-supply = <&vin>;
+			buck3-supply = <&vin>;
+			buck4-supply = <&vin>;
+
+			ldo1-supply = <&v3v3>;
+			ldo2-supply = <&vin>;
+			ldo3-supply = <&vdd_ddr>;
+			ldo4-supply = <&vin>;
+			ldo5-supply = <&vin>;
+			ldo6-supply = <&v3v3>;
+
+			vref_ddr-supply = <&vin>;
+			boost-supply = <&vin>;
+
+			pwr_sw1-supply = <&bst_out>;
+			pwr_sw2-supply = <&bst_out>;
+
+			vddcore: buck1 {
+				regulator-name = "vddcore";
+				regulator-min-microvolt = <1200000>;
+				regulator-max-microvolt = <1350000>;
+				regulator-always-on;
+				regulator-initial-mode = <0>;
+				regulator-over-current-protection;
+			};
+
+			vdd_ddr: buck2 {
+				regulator-name = "vdd_ddr";
+				regulator-min-microvolt = <1350000>;
+				regulator-max-microvolt = <1350000>;
+				regulator-always-on;
+				regulator-initial-mode = <0>;
+				regulator-over-current-protection;
+			};
+
+			vdd: buck3 {
+				regulator-name = "vdd";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-always-on;
+				st,mask-reset;
+				regulator-initial-mode = <0>;
+				regulator-over-current-protection;
+			};
+
+			v3v3: buck4 {
+				regulator-name = "v3v3";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+				regulator-always-on;
+				regulator-over-current-protection;
+				regulator-initial-mode = <0>;
+			};
+
+			vtt_ddr: ldo3 {
+				regulator-name = "vtt_ddr";
+				regulator-min-microvolt = <500000>;
+				regulator-max-microvolt = <750000>;
+				regulator-always-on;
+				regulator-over-current-protection;
+			};
+
+			vdd_usb: ldo4 {
+				regulator-name = "vdd_usb";
+				interrupts = <IT_CURLIM_LDO4 0>;
+			};
+
+			vdda: ldo5 {
+				regulator-name = "vdda";
+				regulator-min-microvolt = <2900000>;
+				regulator-max-microvolt = <2900000>;
+				interrupts = <IT_CURLIM_LDO5 0>;
+				regulator-boot-on;
+			};
+
+			vref_ddr: vref-ddr {
+				regulator-name = "vref_ddr";
+				regulator-always-on;
+			};
+
+			bst_out: boost {
+				regulator-name = "bst_out";
+				interrupts = <IT_OCP_BOOST 0>;
+			};
+
+			vbus_otg: pwr-sw1 {
+				regulator-name = "vbus_otg";
+				interrupts = <IT_OCP_OTG 0>;
+			};
+
+			vbus_sw: pwr-sw2 {
+				regulator-name = "vbus_sw";
+				interrupts = <IT_OCP_SWOUT 0>;
+				regulator-active-discharge = <1>;
+			};
+		};
+
+		onkey {
+			compatible = "st,stpmic1-onkey";
+			interrupts = <IT_PONKEY_F 0>, <IT_PONKEY_R 0>;
+			interrupt-names = "onkey-falling", "onkey-rising";
+			power-off-time-sec = <10>;
+			st,onkey-key-code = <KEY_POWER>;
+			linux,can-disable;
+			status = "okay";
+		};
+
+		watchdog {
+			compatible = "st,stpmic1-wdt";
+			status = "disabled";
+		};
+	};
 	/* USER CODE END i2c4 */
 };
 
@@ -640,6 +967,17 @@
 	status = "okay";
 
 	/* USER CODE BEGIN i2s2 */
+	clocks = <&rcc SPI2>, <&rcc SPI2_K>, <&rcc PLL3_Q>, <&rcc PLL3_R>;
+	clock-names = "pclk", "i2sclk", "x8k", "x11k";
+
+	i2s2_port: port {
+		i2s2_endpoint: endpoint {
+			remote-endpoint = <&wm8960_endpoint>;
+			format = "i2s";
+			mclk-fs = <256>;
+		};
+	};
+
 	/* USER CODE END i2s2 */
 };
 
@@ -661,6 +999,8 @@
 	status = "okay";
 
 	/* USER CODE BEGIN pwr_regulators */
+	vdd-supply = <&vdd>;
+	vdd_3v3_usbfs-supply = <&vdd_usb>;
 	/* USER CODE END pwr_regulators */
 };
 
@@ -696,6 +1036,12 @@
 	status = "okay";
 
 	/* USER CODE BEGIN sdmmc1 */
+	cd-gpios = <&gpiog 14 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+
+	disable-wp;
+	st,neg-edge;
+	bus-width = <4>;
+	vmmc-supply = <&v3v3>;
 	/* USER CODE END sdmmc1 */
 };
 
@@ -707,6 +1053,21 @@
 	status = "okay";
 
 	/* USER CODE BEGIN sdmmc2 */
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	/* arm,primecell-periphid = <0x10153180>; */
+	non-removable;
+	st,neg-edge;
+	cap-sdio-irq;
+	bus-width = <4>;
+	vmmc-supply = <&v3v3>;
+	mmc-pwrseq = <&wifi_pwrseq>;
+
+	brcmf: bcrmf@1 {
+		reg = <1>;
+		compatible = "brcm,bcm4329-fmac";
+	};
 	/* USER CODE END sdmmc2 */
 };
 
@@ -717,6 +1078,15 @@
 	status = "okay";
 
 	/* USER CODE BEGIN spi3 */
+
+	cs-gpios= <&gpiob 13 0>;
+
+	spidev0: spidev0@0 {
+		compatible = "rohm,dh2228fv";
+        reg = <0>;
+        spi-max-frequency = <64000000>;
+        status = "okay";
+    };
 	/* USER CODE END spi3 */
 };
 
@@ -737,6 +1107,13 @@
 	status = "okay";
 
 	/* USER CODE BEGIN spi6 */
+	cs-gpios= <&gpiog 8 0>;
+	spidev1: spidev1@0 {
+		compatible = "rohm,dh2228fv";
+        reg = <0>;
+        spi-max-frequency = <64000000>;
+        status = "okay";
+    };
 	/* USER CODE END spi6 */
 };
 
@@ -755,6 +1132,15 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usart1 */
+	uart-has-rtscts;
+
+	bluetooth {
+		shutdown-gpios = <&gpioa 3 GPIO_ACTIVE_HIGH>;
+		compatible = "brcm,bcm43438-bt";
+		max-speed = <3000000>;
+		vbat-supply = <&v3v3>;
+		vddio-supply = <&v3v3>;
+	};
 	/* USER CODE END usart1 */
 };
 
@@ -788,6 +1174,9 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usart6 */
+	/delete-property/dmas;
+	/delete-property/dma-names;
+	u-boot,dm-pre-reloc;
 	/* USER CODE END usart6 */
 };
 
@@ -795,6 +1184,19 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbh_ehci */
+	phys = <&usbphyc_port0>;
+	phy-names = "usb";
+
+	vbus-supply = <&vbus_sw>;
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	hub@1{
+		compatible = "usb424,2514";
+		reg = <1>;
+		vdd-supply = <&v3v3>;
+	};
 	/* USER CODE END usbh_ehci */
 };
 
@@ -809,6 +1211,12 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbotg_hs */
+	phys = <&usbphyc_port1 0>;
+	phy-names = "usb2-phy";
+
+	/* usb-role-switch; */
+	dr_mode = "peripheral";
+
 	/* USER CODE END usbotg_hs */
 };
 
@@ -816,6 +1224,7 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc */
+	vdd3v3-supply = <&vdd_usb>;
 	/* USER CODE END usbphyc */
 };
 
@@ -823,6 +1232,24 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port0 */
+	st,tune-hs-dc-level = <2>;
+	st,enable-fs-rftime-tuning;
+	st,enable-hs-rftime-reduction;
+	st,trim-hs-current = <15>;
+	st,trim-hs-impedance = <1>;
+	st,tune-squelch-level = <3>;
+	st,tune-hs-rx-offset = <2>;
+	st,no-lsfs-sc;
+
+	st,phy-tuning = <&usb_phy_tuning>;
+
+	phy-supply = <&vdd_usb>;
+    vbus-supply = <&vbus_sw>;
+
+	connector {
+		compatible = "usb-a-connector";
+		vbus-supply = <&vbus_sw>;
+	};
 	/* USER CODE END usbphyc_port0 */
 };
 
@@ -830,9 +1257,90 @@
 	status = "okay";
 
 	/* USER CODE BEGIN usbphyc_port1 */
+    phy-supply = <&vdd_usb>;
+	st,tune-hs-dc-level = <2>;
+	st,enable-fs-rftime-tuning;
+	st,enable-hs-rftime-reduction;
+	st,trim-hs-current = <15>;
+	st,trim-hs-impedance = <1>;
+	st,tune-squelch-level = <3>;
+	st,tune-hs-rx-offset = <2>;
+	st,no-lsfs-sc;
 	/* USER CODE END usbphyc_port1 */
 };
 
 /* USER CODE BEGIN addons */
+
+&cpu0 {
+	clocks = <&scmi_clk CK_SCMI_MPU>;
+	cpu-supply = <&vddcore>;
+};
+
+&gpioz {
+	clocks = <&scmi_clk CK_SCMI_GPIOZ>;
+};
+
+&hash1 {
+	clocks = <&scmi_clk CK_SCMI_HASH1>;
+	resets = <&scmi_reset RST_SCMI_HASH1>;
+};
+
+&i2c4 {
+	clocks = <&scmi_clk CK_SCMI_I2C4>;
+	resets = <&scmi_reset RST_SCMI_I2C4>;
+};
+
+&i2c6 {
+	clocks = <&scmi_clk CK_SCMI_I2C6>;
+	resets = <&scmi_reset RST_SCMI_I2C6>;
+};
+
+&iwdg2 {
+	clocks = <&rcc IWDG2>, <&scmi_clk CK_SCMI_LSI>;
+};
+
+&m4_rproc {
+	resets = <&scmi_reset RST_SCMI_MCU>,
+		 <&scmi_reset RST_SCMI_MCU_HOLD_BOOT>;
+	reset-names = "mcu_rst", "hold_boot";
+	/delete-property/ st,syscfg-holdboot;
+};
+
+&mdma1 {
+	resets = <&scmi_reset RST_SCMI_MDMA>;
+};
+
+&mlahb {
+	resets = <&scmi_reset RST_SCMI_MCU>;
+};
+
+&rcc {
+	compatible = "st,stm32mp1-rcc-secure", "syscon";
+	clock-names = "hse", "hsi", "csi", "lse", "lsi";
+	clocks = <&scmi_clk CK_SCMI_HSE>,
+		 <&scmi_clk CK_SCMI_HSI>,
+		 <&scmi_clk CK_SCMI_CSI>,
+		 <&scmi_clk CK_SCMI_LSE>,
+		 <&scmi_clk CK_SCMI_LSI>;
+};
+
+&rng1 {
+	clocks = <&scmi_clk CK_SCMI_RNG1>;
+	resets = <&scmi_reset RST_SCMI_RNG1>;
+};
+
+&rtc {
+	clocks = <&scmi_clk CK_SCMI_RTCAPB>, <&scmi_clk CK_SCMI_RTC>;
+};
+
+&spi6 {
+	clocks = <&scmi_clk CK_SCMI_SPI6>;
+	resets = <&scmi_reset RST_SCMI_SPI6>;
+};
+
+&usart1 {
+	clocks = <&scmi_clk CK_SCMI_USART1>;
+};
+
 /* USER CODE END addons */
 
