@@ -89,6 +89,7 @@
 		serial0 = &usart6;
 		serial1 = &usart2;
 		serial2 = &usart1;
+		serial3 = &usart3;
 		spi4 = &spi4;
 		spi6 = &spi6;
 		spi3 = &spi3;
@@ -1097,6 +1098,13 @@
 	status = "okay";
 
 	/* USER CODE BEGIN spi4 */
+	cs-gpios= <&gpiog 8 0>;
+	spidev1: spidev1@0 {
+		compatible = "rohm,dh2228fv";
+        reg = <0>;
+        spi-max-frequency = <64000000>;
+        status = "okay";
+    };
 	/* USER CODE END spi4 */
 };
 
@@ -1107,8 +1115,8 @@
 	status = "okay";
 
 	/* USER CODE BEGIN spi6 */
-	cs-gpios= <&gpiog 8 0>;
-	spidev1: spidev1@0 {
+	cs-gpios= <&gpioe 4 0>;
+	spidev2: spidev2@0 {
 		compatible = "rohm,dh2228fv";
         reg = <0>;
         spi-max-frequency = <64000000>;
