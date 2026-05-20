@@ -15,6 +15,7 @@
 #include "stm32mp15xa.dtsi"
 #include "stm32mp15xxab-pinctrl.dtsi"
 #include "stm32mp15-m4-srm.dtsi"
+#include "stm32mp15-scmi.dtsi"
 
 /* USER CODE BEGIN includes */
 
@@ -27,8 +28,8 @@
 /* USER CODE END includes */
 
 / {
-	model = "STMicroelectronics custom STM32CubeMX board - openstlinux-6.6-yocto-scarthgap-mpu-v24.11.06";
-	compatible = "st,stm32mp151a-kaonic-mx", "st,stm32mp151";
+	model = "STMicroelectronics custom STM32CubeMX board - openstlinux-6.6-yocto-scarthgap-mpu-v25.06.11";
+	compatible = "st,stm32mp151a-kaonic1s-r24-mx", "st,stm32mp151";
 
 	memory@c0000000 {
 		device_type = "memory";
