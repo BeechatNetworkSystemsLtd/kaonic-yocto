@@ -23,7 +23,7 @@
 /* USER CODE END includes */
 
 / {
-	model = "STMicroelectronics custom STM32CubeMX board - openstlinux-6.6-yocto-scarthgap-mpu-v24.11.06";
+	model = "STMicroelectronics custom STM32CubeMX board - openstlinux-6.6-yocto-scarthgap-mpu-v25.06.11";
 	compatible = "st,stm32mp151a-kaonic1s-r30-mx", "st,stm32mp151";
 
 	memory@c0000000 {
@@ -319,10 +319,8 @@
 
 &rcc {
 	status = "okay";
-
 	/* USER CODE BEGIN rcc */
 	/* USER CODE END rcc */
-
 	st,clksrc = <
 		CLK_CKPER_HSI
 		CLK_QSPI_PLL4P
