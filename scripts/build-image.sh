@@ -160,8 +160,8 @@ fi
 
 if [ "$UPDATE_DTS" = true ]; then
     echo "Recompiling DeviceTree components..."
-    bitbake -c compile -f tf-a-stm32mp
     bitbake -c compile -f optee-os-stm32mp
+    bitbake -c compile -f tf-a-stm32mp
     bitbake -c compile -f u-boot
     bitbake -c cleansstate virtual/kernel
     bitbake -c compile -f virtual/kernel
