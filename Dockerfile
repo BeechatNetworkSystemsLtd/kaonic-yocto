@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -29,9 +29,10 @@ RUN apt-get update && apt-get install -y \
             sudo \
             gdisk \
             rsync \
+            gperf \
             bc \
             bsdmainutils \
-            libegl1-mesa libgmp-dev libmpc-dev libsdl1.2-dev libssl-dev \
+            libgmp-dev libmpc-dev libsdl1.2-dev libssl-dev \
             gcc-arm-linux-gnueabihf \
             && rm -rf /var/lib/apt/lists/* \
             && mkdir -p /opt/ \
@@ -43,7 +44,7 @@ RUN apt-get update && apt-get install -y \
 ENV LANG=en_US.utf8
 
 # Create user and group
-RUN groupadd builduser -g 1000 \
+RUN groupadd builduser -f -g 1000 \
     && useradd -ms /bin/bash -p builduser builduser -u 1028 -g 1000 \
     && usermod -aG sudo builduser && echo "builduser:builduser" | chpasswd \
     && echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -56,9 +57,9 @@ RUN git config --global user.email "yocto-build@beechat.network" && git config -
     && mkdir /home/builduser/yocto && mkdir /home/builduser/bin && cd /home/builduser/yocto \
     && curl https://storage.googleapis.com/git-repo-downloads/repo > /home/builduser/bin/repo \
     && chmod +x /home/builduser/bin/repo \
-    && /home/builduser/bin/repo init -u https://github.com/STMicroelectronics/oe-manifest.git -b refs/tags/openstlinux-6.6-yocto-scarthgap-mpu-v24.11.06 \
+    && /home/builduser/bin/repo init -u https://github.com/STMicroelectronics/oe-manifest.git -b refs/tags/openstlinux-6.6-yocto-scarthgap-mpu-v25.06.11 \
     && /home/builduser/bin/repo sync \
-    && cd /home/builduser/yocto/layers/st-meta/ && git clone https://github.com/rust-embedded/meta-rust-bin.git
+    && cd /home/builduser/yocto/layers/meta-st/ && git clone https://github.com/rust-embedded/meta-rust-bin.git
 
 CMD ["/bin/bash"]
 

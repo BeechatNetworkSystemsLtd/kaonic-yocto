@@ -19,8 +19,6 @@
 
 /* USER CODE BEGIN includes */
 
-#include "stm32mp15-scmi.dtsi"
-
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/mfd/st,stpmic1.h>
 #include <dt-bindings/input/input.h>

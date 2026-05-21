@@ -1,6 +1,8 @@
 
 include lwbplus-firmware.inc
 
+PACKAGES =+ "${PN}-bcm43439"
+
 do_install:append:stm32mpcommon() {
 
    # Remove previous firmware

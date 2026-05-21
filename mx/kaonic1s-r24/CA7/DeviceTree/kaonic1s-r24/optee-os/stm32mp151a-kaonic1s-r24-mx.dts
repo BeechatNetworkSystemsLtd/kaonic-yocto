@@ -463,11 +463,12 @@
 		CLK_FMC_ACLK
 		CLK_SDMMC12_PLL4P
 		CLK_STGEN_HSE
+		CLK_USBPHY_HSE
 		CLK_SPI2S23_CKPER
 		CLK_SPI45_PCLK2
 		CLK_SPI6_HSI
 		CLK_I2C46_HSI
-		CLK_USBO_PLL4R
+		CLK_USBO_USBPHY
 		CLK_I2C12_PCLK1
 		CLK_UART1_PCLK5
 		CLK_UART24_PCLK1
@@ -480,7 +481,7 @@
 		CLK_MCO2_DISABLED
 	>;
 	st,clkdiv = <
-		DIV(DIV_MPU, 1)
+		DIV(DIV_MPU, 0)
 		DIV(DIV_AXI, 0)
 		DIV(DIV_MCU, 0)
 		DIV(DIV_APB1, 1)
@@ -493,14 +494,14 @@
 		DIV(DIV_MCO2, 0)
 	>;
 	st,pll_vco {
-		pll1_vco_800Mhz: pll1-vco-800Mhz {
-			src = < CLK_PLL12_HSI >;
-			divmn = < 3 24 >;
+		pll1_vco_1296Mhz: pll1-vco-1296Mhz {
+			src = < CLK_PLL12_HSE >;
+			divmn = < 1 53 >;
 		};
 		pll2_vco_1066Mhz: pll2-vco-1066Mhz {
-			src = < CLK_PLL12_HSI >;
-			divmn = < 3 32 >;
-			frac = < 0xa00 >;
+			src = < CLK_PLL12_HSE >;
+			divmn = < 2 65 >;
+			frac = < 0x1400 >;
 		};
 		pll3_vco_402Mhz: pll3-vco-402Mhz {
 			src = < CLK_PLL3_HSE >;
@@ -521,7 +522,7 @@
 		st,pll = < &pll1_cfg1 >;
 
 		pll1_cfg1: pll1_cfg1 {
-			st,pll_vco = < &pll1_vco_800Mhz >;
+			st,pll_vco = < &pll1_vco_1296Mhz >;
 			st,pll_div_pqr = < 0 1 1 >;
 		};
 		/* USER CODE BEGIN pll1 */
