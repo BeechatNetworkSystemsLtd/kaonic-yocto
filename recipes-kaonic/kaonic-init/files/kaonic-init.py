@@ -121,7 +121,6 @@ def main():
 
     if should_update_serial:
         print("Update kaonic serial")
-        update_hostapd_conf(f"Kaonic /{serial_suffix}/")
         save_serial(serial)
 
     update_hostname(f"kaonic1s-{serial_suffix}")

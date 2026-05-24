@@ -1,6 +1,6 @@
 [Unit]
 Description=Kaonic Init Service
-Before=hostapd.service kanoic-commd.service avahi-daemon.service
+Before=hostapd.service kaonic-commd.service avahi-daemon.service
 After=local-fs.target
 
 [Service]
@@ -10,4 +10,3 @@ ExecStart=/usr/bin/python3 /usr/bin/kaonic-init.py
 
 [Install]
 WantedBy=multi-user.target
-

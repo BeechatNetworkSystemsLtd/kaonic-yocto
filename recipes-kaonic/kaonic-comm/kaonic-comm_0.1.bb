@@ -42,12 +42,15 @@ FILES:${PN} += " \
     ${systemd_system_unitdir}/kaonic-wifi-mode.service \
     ${systemd_system_unitdir}/kaonic-commd.service \
     ${systemd_system_unitdir}/kaonic-factory.service \
+    ${sysconfdir}/kaonic/wifi-mode \
     /etc/kaonic/kaonic_machine \
     /etc/kaonic/beechat-ota.pub.pem \
     /etc/kaonic/plugins \
     /etc/kaonic/plugins/kaonic-commd \
     /etc/kaonic/plugins/kaonic-factory \
 "
+
+CONFFILES:${PN} += "${sysconfdir}/kaonic/wifi-mode"
 
 S = "${WORKDIR}/git"
 
@@ -69,12 +72,14 @@ do_install() {
     install -m 0755  ${WORKDIR}/wifi_connect.sh ${D}/home/root/wifi_connect.sh
     install -m 0755  ${WORKDIR}/wifi_mode.sh ${D}/home/root/wifi_mode.sh
 
-    install -d ${D}/etc/kaonic
+    install -d ${D}${sysconfdir}/kaonic
     install -d ${D}/etc/kaonic/plugins
     install -d ${D}/etc/kaonic/plugins/kaonic-commd/current
     install -d ${D}/etc/kaonic/plugins/kaonic-factory/current
 
     echo ${MACHINE} > ${D}/etc/kaonic/kaonic_machine
+    printf 'ap\n' > ${D}${sysconfdir}/kaonic/wifi-mode
+    chmod 0644 ${D}${sysconfdir}/kaonic/wifi-mode
 
     install -m 0644 ${S}/kaonic-commd/kaonic-plugin.toml ${D}/etc/kaonic/plugins/kaonic-commd/kaonic-plugin.toml
     install -m 0644 ${S}/kaonic-commd/kaonic-commd.service ${D}/etc/kaonic/plugins/kaonic-commd/kaonic-commd.service

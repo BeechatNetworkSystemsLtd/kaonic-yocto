@@ -1,6 +1,6 @@
 [Unit]
 Description=Kaonic Factory
-After=network.target kanoic-commd.service
+After=network.target kaonic-commd.service
 
 [Service]
 ExecStart=/usr/bin/kaonic-factory
@@ -14,4 +14,3 @@ StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
-
