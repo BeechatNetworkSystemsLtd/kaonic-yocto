@@ -1,20 +1,19 @@
-FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+SUMMARY = "Hostapd daemon"
+LICENSE = "BSD-3-Clause"
+LIC_FILES_CHKSUM = "file://hostapd/README;md5=8aa4bc8523e30f0eb2453c4fcbcef5ca"
+
+require hostapd.inc
 
 SRC_URI:append = " file://hostapd.service"
 
-do_install:append () {
-    install -d ${D}${systemd_system_unitdir}/
-    install -m 0644 ${WORKDIR}/hostapd.service ${D}${systemd_system_unitdir}
-
-    if ! grep -qx 'ssid=test' ${D}${sysconfdir}/hostapd.conf; then
-        bbfatal "Expected default ssid=test in ${sysconfdir}/hostapd.conf"
-    fi
-    sed -i 's/^ssid=test$/ssid=Kaonic-1S/' ${D}${sysconfdir}/hostapd.conf
-}
-
-SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE:${PN} = "hostapd.service"
+SYSTEMD_AUTO_ENABLE:${PN} = "enable"
 
-SYSTEMD_AUTO_ENABLE:${PN} = "disable"
+FILES:${PN} += "${systemd_system_unitdir}"
 
-FILES_${PN} += "${systemd_system_unitdir}/hostapd.service"
+do_install:append() {
+    sed -i 's/^ssid=test$/ssid=Kaonic-1S/' ${D}${sysconfdir}/hostapd.conf
+    if ! grep -q '^ssid=Kaonic-1S$' ${D}${sysconfdir}/hostapd.conf; then
+        bbfatal "Expected default hostapd SSID line was not updated"
+    fi
+}
