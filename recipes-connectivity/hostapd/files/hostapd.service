@@ -1,12 +1,16 @@
 [Unit]
-Description=Access point and authentication server for Wi-Fi and Ethernet
-After=network.target
-ExecCondition=/bin/sh -c 'mode="$(sed -n "1p" /etc/kaonic/wifi-mode 2>/dev/null || true)"; [ "${mode:-ap}" = ap ]'
+Description=Hostapd IEEE 802.11 Access Point
+Wants=systemd-networkd.service
+Before=systemd-networkd.service
+Before=systemd-networkd-wait-online.service
+Before=network.target
+BindsTo=sys-subsystem-net-devices-wlan0.device
+After=sys-subsystem-net-devices-wlan0.device
 
 [Service]
-Type=forking
-PIDFile=/run/hostapd.pid
-ExecStart=/usr/sbin/hostapd /etc/hostapd.conf -B -P /run/hostapd.pid
+Type=simple
+ExecCondition=/bin/sh -c 'mode="$(sed -n "1p" /etc/kaonic/wifi-mode 2>/dev/null || true)"; [ "${mode:-ap}" = ap ]'
+ExecStart=/usr/sbin/hostapd /etc/hostapd.conf -P /run/hostapd.pid
 
 [Install]
 WantedBy=multi-user.target

@@ -1,60 +1,97 @@
-SUMMARY = "Kaonic Communications Daemon"
-LICENSE = "GPL-3.0-only"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=d32239bcb673463ab874e80d47fae504"
+DESCRIPTION = "Kaonic Radio Package" 
+
+SECTION = "kaonic"
+LICENSE = "MIT"
+
+LIC_FILES_CHKSUM = "file://LICENSE;md5=f978e2caad0e533cf3b63ddb6d8dec6f"
+
+DEPENDS:append = " libgpiod protobuf protobuf-native grpc grpc-native"
+RDEPENDS:${PN} += "dnsmasq hostapd systemd wpa-supplicant"
+
+DEPENDS += "cargo-bin-cross-${TARGET_ARCH}"
+
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+INSANE_SKIP:${PN} += "already-stripped"
 
 inherit cargo_bin systemd pkgconfig
 
-SRC_URI = "git://github.com/BeechatNetworkSystemsLtd/kaonic_communication.git;protocol=https;branch=main"
-SRC_URI += "file://kaonic-commd.service"
-SRC_URI += "file://kaonic-factory.service"
-SRC_URI += "file://kaonic-wifi-mode.service"
-SRC_URI += "file://wifi_station.sh"
-SRC_URI += "file://wifi_mode.sh"
-SRCREV = "672e5bf03d318c1bb6771552a11859542a0821e9"
-S = "${WORKDIR}/git"
+PR = "r2" 
+SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-radio.git;protocol=https;branch=main;"
+SRCREV = "3abf34ec5c4a57bdaa41c3b9ab12df7db03496a0"
 
-DEPENDS += "protobuf-native openssl zeromq"
-RDEPENDS:${PN} += "dnsmasq hostapd systemd wpa-supplicant"
+SRC_URI += " \
+    file://wifi_connect.sh \
+    file://wifi_mode.sh \
+    file://kaonic-wifi-mode.service \
+"
 
-CARGO_BUILD_FLAGS += "--bin kaonic-commd --bin kaonic-factory"
+do_compile[network] = "1"
 
-CARGO_FEATURES = ""
-
+# Systemd
+SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE:${PN} = "kaonic-commd.service kaonic-factory.service kaonic-wifi-mode.service"
+
 SYSTEMD_AUTO_ENABLE:${PN} = "enable"
 
-FILES:${PN} += "${systemd_system_unitdir} ${sysconfdir}/kaonic/plugins/kaonic-factory/current ${sysconfdir}/kaonic/plugins/kaonic-commd/current ${sysconfdir}/kaonic/kaonic_machine ${sysconfdir}/kaonic/wifi-mode"
+# Files
+FILES:${PN} += " \
+    ${bindir}/kaonic-wifi-mode \
+    /home/root/wifi_connect.sh \
+    /home/root/wifi_mode.sh \
+    ${systemd_system_unitdir}/kaonic-wifi-mode.service \
+    ${systemd_system_unitdir}/kaonic-commd.service \
+    ${systemd_system_unitdir}/kaonic-factory.service \
+    ${sysconfdir}/kaonic/wifi-mode \
+    /etc/kaonic/kaonic_machine \
+    /etc/kaonic/beechat-ota.pub.pem \
+    /etc/kaonic/plugins \
+    /etc/kaonic/plugins/kaonic-commd \
+    /etc/kaonic/plugins/kaonic-factory \
+"
+
 CONFFILES:${PN} += "${sysconfdir}/kaonic/wifi-mode"
 
-# Install the compiled binary
-# for inspo, try: bitbake-getvar -r kaonic-comm WORKDIR B RUST_TARGET CARGO_BUILD_PROFILE
-# after `bitbake kaonic-comm`
+S = "${WORKDIR}/git"
+
 do_install() {
+    # Kaonic commd
     install -d ${D}${bindir}
-    install -d ${D}${sysconfdir}/kaonic
 
-    install -d ${D}${systemd_system_unitdir}
-    install -m 0644 ${WORKDIR}/kaonic-commd.service ${D}${systemd_system_unitdir}
-    install -m 0644 ${WORKDIR}/kaonic-factory.service ${D}${systemd_system_unitdir}
+    # Kaonic systemd service
+    install -d ${D}${systemd_system_unitdir}/
     install -m 0644 ${WORKDIR}/kaonic-wifi-mode.service ${D}${systemd_system_unitdir}
+    install -m 0644 ${S}/kaonic-commd/kaonic-commd.service ${D}${systemd_system_unitdir}
+    install -m 0644 ${S}/kaonic-factory/kaonic-factory.service ${D}${systemd_system_unitdir}
 
-    install -m 0755 ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-commd ${D}${bindir}/kaonic-commd
-    install -m 0755 ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-factory ${D}${bindir}/kaonic-factory
-
-    install -m 0755 ${WORKDIR}/wifi_station.sh ${D}${bindir}/kaonic-wifi-station
+    # Help scripts
+    install -d ${D}${bindir}
     install -m 0755 ${WORKDIR}/wifi_mode.sh ${D}${bindir}/kaonic-wifi-mode
+
+    install -d ${D}/home/root
+    install -m 0755  ${WORKDIR}/wifi_connect.sh ${D}/home/root/wifi_connect.sh
+    install -m 0755  ${WORKDIR}/wifi_mode.sh ${D}/home/root/wifi_mode.sh
+
+    install -d ${D}${sysconfdir}/kaonic
+    install -d ${D}/etc/kaonic/plugins
+    install -d ${D}/etc/kaonic/plugins/kaonic-commd/current
+    install -d ${D}/etc/kaonic/plugins/kaonic-factory/current
+
+    echo ${MACHINE} > ${D}/etc/kaonic/kaonic_machine
     printf 'ap\n' > ${D}${sysconfdir}/kaonic/wifi-mode
+    chmod 0644 ${D}${sysconfdir}/kaonic/wifi-mode
 
-    echo "${MACHINE}" > ${D}${sysconfdir}/kaonic/kaonic_machine
+    install -m 0644 ${S}/kaonic-commd/kaonic-plugin.toml ${D}/etc/kaonic/plugins/kaonic-commd/kaonic-plugin.toml
+    install -m 0644 ${S}/kaonic-commd/kaonic-commd.service ${D}/etc/kaonic/plugins/kaonic-commd/kaonic-commd.service
+    install -m 0755 ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-commd ${D}/etc/kaonic/plugins/kaonic-commd/current/kaonic-commd
+    sha256sum ${D}/etc/kaonic/plugins/kaonic-commd/current/kaonic-commd | awk '{print $1}' > ${D}/etc/kaonic/plugins/kaonic-commd/kaonic-commd.sha256
+    ln -sf /etc/kaonic/plugins/kaonic-commd/current/kaonic-commd ${D}${bindir}/kaonic-commd
 
-    sha256sum ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-commd | cut -d ' ' -f 1 > ${D}${bindir}/kaonic-commd.sha256
-    sha256sum ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-factory | cut -d ' ' -f 1 > ${D}${bindir}/kaonic-factory.sha256
+    install -m 0644 ${S}/kaonic-factory/kaonic-plugin.toml ${D}/etc/kaonic/plugins/kaonic-factory/kaonic-plugin.toml
+    install -m 0644 ${S}/kaonic-factory/kaonic-factory.service ${D}/etc/kaonic/plugins/kaonic-factory/kaonic-factory.service
+    install -m 0755 ${B}/${RUST_TARGET}/${CARGO_BUILD_PROFILE}/kaonic-factory ${D}/etc/kaonic/plugins/kaonic-factory/current/kaonic-factory
+    sha256sum ${D}/etc/kaonic/plugins/kaonic-factory/current/kaonic-factory | awk '{print $1}' > ${D}/etc/kaonic/plugins/kaonic-factory/kaonic-factory.sha256
+    ln -sf /etc/kaonic/plugins/kaonic-factory/current/kaonic-factory ${D}${bindir}/kaonic-factory
 
-    install -d ${D}${sysconfdir}/kaonic/plugins/kaonic-factory/current
-    ln -sf ${bindir}/kaonic-factory ${D}${sysconfdir}/kaonic/plugins/kaonic-factory/current/kaonic-factory
-    ln -sf ${bindir}/kaonic-factory.sha256 ${D}${sysconfdir}/kaonic/plugins/kaonic-factory/current/sha256
-
-    install -d ${D}${sysconfdir}/kaonic/plugins/kaonic-commd/current
-    ln -sf ${bindir}/kaonic-commd ${D}${sysconfdir}/kaonic/plugins/kaonic-commd/current/kaonic-commd
-    ln -sf ${bindir}/kaonic-commd.sha256 ${D}${sysconfdir}/kaonic/plugins/kaonic-commd/current/sha256
+    install -m 0644 ${S}/certs/beechat-ota.pub.pem ${D}/etc/kaonic/
 }
