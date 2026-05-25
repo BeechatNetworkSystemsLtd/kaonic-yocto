@@ -33,6 +33,7 @@ RUN apt-get update && apt-get install -y \
             bc \
             bsdmainutils \
             libgmp-dev libmpc-dev libsdl1.2-dev libssl-dev \
+            libclang-dev \
             gcc-arm-linux-gnueabihf \
             && rm -rf /var/lib/apt/lists/* \
             && mkdir -p /opt/ \
