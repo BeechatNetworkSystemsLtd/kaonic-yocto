@@ -111,6 +111,7 @@
 		};
 		clk_hse: clk-hse {
 			clock-frequency = <24000000>;
+			st,bypass;
 
 			/* USER CODE BEGIN clk_hse */
 			/* USER CODE END clk_hse */
@@ -459,18 +460,18 @@
 	/* USER CODE BEGIN rcc */
 	/* USER CODE END rcc */
 	st,clksrc = <
-		CLK_CKPER_HSI
+		CLK_CKPER_DISABLED
 		CLK_FMC_ACLK
 		CLK_SDMMC12_PLL4P
 		CLK_STGEN_HSE
 		CLK_USBPHY_HSE
-		CLK_SPI2S23_CKPER
-		CLK_SPI45_PCLK2
-		CLK_SPI6_HSI
+		CLK_SPI2S23_PLL4P
+		CLK_SPI45_PLL4Q
+		CLK_SPI6_PLL4Q
 		CLK_I2C46_HSI
 		CLK_USBO_USBPHY
 		CLK_I2C12_PCLK1
-		CLK_UART1_PCLK5
+		CLK_UART1_PLL3Q
 		CLK_UART24_PCLK1
 		CLK_UART6_PCLK2
 		CLK_MPU_PLL1P
@@ -481,7 +482,7 @@
 		CLK_MCO2_DISABLED
 	>;
 	st,clkdiv = <
-		DIV(DIV_MPU, 0)
+		DIV(DIV_MPU, 1)
 		DIV(DIV_AXI, 0)
 		DIV(DIV_MCU, 0)
 		DIV(DIV_APB1, 1)
@@ -503,9 +504,9 @@
 			divmn = < 2 65 >;
 			frac = < 0x1400 >;
 		};
-		pll3_vco_402Mhz: pll3-vco-402Mhz {
+		pll3_vco_624Mhz: pll3-vco-624Mhz {
 			src = < CLK_PLL3_HSE >;
-			divmn = < 3 66 >;
+			divmn = < 3 103 >;
 		};
 		pll4_vco_480Mhz: pll4-vco-480Mhz {
 			src = < CLK_PLL4_HSE >;
@@ -550,8 +551,8 @@
 		st,pll = < &pll3_cfg1 >;
 
 		pll3_cfg1: pll3_cfg1 {
-			st,pll_vco = < &pll3_vco_402Mhz >;
-			st,pll_div_pqr = < 1 1 1 >;
+			st,pll_vco = < &pll3_vco_624Mhz >;
+			st,pll_div_pqr = < 2 5 1 >;
 		};
 		/* USER CODE BEGIN pll3 */
 		/* USER CODE END pll3 */
@@ -565,7 +566,7 @@
 
 		pll4_cfg1: pll4_cfg1 {
 			st,pll_vco = < &pll4_vco_480Mhz >;
-			st,pll_div_pqr = < 2 1 24 >;
+			st,pll_div_pqr = < 3 3 24 >;
 		};
 		/* USER CODE BEGIN pll4 */
 		/* USER CODE END pll4 */
