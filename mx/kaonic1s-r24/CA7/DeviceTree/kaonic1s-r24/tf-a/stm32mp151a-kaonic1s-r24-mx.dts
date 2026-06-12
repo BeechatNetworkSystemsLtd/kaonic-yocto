@@ -169,6 +169,13 @@
 	/* USER CODE END pinctrl_z */
 };
 
+&hash1 {
+	status = "okay";
+
+	/* USER CODE BEGIN hash1 */
+	/* USER CODE END hash1 */
+};
+
 &i2c4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c4_pins_mx>;
@@ -329,13 +336,13 @@
 			divmn = < 2 65 >;
 			frac = < 0x1400 >;
 		};
-		pll3_vco_624Mhz: pll3-vco-624Mhz {
+		pll3_vco_600Mhz: pll3-vco-600Mhz {
 			src = < CLK_PLL3_HSE >;
-			divmn = < 3 103 >;
+			divmn = < 4 124 >;
 		};
-		pll4_vco_480Mhz: pll4-vco-480Mhz {
+		pll4_vco_448Mhz: pll4-vco-448Mhz {
 			src = < CLK_PLL4_HSE >;
-			divmn = < 1 39 >;
+			divmn = < 5 111 >;
 		};
 		/* USER CODE BEGIN rcc_st-pll_vco */
 		/* USER CODE END rcc_st-pll_vco */
@@ -376,8 +383,8 @@
 		st,pll = < &pll3_cfg1 >;
 
 		pll3_cfg1: pll3_cfg1 {
-			st,pll_vco = < &pll3_vco_624Mhz >;
-			st,pll_div_pqr = < 2 5 1 >;
+			st,pll_vco = < &pll3_vco_600Mhz >;
+			st,pll_div_pqr = < 2 5 24 >;
 		};
 		/* USER CODE BEGIN pll3 */
 		/* USER CODE END pll3 */
@@ -390,8 +397,8 @@
 		st,pll = < &pll4_cfg1 >;
 
 		pll4_cfg1: pll4_cfg1 {
-			st,pll_vco = < &pll4_vco_480Mhz >;
-			st,pll_div_pqr = < 3 3 24 >;
+			st,pll_vco = < &pll4_vco_448Mhz >;
+			st,pll_div_pqr = < 6 6 6 >;
 		};
 		/* USER CODE BEGIN pll4 */
 		/* USER CODE END pll4 */

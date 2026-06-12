@@ -1,0 +1,22 @@
+From 4d94af4e5c40df704d5c69f67e6b6770ff685d19 Mon Sep 17 00:00:00 2001
+From: Yocto Build <yocto-build@beechat.network>
+Date: Mon, 25 May 2026 19:28:09 +0000
+Subject: [PATCH] feat: change uart to 6
+
+---
+ core/arch/arm/plat-stm32mp1/conf.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/arch/arm/plat-stm32mp1/conf.mk b/core/arch/arm/plat-stm32mp1/conf.mk
+index 22c7a6357..9f683806a 100644
+--- a/core/arch/arm/plat-stm32mp1/conf.mk
++++ b/core/arch/arm/plat-stm32mp1/conf.mk
+@@ -483,7 +483,7 @@ endif
+ CFG_WITH_NSEC_GPIOS ?= y
+ CFG_WITH_NSEC_UARTS ?= y
+ # UART instance used for early console (0 disables early console)
+-CFG_STM32_EARLY_CONSOLE_UART ?= 4
++CFG_STM32_EARLY_CONSOLE_UART ?= 6
+ 
+ # CFG_STM32MP15_HUK enables use of a HUK read from BSEC fuses.
+ # Disable the HUK by default as it requires a product specific configuration.

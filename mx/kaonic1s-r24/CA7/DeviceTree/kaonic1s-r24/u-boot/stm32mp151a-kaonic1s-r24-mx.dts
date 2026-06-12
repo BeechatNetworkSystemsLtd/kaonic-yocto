@@ -612,6 +612,13 @@
 
 	/* USER CODE BEGIN m4_rproc */
 	/* USER CODE END m4_rproc */
+
+	m4_system_resources{
+		status = "okay";
+
+		/* USER CODE BEGIN m4_system_resources */
+		/* USER CODE END m4_system_resources */
+	};
 };
 
 &bsec {
@@ -620,6 +627,13 @@
 	/* USER CODE BEGIN bsec */
 
 	/* USER CODE END bsec */
+};
+
+&crc1 {
+	status = "okay";
+
+	/* USER CODE BEGIN crc1 */
+	/* USER CODE END crc1 */
 };
 
 &dma1 {
@@ -654,6 +668,13 @@
 
 	/* USER CODE BEGIN fmc */
 	/* USER CODE END fmc */
+};
+
+&hash1 {
+	status = "okay";
+
+	/* USER CODE BEGIN hash1 */
+	/* USER CODE END hash1 */
 };
 
 &hsem {
@@ -892,6 +913,27 @@
 	/* USER CODE END ipcc */
 };
 
+&m4_crc2 {
+	status = "okay";
+
+	/* USER CODE BEGIN m4_crc2 */
+	/* USER CODE END m4_crc2 */
+};
+
+&m4_hash2 {
+	status = "okay";
+
+	/* USER CODE BEGIN m4_hash2 */
+	/* USER CODE END m4_hash2 */
+};
+
+&m4_rng2 {
+	status = "okay";
+
+	/* USER CODE BEGIN m4_rng2 */
+	/* USER CODE END m4_rng2 */
+};
+
 &mdma1 {
 	status = "okay";
 
@@ -1030,8 +1072,10 @@
 
 	bluetooth {
 		shutdown-gpios = <&gpioa 3 GPIO_ACTIVE_HIGH>;
+		device-wakeup-gpios = <&gpioa 4 GPIO_ACTIVE_HIGH>;
+		interrupts-extended = <&gpioe 1 IRQ_TYPE_EDGE_FALLING>;
+		interrupt-names = "host-wakeup";
 		compatible = "brcm,bcm43438-bt";
-		max-speed = <3000000>;
 		vbat-supply = <&v3v3>;
 		vddio-supply = <&v3v3>;
 	};
