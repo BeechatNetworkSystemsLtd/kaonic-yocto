@@ -58,7 +58,7 @@ RUN git config --global user.email "yocto-build@beechat.network" && git config -
     && chmod +x /home/builduser/bin/repo \
     && /home/builduser/bin/repo init -u https://github.com/STMicroelectronics/oe-manifest.git -b refs/tags/openstlinux-6.6-yocto-scarthgap-mpu-v24.11.06 \
     && /home/builduser/bin/repo sync \
-    && cd /home/builduser/yocto/layers/st-meta/ && git clone https://github.com/rust-embedded/meta-rust-bin.git
+    && cd /home/builduser/yocto/layers/meta-st/ && git clone https://github.com/rust-embedded/meta-rust-bin.git
 
 CMD ["/bin/bash"]
 
