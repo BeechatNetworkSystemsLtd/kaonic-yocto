@@ -27,7 +27,7 @@ inherit cargo_bin systemd pkgconfig
 
 PR = "r3" 
 SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-gateway.git;protocol=https;branch=main;"
-SRCREV = "dcd073935d4e139e535c5f0d7c9f6d2f02668dbd"
+SRCREV = "a36ff32ee1e48d761a74c2745ed95c8f2658dbb3"
 
 SRC_URI += " \
     file://kaonic-installer.service \

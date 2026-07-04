@@ -18,7 +18,7 @@ inherit cargo_bin systemd pkgconfig
 
 PR = "r2" 
 SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-radio.git;protocol=https;branch=main;"
-SRCREV = "3abf34ec5c4a57bdaa41c3b9ab12df7db03496a0"
+SRCREV = "9a7dcce0368e65653e406019a6c9b0f88dc7c085"
 
 SRC_URI += " \
     file://wifi_connect.sh \
