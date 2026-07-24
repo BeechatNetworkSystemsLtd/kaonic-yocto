@@ -10,7 +10,7 @@
     * `docker buildx build --platform=linux/arm64 . -t kaonic-yocto` - for aarch64
     * `docker buildx build --platform=linux/amd64 . -t kaonic-yocto` - for x86_64
 * Run docker container
-    * `docker run -it -v ./:/home/builduser/yocto/layers/meta-st/meta-kaonic --name kaonic-yocto kaonic-yocto`
+    * `docker run -it -v ./:/home/kanoic-builder/yocto/layers/meta-st/meta-kaonic --name kaonic-yocto kaonic-yocto`
 * Initialize build environment
     * `cd ~/yocto/`
     * `./layers/meta-st/meta-kaonic/scripts/build-image.sh --machine stm32mp1-kaonic-protoa`
