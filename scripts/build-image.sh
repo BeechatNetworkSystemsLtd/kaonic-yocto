@@ -7,6 +7,7 @@ SCRIPT_SOURCED=false
 SCRIPT_NAME="${BASH_SOURCE[0]:-$0}"
 
 MACHINE=""
+REQUESTED_BUILD_DIR=""
 UPDATE_RUST=false
 UPDATE_DTS=false
 CLEAN_IMAGE=false
@@ -19,7 +20,25 @@ ENV_ONLY=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --machine)
+            if [[ -z "${2:-}" || "$2" == --* ]]; then
+                echo "Error: --machine requires a value."
+                if [ "$SCRIPT_SOURCED" = true ]; then
+                    return 1
+                fi
+                exit 1
+            fi
             MACHINE="$2"
+            shift 2
+            ;;
+        --build-dir)
+            if [[ -z "${2:-}" || "$2" == --* ]]; then
+                echo "Error: --build-dir requires a value."
+                if [ "$SCRIPT_SOURCED" = true ]; then
+                    return 1
+                fi
+                exit 1
+            fi
+            REQUESTED_BUILD_DIR="${2%/}"
             shift 2
             ;;
         --rust)
@@ -53,8 +72,9 @@ while [[ $# -gt 0 ]]; do
             echo "  --machine <name>        Specify the machine/board name"
             echo ""
             echo "Optional:"
+            echo "  --build-dir <dir>       Build directory (default: build-<machine>-image under ~/yocto)"
             echo "  --rust                  Update Rust crates for kaonic packages"
-            echo "  --dts                   Recompile DeviceTree (tf-a, optee, u-boot, kernel)"
+            echo "  --dts                   Clean and rebuild DeviceTree components (tf-a, optee, u-boot, kernel)"
             echo "  --clean                 Clean image before building"
             echo "  --clean-package <pkg>   Clean specific package (can be used multiple times)"
             echo "  --gz                    Compress final image with gzip (Etcher-compatible)"
@@ -63,6 +83,7 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Examples:"
             echo "  $SCRIPT_NAME --machine stm32mp1-kaonic-protoc"
+            echo "  $SCRIPT_NAME --machine stm32mp1-kaonic-protoc --build-dir build-protoc"
             echo "  source $SCRIPT_NAME --machine stm32mp1-kaonic-protoc --env"
             echo "  $SCRIPT_NAME --machine stm32mp1-kaonic-protoc --rust --dts"
             echo "  $SCRIPT_NAME --machine stm32mp1-kaonic-protoc --gz"
@@ -100,8 +121,21 @@ ROOT_DIR=$HOME/yocto
 KAONIC_REPO=$ROOT_DIR/layers/meta-st/meta-kaonic
 KAONIC_DEPLOY_DIR=$KAONIC_REPO/deploy
 KAONIC_MACHINE_DEPLOY_DIR=$KAONIC_DEPLOY_DIR/${MACHINE}
-KAONIC_BUILD_DIR_NAME=build-${MACHINE}-image
-KAONIC_BUILD_DIR=$ROOT_DIR/$KAONIC_BUILD_DIR_NAME
+
+if [[ -z "$REQUESTED_BUILD_DIR" ]]; then
+    KAONIC_BUILD_DIR_NAME=build-${MACHINE}-image
+    KAONIC_BUILD_DIR=$ROOT_DIR/$KAONIC_BUILD_DIR_NAME
+    ENVSETUP_BUILD_DIR=$KAONIC_BUILD_DIR_NAME
+elif [[ "$REQUESTED_BUILD_DIR" = /* ]]; then
+    KAONIC_BUILD_DIR=$REQUESTED_BUILD_DIR
+    KAONIC_BUILD_DIR_NAME=$(basename "$REQUESTED_BUILD_DIR")
+    ENVSETUP_BUILD_DIR=$KAONIC_BUILD_DIR
+else
+    KAONIC_BUILD_DIR_NAME=$REQUESTED_BUILD_DIR
+    KAONIC_BUILD_DIR=$ROOT_DIR/$KAONIC_BUILD_DIR_NAME
+    ENVSETUP_BUILD_DIR=$KAONIC_BUILD_DIR_NAME
+fi
+
 IMAGE_DIR=$KAONIC_BUILD_DIR/tmp-glibc/deploy/images/$MACHINE
 
 get_cubemx_dtb() {
@@ -144,10 +178,12 @@ KAONIC_VERSION=$(git describe --tags | cut -d '-' -f1 | sed 's/^v//')
 
 echo "Kaonic machine: $MACHINE"
 echo "Kaonic version: $KAONIC_VERSION"
+echo "Build directory: $KAONIC_BUILD_DIR"
 
 cd $ROOT_DIR
 
-DISTRO=openstlinux-weston MACHINE=${MACHINE} source ./layers/meta-st/scripts/envsetup.sh --no-ui $KAONIC_BUILD_DIR_NAME << 'EOF'
+unset BUILD_DIR
+DISTRO=openstlinux-weston MACHINE=${MACHINE} source ./layers/meta-st/scripts/envsetup.sh --no-ui "$ENVSETUP_BUILD_DIR" << 'EOF'
 y
 n
 y
@@ -201,12 +237,15 @@ if [ -n "$CLEAN_PACKAGES" ]; then
 fi
 
 if [ "$UPDATE_DTS" = true ]; then
-    echo "Recompiling DeviceTree components..."
-    bitbake -c compile -f optee-os-stm32mp
-    bitbake -c compile -f tf-a-stm32mp
-    bitbake -c compile -f u-boot
+    echo "Cleaning and rebuilding DeviceTree components..."
+    bitbake -c cleansstate optee-os-stm32mp
+    bitbake -c compile optee-os-stm32mp
+    bitbake -c cleansstate tf-a-stm32mp
+    bitbake -c compile tf-a-stm32mp
+    bitbake -c cleansstate u-boot
+    bitbake -c compile u-boot
     bitbake -c cleansstate virtual/kernel
-    bitbake -c compile -f virtual/kernel
+    bitbake -c compile virtual/kernel
 fi
 
 # bitbake -c cleansstate linux-firmware
@@ -220,7 +259,6 @@ bitbake kaonic-st-image-core
 echo "Generate bootable image"
 cd $IMAGE_DIR
 
-IMAGE_FILENAME=${MACHINE}-v${KAONIC_VERSION}-sdcard.raw
 FLASHLAYOUT_DTB="$(get_cubemx_dtb)"
 
 if [[ -z "$FLASHLAYOUT_DTB" ]]; then
@@ -232,16 +270,63 @@ if [[ -z "$FLASHLAYOUT_DTB" ]]; then
 fi
 
 FLASHLAYOUT_DIR=./flashlayout_kaonic-st-image-core/opteemin
-FLASHLAYOUT_TSV=${FLASHLAYOUT_DIR}/FlashLayout_sdcard_${FLASHLAYOUT_DTB}-opteemin.tsv
-FLASHLAYOUT_RAW=$(basename "${FLASHLAYOUT_TSV%.tsv}.raw")
+SDCARD_FLASHLAYOUT_TSV=${FLASHLAYOUT_DIR}/FlashLayout_sdcard_${FLASHLAYOUT_DTB}-opteemin.tsv
+EMMC_FLASHLAYOUT_TSV=${FLASHLAYOUT_DIR}/FlashLayout_emmc_${FLASHLAYOUT_DTB}-opteemin.tsv
 
-if [[ ! -f "$FLASHLAYOUT_TSV" ]]; then
-    echo "Error: flashlayout TSV not found: $FLASHLAYOUT_TSV"
+if [[ -f "$SDCARD_FLASHLAYOUT_TSV" ]]; then
+    BOOT_DEVICE=sdcard
+    FLASHLAYOUT_TSV=$SDCARD_FLASHLAYOUT_TSV
+elif [[ -f "$EMMC_FLASHLAYOUT_TSV" ]]; then
+    BOOT_DEVICE=emmc
+    FLASHLAYOUT_TSV=$EMMC_FLASHLAYOUT_TSV
+else
+    echo "Error: no flashlayout TSV found for sdcard or emmc in: $FLASHLAYOUT_DIR"
     if [ "$SCRIPT_SOURCED" = true ]; then
         return 1
     fi
     exit 1
 fi
+
+echo "Boot device: $BOOT_DEVICE"
+
+if [[ "$BOOT_DEVICE" = "emmc" ]]; then
+    echo "eMMC boot device: no raw sdcard image is generated."
+    echo "Deploy eMMC USB programming artifacts"
+
+    mkdir -p ${KAONIC_DEPLOY_DIR}
+    rm -rf ${KAONIC_MACHINE_DEPLOY_DIR}
+    mkdir -p ${KAONIC_MACHINE_DEPLOY_DIR}
+
+    # Place the flashlayout TSV at the deploy root; STM32CubeProgrammer
+    # resolves the Binary column paths relative to the TSV location.
+    cp "$FLASHLAYOUT_TSV" ${KAONIC_MACHINE_DEPLOY_DIR}/
+
+    # Copy every binary referenced by the flashlayout, keeping relative paths
+    while IFS=$'\t' read -r opt id name type ip offset binary; do
+        case "$opt" in \#*|"") continue ;; esac
+        [[ -z "$binary" || "$binary" = "none" ]] && continue
+        if [[ ! -f "$binary" ]]; then
+            echo "Error: flashlayout references missing binary: $binary"
+            if [ "$SCRIPT_SOURCED" = true ]; then
+                return 1
+            fi
+            exit 1
+        fi
+        mkdir -p "${KAONIC_MACHINE_DEPLOY_DIR}/$(dirname "$binary")"
+        cp "$binary" "${KAONIC_MACHINE_DEPLOY_DIR}/$binary"
+    done < "$FLASHLAYOUT_TSV"
+
+    echo "Deployed to: $KAONIC_MACHINE_DEPLOY_DIR"
+    echo "Flash the board over USB DFU (USB boot mode) with:"
+    echo "  STM32_Programmer_CLI -c port=usb1 -w $KAONIC_MACHINE_DEPLOY_DIR/$(basename "$FLASHLAYOUT_TSV")"
+    if [ "$SCRIPT_SOURCED" = true ]; then
+        return 0
+    fi
+    exit 0
+fi
+
+IMAGE_FILENAME=${MACHINE}-v${KAONIC_VERSION}-sdcard.raw
+FLASHLAYOUT_RAW=$(basename "${FLASHLAYOUT_TSV%.tsv}.raw")
 
 rm -f "$FLASHLAYOUT_RAW"
 ./scripts/create_sdcard_from_flashlayout.sh "$FLASHLAYOUT_TSV"
