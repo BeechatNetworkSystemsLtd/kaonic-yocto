@@ -1,7 +1,7 @@
 [Unit]
 Description=Apply persisted Kaonic WiFi mode
-Wants=systemd-networkd.service
-After=local-fs.target kaonic-init.service systemd-networkd.service
+Wants=sys-subsystem-net-devices-wlan0.device systemd-networkd.service
+After=local-fs.target kaonic-init.service sys-subsystem-net-devices-wlan0.device systemd-networkd.service
 Before=kaonic-commd.service kaonic-factory.service
 
 [Service]

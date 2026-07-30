@@ -4,7 +4,8 @@ Wants=systemd-networkd.service
 Before=systemd-networkd.service
 Before=systemd-networkd-wait-online.service
 Before=network.target
-ConditionPathExists=/sys/class/net/wlan0
+BindsTo=sys-subsystem-net-devices-wlan0.device
+After=sys-subsystem-net-devices-wlan0.device
 
 [Service]
 Type=simple
