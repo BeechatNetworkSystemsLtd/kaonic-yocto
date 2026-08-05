@@ -138,15 +138,92 @@ fi
 
 IMAGE_DIR=$KAONIC_BUILD_DIR/tmp-glibc/deploy/images/$MACHINE
 
-get_cubemx_dtb() {
-    bitbake -e kaonic-st-image-core 2>/dev/null | awk -F= '
-        /^CUBEMX_DTB=/ {
-            gsub(/^"/, "", $2)
-            gsub(/"$/, "", $2)
-            print $2
+# One `bitbake -e` call is slow, so cache it and read every variable from there.
+bitbake_env() {
+    if [[ -z "${BITBAKE_ENV_CACHE:-}" ]]; then
+        BITBAKE_ENV_CACHE="$(bitbake -e kaonic-st-image-core 2>/dev/null)"
+    fi
+    printf '%s' "$BITBAKE_ENV_CACHE"
+}
+
+bitbake_var() {
+    bitbake_env | awk -F= -v key="^$1=" '
+        $0 ~ key {
+            sub(/^[^=]*=/, "", $0)
+            gsub(/^"/, "", $0)
+            gsub(/"$/, "", $0)
+            print
             exit
         }
     '
+}
+
+get_cubemx_dtb() {
+    bitbake_var CUBEMX_DTB
+}
+
+# SoC part number, derived from the CubeMX device tree name:
+# stm32mp151a-kaonic1s-r30-mx -> STM32MP151A
+get_soc() {
+    get_cubemx_dtb | cut -d- -f1 | tr '[:lower:]' '[:upper:]'
+}
+
+# Write manifest.toml describing a deploy directory.
+#
+# This is what lets a flashing tool decide, before touching hardware, whether a
+# bundle fits the board in front of it and which of the two flashing routes to
+# take. $1=dir  $2=emmc|sdcard  $3=flashlayout name (emmc)  $4=raw image (sdcard)
+write_manifest() {
+    local dir="$1" boot="$2" layout="$3" raw="$4"
+    local manifest="$dir/manifest.toml"
+
+    {
+        echo 'schema = 1'
+        echo "machine = \"${MACHINE}\""
+        echo "soc = \"$(get_soc)\""
+        echo "boot_device = \"${boot}\""
+        echo "version = \"${KAONIC_VERSION}\""
+        echo "built = \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
+        [[ -n "$layout" ]] && echo "flashlayout = \"${layout}\""
+        [[ -n "$raw" ]] && echo "raw_image = \"${raw}\""
+        # Every payload file with its size and hash, so a truncated or altered
+        # bundle is detectable rather than failing obscurely mid-flash. These are
+        # array-of-tables entries, so they must come after every scalar key above.
+        while IFS= read -r f; do
+            local rel="${f#./}"
+            [[ "$rel" == "manifest.toml" ]] && continue
+            local size sha
+            size=$(stat -c%s "$dir/$rel" 2>/dev/null || stat -f%z "$dir/$rel")
+            sha=$(sha256sum "$dir/$rel" | cut -d' ' -f1)
+            printf '\n[[files]]\npath = "%s"\nsize = %s\nsha256 = "%s"\n' "$rel" "$size" "$sha"
+        done < <(cd "$dir" && find . -type f | sort)
+    } > "$manifest"
+
+    echo "Wrote $manifest"
+}
+
+# Pack a deploy directory into a single .tar.gz for distribution.
+make_bundle() {
+    local dir="$1"
+    local name="kaonic-${MACHINE}-v${KAONIC_VERSION}.tar.gz"
+    BUNDLE_PATH="${KAONIC_DEPLOY_DIR}/${name}"
+
+    echo "Packing bundle: $BUNDLE_PATH"
+    rm -f "$BUNDLE_PATH"
+    # Archived without a leading directory so manifest paths are the entry paths.
+    tar -czf "$BUNDLE_PATH" -C "$dir" .
+    sha256sum "$BUNDLE_PATH" > "$BUNDLE_PATH.sha256"
+    echo "Bundle: $(du -h "$BUNDLE_PATH" | cut -f1)"
+}
+
+# The boot scheme is part of every artifact name (`-optee-`, `-opteemin-`, ...),
+# so it is read from the machine configuration rather than hardcoded — switching
+# ST_OPTEE_PROFILE renames all of them.
+get_bootscheme() {
+    local labels
+    labels="$(bitbake_var BOOTSCHEME_LABELS)"
+    # Last label wins, matching how the machine conf appends.
+    printf '%s' "$labels" | tr ' ' '\n' | grep -E '^optee' | tail -n1
 }
 
 find_meta_rust_bin_dir() {
@@ -269,9 +346,19 @@ if [[ -z "$FLASHLAYOUT_DTB" ]]; then
     exit 1
 fi
 
-FLASHLAYOUT_DIR=./flashlayout_kaonic-st-image-core/opteemin
-SDCARD_FLASHLAYOUT_TSV=${FLASHLAYOUT_DIR}/FlashLayout_sdcard_${FLASHLAYOUT_DTB}-opteemin.tsv
-EMMC_FLASHLAYOUT_TSV=${FLASHLAYOUT_DIR}/FlashLayout_emmc_${FLASHLAYOUT_DTB}-opteemin.tsv
+BOOTSCHEME="$(get_bootscheme)"
+if [[ -z "$BOOTSCHEME" ]]; then
+    echo "Error: unable to determine the optee boot scheme from BOOTSCHEME_LABELS."
+    if [ "$SCRIPT_SOURCED" = true ]; then
+        return 1
+    fi
+    exit 1
+fi
+echo "Boot scheme: $BOOTSCHEME"
+
+FLASHLAYOUT_DIR=./flashlayout_kaonic-st-image-core/${BOOTSCHEME}
+SDCARD_FLASHLAYOUT_TSV=${FLASHLAYOUT_DIR}/FlashLayout_sdcard_${FLASHLAYOUT_DTB}-${BOOTSCHEME}.tsv
+EMMC_FLASHLAYOUT_TSV=${FLASHLAYOUT_DIR}/FlashLayout_emmc_${FLASHLAYOUT_DTB}-${BOOTSCHEME}.tsv
 
 if [[ -f "$SDCARD_FLASHLAYOUT_TSV" ]]; then
     BOOT_DEVICE=sdcard
@@ -316,9 +403,14 @@ if [[ "$BOOT_DEVICE" = "emmc" ]]; then
         cp "$binary" "${KAONIC_MACHINE_DEPLOY_DIR}/$binary"
     done < "$FLASHLAYOUT_TSV"
 
+    write_manifest "$KAONIC_MACHINE_DEPLOY_DIR" emmc "$(basename "$FLASHLAYOUT_TSV")" ""
+    make_bundle "$KAONIC_MACHINE_DEPLOY_DIR"
+
     echo "Deployed to: $KAONIC_MACHINE_DEPLOY_DIR"
-    echo "Flash the board over USB DFU (USB boot mode) with:"
-    echo "  STM32_Programmer_CLI -c port=usb1 -w $KAONIC_MACHINE_DEPLOY_DIR/$(basename "$FLASHLAYOUT_TSV")"
+    echo "Flash the board over USB with:"
+    echo "  kaonic-flash flash $KAONIC_MACHINE_DEPLOY_DIR/$(basename "$FLASHLAYOUT_TSV") --wipe"
+    echo "or hand the bundle to the GUI:"
+    echo "  $BUNDLE_PATH"
     if [ "$SCRIPT_SOURCED" = true ]; then
         return 0
     fi
@@ -359,5 +451,12 @@ if [ "$COMPRESS_IMAGE" = true ] && [ -f ${IMAGE_FILENAME}.gz ]; then
     cp ${IMAGE_FILENAME}.gz $KAONIC_MACHINE_DEPLOY_DIR/
     echo "Deployed compressed image: ${IMAGE_FILENAME}.gz"
 fi
+
+# The raw image is already the payload here, so the bundle carries it plus the
+# manifest. It is deliberately the same shape as the eMMC bundle, so the GUI has
+# one thing to open regardless of how the board is programmed.
+write_manifest "$KAONIC_MACHINE_DEPLOY_DIR" sdcard "" "${IMAGE_FILENAME}"
+make_bundle "$KAONIC_MACHINE_DEPLOY_DIR"
+echo "Bundle: $BUNDLE_PATH"
 
 #*****************************************************************************#
