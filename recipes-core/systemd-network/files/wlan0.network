@@ -2,5 +2,14 @@
 Name=wlan0
 
 [Network]
-Bridge=br0
-
+# Deliberately no Bridge= and no addressing: hostapd owns this interface.
+#
+# This file only applies in AP mode — wifi_mode.sh drops an override of the same
+# name into /etc/systemd/network for station mode, and /etc wins over /usr/lib.
+# In AP mode hostapd sets the interface type and then adds it to br0 itself
+# (bridge=br0 in hostapd.conf). Enslaving it from here as well used to look
+# correct and then silently come undone: networkd attached the port, hostapd
+# switched the interface into AP mode, and the type change dropped the
+# membership. Clients then associated to an unbridged wlan0 and never got a
+# lease from the DHCP server running on br0.
+LinkLocalAddressing=no
