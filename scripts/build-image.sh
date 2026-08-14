@@ -68,6 +68,11 @@ while [[ $# -gt 0 ]]; do
         --help|-h)
             echo "Usage: $SCRIPT_NAME --machine <name> [OPTIONS]"
             echo ""
+            echo "Artifacts, under deploy/, named image-<machine>-v<version>-<kind>.tar.gz:"
+            echo "  eMMC boards     -emmc         programmed over USB"
+            echo "  sdcard boards   -sdcard-raw   image for a card reader"
+            echo "                  -sdcard-usb   same card, written over USB"
+            echo ""
             echo "Required:"
             echo "  --machine <name>        Specify the machine/board name"
             echo ""
@@ -78,6 +83,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --clean                 Clean image before building"
             echo "  --clean-package <pkg>   Clean specific package (can be used multiple times)"
             echo "  --gz                    Compress final image with gzip (Etcher-compatible)"
+            echo "                          (sdcard boards only; ignored on eMMC boards)"
             echo "  --env                   Initialize Yocto/BitBake environment only"
             echo "  -h, --help              Show this help message"
             echo ""
@@ -121,6 +127,9 @@ ROOT_DIR=$HOME/yocto
 KAONIC_REPO=$ROOT_DIR/layers/meta-st/meta-kaonic
 KAONIC_DEPLOY_DIR=$KAONIC_REPO/deploy
 KAONIC_MACHINE_DEPLOY_DIR=$KAONIC_DEPLOY_DIR/${MACHINE}
+# Only used by sdcard boards, which deploy two artifacts. eMMC boards have no
+# raw image, so their USB package is the machine directory itself.
+KAONIC_USB_DEPLOY_DIR=$KAONIC_DEPLOY_DIR/${MACHINE}-usb
 
 if [[ -z "$REQUESTED_BUILD_DIR" ]]; then
     KAONIC_BUILD_DIR_NAME=build-${MACHINE}-image
@@ -203,9 +212,19 @@ write_manifest() {
 }
 
 # Pack a deploy directory into a single .tar.gz for distribution.
+#
+# $1=dir  $2=kind, naming the storage the bundle targets and — where a board
+# produces more than one — how it is delivered: `emmc`, `sdcard-raw`,
+# `sdcard-usb`. The medium is in the name because it decides what an operator
+# does with the file, and two bundles of the same build are otherwise
+# indistinguishable.
 make_bundle() {
-    local dir="$1"
-    local name="kaonic-${MACHINE}-v${KAONIC_VERSION}.tar.gz"
+    local dir="$1" kind="$2"
+    # `image-` marks a file as something to publish: the flashing tool offers
+    # only these, so a folder can hold working files without them being listed
+    # as things to write to a board. No `kaonic-` here — MACHINE already carries
+    # the board name, and the old name said it twice.
+    local name="image-${MACHINE}-v${KAONIC_VERSION}-${kind}.tar.gz"
     BUNDLE_PATH="${KAONIC_DEPLOY_DIR}/${name}"
 
     echo "Packing bundle: $BUNDLE_PATH"
@@ -214,6 +233,39 @@ make_bundle() {
     tar -czf "$BUNDLE_PATH" -C "$dir" .
     sha256sum "$BUNDLE_PATH" > "$BUNDLE_PATH.sha256"
     echo "Bundle: $(du -h "$BUNDLE_PATH" | cut -f1)"
+}
+
+# Assemble a USB programming package: the flashlayout TSV plus every binary it
+# references, laid out so STM32CubeProgrammer can be pointed straight at the TSV.
+#
+# This is boot-device independent. The ROM's USB DFU route does not care where
+# the image ends up — the TSV's `IP` column does — so an SD-card board is
+# programmed over USB exactly like an eMMC one, from the sdcard flashlayout.
+# $1=destination dir  $2=flashlayout TSV path (relative to $IMAGE_DIR)
+deploy_usb_package() {
+    local dir="$1" tsv="$2"
+
+    rm -rf "$dir"
+    mkdir -p "$dir"
+
+    # Place the flashlayout TSV at the package root; STM32CubeProgrammer
+    # resolves the Binary column paths relative to the TSV location.
+    cp "$tsv" "$dir/"
+
+    # Copy every binary referenced by the flashlayout, keeping relative paths
+    while IFS=$'\t' read -r opt id name type ip offset binary; do
+        case "$opt" in \#*|"") continue ;; esac
+        [[ -z "$binary" || "$binary" = "none" ]] && continue
+        if [[ ! -f "$binary" ]]; then
+            # Only ever a non-zero return: `exit` here would kill the caller's
+            # shell when this script is sourced, and `return` from inside a
+            # function would not stop the script. The call site decides.
+            echo "Error: flashlayout references missing binary: $binary" >&2
+            return 1
+        fi
+        mkdir -p "$dir/$(dirname "$binary")"
+        cp "$binary" "$dir/$binary"
+    done < "$tsv"
 }
 
 # The boot scheme is part of every artifact name (`-optee-`, `-opteemin-`, ...),
@@ -376,35 +428,23 @@ fi
 
 echo "Boot device: $BOOT_DEVICE"
 
+mkdir -p ${KAONIC_DEPLOY_DIR}
+
 if [[ "$BOOT_DEVICE" = "emmc" ]]; then
     echo "eMMC boot device: no raw sdcard image is generated."
     echo "Deploy eMMC USB programming artifacts"
 
-    mkdir -p ${KAONIC_DEPLOY_DIR}
-    rm -rf ${KAONIC_MACHINE_DEPLOY_DIR}
-    mkdir -p ${KAONIC_MACHINE_DEPLOY_DIR}
-
-    # Place the flashlayout TSV at the deploy root; STM32CubeProgrammer
-    # resolves the Binary column paths relative to the TSV location.
-    cp "$FLASHLAYOUT_TSV" ${KAONIC_MACHINE_DEPLOY_DIR}/
-
-    # Copy every binary referenced by the flashlayout, keeping relative paths
-    while IFS=$'\t' read -r opt id name type ip offset binary; do
-        case "$opt" in \#*|"") continue ;; esac
-        [[ -z "$binary" || "$binary" = "none" ]] && continue
-        if [[ ! -f "$binary" ]]; then
-            echo "Error: flashlayout references missing binary: $binary"
-            if [ "$SCRIPT_SOURCED" = true ]; then
-                return 1
-            fi
-            exit 1
+    if ! deploy_usb_package "$KAONIC_MACHINE_DEPLOY_DIR" "$FLASHLAYOUT_TSV"; then
+        if [ "$SCRIPT_SOURCED" = true ]; then
+            return 1
         fi
-        mkdir -p "${KAONIC_MACHINE_DEPLOY_DIR}/$(dirname "$binary")"
-        cp "$binary" "${KAONIC_MACHINE_DEPLOY_DIR}/$binary"
-    done < "$FLASHLAYOUT_TSV"
+        exit 1
+    fi
 
     write_manifest "$KAONIC_MACHINE_DEPLOY_DIR" emmc "$(basename "$FLASHLAYOUT_TSV")" ""
-    make_bundle "$KAONIC_MACHINE_DEPLOY_DIR"
+    # No delivery qualifier: an eMMC board has exactly one artifact, and USB is
+    # the only way to write it.
+    make_bundle "$KAONIC_MACHINE_DEPLOY_DIR" emmc
 
     echo "Deployed to: $KAONIC_MACHINE_DEPLOY_DIR"
     echo "Flash the board over USB with:"
@@ -437,10 +477,11 @@ fi
 #*****************************************************************************#
 
 echo "Deploy artifacts"
-mkdir -p ${KAONIC_DEPLOY_DIR}
+# Cleaned rather than added to: the manifest describes every file in the
+# directory, so images left over from an earlier version would be listed — and
+# shipped in the bundle — as if they belonged to this build.
+rm -rf ${KAONIC_MACHINE_DEPLOY_DIR}
 mkdir -p ${KAONIC_MACHINE_DEPLOY_DIR}
-
-rm -rf $KAONIC_MACHINE_DEPLOY_DIR/${IMAGE_FILENAME}*
 
 cp ${IMAGE_FILENAME} $KAONIC_MACHINE_DEPLOY_DIR/
 cp ${IMAGE_FILENAME}.sha256 $KAONIC_MACHINE_DEPLOY_DIR/
@@ -456,7 +497,34 @@ fi
 # manifest. It is deliberately the same shape as the eMMC bundle, so the GUI has
 # one thing to open regardless of how the board is programmed.
 write_manifest "$KAONIC_MACHINE_DEPLOY_DIR" sdcard "" "${IMAGE_FILENAME}"
-make_bundle "$KAONIC_MACHINE_DEPLOY_DIR"
-echo "Bundle: $BUNDLE_PATH"
+make_bundle "$KAONIC_MACHINE_DEPLOY_DIR" sdcard-raw
+RAW_BUNDLE_PATH="$BUNDLE_PATH"
+
+#*****************************************************************************#
+
+# Second artifact for the same build: the SD card written over USB instead of in
+# a card reader. The board is held in USB boot by the BOOT pins, the ROM takes
+# TF-A and U-Boot into DDR from the `-programmer-usb` binaries, and U-Boot writes
+# the partitions to the card in the slot. Same TSV the raw image is built from —
+# only the delivery differs — so the two artifacts cannot drift apart.
+echo "Deploy USB programming artifacts"
+
+if ! deploy_usb_package "$KAONIC_USB_DEPLOY_DIR" "$FLASHLAYOUT_TSV"; then
+    if [ "$SCRIPT_SOURCED" = true ]; then
+        return 1
+    fi
+    exit 1
+fi
+
+write_manifest "$KAONIC_USB_DEPLOY_DIR" sdcard "$(basename "$FLASHLAYOUT_TSV")" ""
+make_bundle "$KAONIC_USB_DEPLOY_DIR" sdcard-usb
+
+echo
+echo "SD card image (write to a card with Etcher/dd):"
+echo "  $RAW_BUNDLE_PATH"
+echo "USB programming package:"
+echo "  $BUNDLE_PATH"
+echo "Flash the board over USB with:"
+echo "  kaonic-flash flash $KAONIC_USB_DEPLOY_DIR/$(basename "$FLASHLAYOUT_TSV") --wipe"
 
 #*****************************************************************************#
