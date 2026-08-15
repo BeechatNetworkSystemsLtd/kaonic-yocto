@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Kaonic <dev@beechat.network>
+Date: Wed, 5 Aug 2026 15:00:00 +0000
+Subject: [PATCH] gpio: keep devicetree bias flags when requesting a GPIO
+
+gpio-uclass parses GPIO_PULL_UP / GPIO_PULL_DOWN out of a `gpios` property,
+and drivers that implement set_flags act on them. But gpio_request_tail()
+masks the parsed flags with GPIOD_MASK_DIR, which covers only the direction
+bits, so the bias is discarded between being read and being applied.
+
+GPIOD_MASK_PULL already exists for these bits; preserve it too.
+
+Signed-off-by: Kaonic <dev@beechat.network>
+---
+ drivers/gpio/gpio-uclass.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpio/gpio-uclass.c b/drivers/gpio/gpio-uclass.c
+--- a/drivers/gpio/gpio-uclass.c
++++ b/drivers/gpio/gpio-uclass.c
+@@ -1116,9 +1116,10 @@
+ 		goto err;
+ 	}
+ 
+-	/* Keep any direction flags provided by the devicetree */
++	/* Keep any direction and bias flags provided by the devicetree */
+ 	ret = dm_gpio_set_dir_flags(desc,
+-				    flags | (desc->flags & GPIOD_MASK_DIR));
++				    flags | (desc->flags &
++				     (GPIOD_MASK_DIR | GPIOD_MASK_PULL)));
+ 	if (ret) {
+ 		debug("%s: dm_gpio_set_dir failed\n", __func__);
+ 		goto err;
+ 	}

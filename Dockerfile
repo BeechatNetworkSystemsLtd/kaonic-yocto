@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -29,9 +29,11 @@ RUN apt-get update && apt-get install -y \
             sudo \
             gdisk \
             rsync \
+            gperf \
             bc \
             bsdmainutils \
-            libegl1-mesa libgmp-dev libmpc-dev libsdl1.2-dev libssl-dev \
+            libgmp-dev libmpc-dev libsdl1.2-dev libssl-dev \
+            libclang-dev \
             gcc-arm-linux-gnueabihf \
             && rm -rf /var/lib/apt/lists/* \
             && mkdir -p /opt/ \
@@ -43,22 +45,24 @@ RUN apt-get update && apt-get install -y \
 ENV LANG=en_US.utf8
 
 # Create user and group
-RUN groupadd builduser -g 1000 \
-    && useradd -ms /bin/bash -p builduser builduser -u 1028 -g 1000 \
-    && usermod -aG sudo builduser && echo "builduser:builduser" | chpasswd \
-    && echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+RUN groupadd kanoic-builder -f -g 1000 \
+    && useradd -ms /bin/bash -p kanoic-builder kanoic-builder -u 1028 -g 1000 \
+    && usermod -aG sudo kanoic-builder && echo "kanoic-builder:kanoic-builder" | chpasswd \
+    && echo "kanoic-builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-USER builduser
+USER kanoic-builder
 
 ENV DISTRO=openstlinux-weston
 
 RUN git config --global user.email "yocto-build@beechat.network" && git config --global user.name "Yocto Build" \
-    && mkdir /home/builduser/yocto && mkdir /home/builduser/bin && cd /home/builduser/yocto \
-    && curl https://storage.googleapis.com/git-repo-downloads/repo > /home/builduser/bin/repo \
-    && chmod +x /home/builduser/bin/repo \
-    && /home/builduser/bin/repo init -u https://github.com/STMicroelectronics/oe-manifest.git -b refs/tags/openstlinux-6.6-yocto-scarthgap-mpu-v24.11.06 \
-    && /home/builduser/bin/repo sync \
-    && cd /home/builduser/yocto/layers/meta-st/ && git clone https://github.com/rust-embedded/meta-rust-bin.git
+    && mkdir /home/kanoic-builder/yocto && mkdir /home/kanoic-builder/bin && cd /home/kanoic-builder/yocto \
+    && curl https://storage.googleapis.com/git-repo-downloads/repo > /home/kanoic-builder/bin/repo \
+    && chmod +x /home/kanoic-builder/bin/repo \
+    && /home/kanoic-builder/bin/repo init -u https://github.com/STMicroelectronics/oe-manifest.git -b refs/tags/openstlinux-6.6-yocto-scarthgap-mpu-v26.06.10 \
+    && /home/kanoic-builder/bin/repo sync \
+    && cd /home/kanoic-builder/yocto/layers/meta-st/ && git clone https://github.com/rust-embedded/meta-rust-bin.git \
+    && ln -s /home/kanoic-builder/yocto/layers/meta-st/meta-kaonic/scripts/build-image.sh /home/kanoic-builder/yocto/build_image.sh
+
+WORKDIR /home/kanoic-builder/yocto
 
 CMD ["/bin/bash"]
-

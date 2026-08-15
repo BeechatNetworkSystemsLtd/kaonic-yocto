@@ -1,6 +1,8 @@
 
 include lwbplus-firmware.inc
 
+PACKAGES =+ "${PN}-bcm43439"
+
 do_install:append:stm32mpcommon() {
 
    # Remove previous firmware
@@ -28,11 +30,11 @@ do_install:append:stm32mpcommon() {
 
    # Add symlinks for newest kernel compatibility
    cd ${D}${nonarch_base_libdir}/firmware/brcm/
-   ln -sf brcmfmac43439-sdio.bin brcmfmac43439-sdio.st,stm32mp151a-kaonic-mx.bin
-   ln -sf brcmfmac43439-sdio.txt brcmfmac43439-sdio.st,stm32mp151a-kaonic-mx.txt
+   ln -sf brcmfmac43439-sdio.bin brcmfmac43439-sdio.st,${CUBEMX_DTB}.bin
+   ln -sf brcmfmac43439-sdio.txt brcmfmac43439-sdio.st,${CUBEMX_DTB}.txt
 }
 
 FILES:${PN}-bcm43439:append:stm32mpcommon = " \
     ${nonarch_base_libdir}/firmware/brcm/brcmfmac43439-sdio.* \
-    ${nonarch_base_libdir}/firmware/brcm/brcmfmac43439-sdio.st,stm32mp151a-kaonic-mx* \
+    ${nonarch_base_libdir}/firmware/brcm/brcmfmac43439-sdio.st,${CUBEMX_DTB}* \
  "

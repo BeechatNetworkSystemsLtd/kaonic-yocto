@@ -5,10 +5,15 @@ Name=br0
 ConfigureWithoutCarrier=yes
 Address=192.168.10.1/24
 DHCPServer=yes
-IPMasquerade=yes   # If your board has internet upstream to share
+# Uncomment to share an upstream internet connection. Note that systemd does
+# not accept trailing comments on a setting line: the text becomes part of the
+# value and the whole assignment is rejected.
+#IPMasquerade=ipv4
 
 [DHCPServer]
 PoolOffset=10
 PoolSize=100
-EmitDNS=yes
 EmitRouter=yes
+EmitDNS=yes
+# Hand out this board as the resolver, which is what dnsmasq answers on.
+DNS=192.168.10.1

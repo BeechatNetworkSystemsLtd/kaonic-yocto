@@ -17,6 +17,10 @@ usage() {
     exit 1
 }
 
+wifi_iface_present() {
+    ip link show "$WLAN_IFACE" >/dev/null 2>&1
+}
+
 write_mode() {
     install -d /etc/kaonic
     printf '%s\n' "$1" > "$MODE_FILE"
@@ -50,6 +54,11 @@ start_wpa_supplicant() {
         exit 1
     fi
 
+    if ! wifi_iface_present; then
+        echo "WiFi interface $WLAN_IFACE is not present yet; skipping STA bring-up"
+        return 0
+    fi
+
     stop_wpa_supplicant
 
     ip link set "$WLAN_IFACE" down || true
@@ -75,6 +84,11 @@ render_wpa_config() {
 }
 
 apply_ap_mode() {
+    if ! wifi_iface_present; then
+        echo "WiFi interface $WLAN_IFACE is not present yet; skipping AP bring-up"
+        return 0
+    fi
+
     stop_wpa_supplicant
     rm -f "$WLAN_OVERRIDE"
     ip link set "$WLAN_IFACE" down || true
@@ -84,6 +98,11 @@ apply_ap_mode() {
 }
 
 apply_sta_mode() {
+    if ! wifi_iface_present; then
+        echo "WiFi interface $WLAN_IFACE is not present yet; skipping STA mode"
+        return 0
+    fi
+
     systemctl stop hostapd.service || true
     write_sta_network_override
     systemctl restart systemd-networkd.service
@@ -146,7 +165,11 @@ show_status() {
         echo "wpa_supplicant: stopped"
     fi
 
-    iw "$WLAN_IFACE" link || true
+    if wifi_iface_present; then
+        iw "$WLAN_IFACE" link || true
+    else
+        echo "$WLAN_IFACE: absent"
+    fi
 }
 
 cmd="${1:-}"
