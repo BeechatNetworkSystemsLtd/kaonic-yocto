@@ -163,14 +163,15 @@
 		simple-audio-card,bitclock-master = <&cpu_dai>;
 		simple-audio-card,frame-master = <&cpu_dai>;
 		status = "okay";
+
 		simple-audio-card,widgets =
 			"Microphone", "Mic Jack",
-			"Headphone", "Mono Out";
+			"Speaker", "Ext Spk";
 		simple-audio-card,routing =
 			"Mic Jack", "MICB",
-			"LINPUT3", "Mic Jack",
-			"Mono Out", "HP_L",
-			"Mono Out", "HP_R";
+			"LINPUT2", "Mic Jack",
+			"Ext Spk", "SPK_LP",
+			"Ext Spk", "SPK_LN";
 		cpu_dai: simple-audio-card,cpu {
 			sound-dai = <&i2s2>;
 		};
@@ -754,11 +755,15 @@
 		#sound-dai-cells = <0>;
 		clocks = <&wm8960_mclk>;
 		clock-names = "mclk";
+		/* ADCLRC/GPIO1 and DACLRC are tied together on the adapter */
 		wlf,shared-lrclk;
+		wlf,gpio-cfg = <1 0>;
 		AVDD-supply = <&v3v3>;
-		IOVDD-supply = <&v3v3>;
 		DCVDD-supply = <&v3v3>;
 		DBVDD-supply = <&v3v3>;
+		/* SPKVDD1/SPKVDD2 are fed from the +5V rail of the Kaonic connector */
+		SPKVDD1-supply = <&vin>;
+		SPKVDD2-supply = <&vin>;
 
 		port {
 			wm8960_endpoint: endpoint {

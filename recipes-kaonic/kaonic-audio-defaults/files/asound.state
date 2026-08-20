@@ -269,7 +269,7 @@ state.Audio {
 	control.5 {
 		iface MIXER
 		name 'Left Input Boost Mixer LINPUT2 Volume'
-		value 0
+		value 7
 		comment {
 			access 'read write'
 			type INTEGER
@@ -534,7 +534,7 @@ state.Audio {
 	control.26 {
 		iface MIXER
 		name 'ALC Function'
-		value Off
+		value 'Left'
 		comment {
 			access 'read write'
 			type ENUMERATED
@@ -559,7 +559,7 @@ state.Audio {
 	control.28 {
 		iface MIXER
 		name 'ALC Target'
-		value 4
+		value 12
 		comment {
 			access 'read write'
 			type INTEGER
@@ -757,7 +757,7 @@ state.Audio {
 	control.44 {
 		iface MIXER
 		name 'Left Boost Mixer LINPUT2 Switch'
-		value false
+		value true
 		comment {
 			access 'read write'
 			type BOOLEAN

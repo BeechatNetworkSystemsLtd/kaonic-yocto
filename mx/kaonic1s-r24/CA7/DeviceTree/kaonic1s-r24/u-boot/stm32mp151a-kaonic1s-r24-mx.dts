@@ -162,14 +162,15 @@
 		simple-audio-card,bitclock-master = <&cpu_dai>;
 		simple-audio-card,frame-master = <&cpu_dai>;
 		status = "okay";
+
 		simple-audio-card,widgets =
 			"Microphone", "Mic Jack",
-			"Headphone", "Mono Out";
+			"Speaker", "Ext Spk";
 		simple-audio-card,routing =
 			"Mic Jack", "MICB",
-			"LINPUT3", "Mic Jack",
-			"Mono Out", "HP_L",
-			"Mono Out", "HP_R";
+			"LINPUT2", "Mic Jack",
+			"Ext Spk", "SPK_LP",
+			"Ext Spk", "SPK_LN";
 		cpu_dai: simple-audio-card,cpu {
 			sound-dai = <&i2s2>;
 		};
@@ -563,6 +564,46 @@
 	};
 
 	/* USER CODE BEGIN pinctrl */
+
+	fmc_fpga_pins_mx: fmc_fpga_mx-0 {
+		pins1 {
+			pinmux = <STM32_PINMUX('D', 0, AF12)>, /* FMC_D2 */
+					 <STM32_PINMUX('D', 1, AF12)>, /* FMC_D3 */
+					 <STM32_PINMUX('D', 4, AF12)>, /* FMC_NOE */
+					 <STM32_PINMUX('D', 5, AF12)>, /* FMC_NWE */
+					 <STM32_PINMUX('D', 12, AF12)>, /* FMC_A17 */
+					 <STM32_PINMUX('D', 14, AF12)>, /* FMC_D0 */
+					 <STM32_PINMUX('D', 15, AF12)>, /* FMC_D1 */
+					 <STM32_PINMUX('E', 7, AF12)>, /* FMC_D4 */
+					 <STM32_PINMUX('E', 8, AF12)>, /* FMC_D5 */
+					 <STM32_PINMUX('E', 9, AF12)>, /* FMC_D6 */
+					 <STM32_PINMUX('E', 10, AF12)>; /* FMC_D7 */
+			bias-disable;
+			drive-push-pull;
+			slew-rate = <1>;
+		};
+		pins2 {
+			pinmux = <STM32_PINMUX('G', 9, AF12)>; /* FMC_NE2 */
+		};
+	};
+
+	fmc_fpga_sleep_pins_mx: fmc_fpga_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('D', 0, ANALOG)>, /* FMC_D2 */
+					 <STM32_PINMUX('D', 1, ANALOG)>, /* FMC_D3 */
+					 <STM32_PINMUX('D', 4, ANALOG)>, /* FMC_NOE */
+					 <STM32_PINMUX('D', 5, ANALOG)>, /* FMC_NWE */
+					 <STM32_PINMUX('D', 12, ANALOG)>, /* FMC_A17 */
+					 <STM32_PINMUX('D', 14, ANALOG)>, /* FMC_D0 */
+					 <STM32_PINMUX('D', 15, ANALOG)>, /* FMC_D1 */
+					 <STM32_PINMUX('E', 7, ANALOG)>, /* FMC_D4 */
+					 <STM32_PINMUX('E', 8, ANALOG)>, /* FMC_D5 */
+					 <STM32_PINMUX('E', 9, ANALOG)>, /* FMC_D6 */
+					 <STM32_PINMUX('E', 10, ANALOG)>, /* FMC_D7 */
+					 <STM32_PINMUX('G', 9, ANALOG)>; /* FMC_NE2 */
+		};
+	};
+
 	i2c4_pins_mx: i2c4_mx-0 {
 		pins {
 			pinmux = <STM32_PINMUX('D', 13, AF4)>, /* I2C4_SDA */
@@ -651,6 +692,25 @@
 	status = "okay";
 
 	/* USER CODE BEGIN fmc */
+	/* Override the CubeMX pin groups: FMC_A17 (PD12) is required to reach
+	 * the FPGA DATA port and is not part of fmc_pins_mx.
+	 */
+	pinctrl-0 = <&fmc_fpga_pins_mx>;
+	pinctrl-1 = <&fmc_fpga_sleep_pins_mx>;
+
+	#address-cells = <2>;
+	#size-cells = <1>;
+
+	fpga@1,0 {
+		compatible = "beechat,kaonic1s-fpga";
+		reg = <1 0x00000000 0x00040000>;
+		bank-width = <1>;
+
+		st,fmc2-ebi-cs-transaction-type = <1>; /* async mode 1, PSRAM */
+		st,fmc2-ebi-cs-address-setup-ns = <30>;
+		st,fmc2-ebi-cs-data-setup-ns = <40>;
+		st,fmc2-ebi-cs-bus-turnaround-ns = <15>;
+	};
 	/* USER CODE END fmc */
 };
 
@@ -691,11 +751,15 @@
 		#sound-dai-cells = <0>;
 		clocks = <&wm8960_mclk>;
 		clock-names = "mclk";
+		/* ADCLRC/GPIO1 and DACLRC are tied together on the adapter */
 		wlf,shared-lrclk;
+		wlf,gpio-cfg = <1 0>;
 		AVDD-supply = <&v3v3>;
-		IOVDD-supply = <&v3v3>;
 		DCVDD-supply = <&v3v3>;
 		DBVDD-supply = <&v3v3>;
+		/* SPKVDD1/SPKVDD2 are fed from the +5V rail of the Kaonic connector */
+		SPKVDD1-supply = <&vin>;
+		SPKVDD2-supply = <&vin>;
 
 		port {
 			wm8960_endpoint: endpoint {
@@ -985,16 +1049,6 @@
 	/* usb-role-switch; */
 	dr_mode = "peripheral";
 
-	/*
-	 * Tells dwc2 to treat the B-session as valid rather than waiting to sense
-	 * VBUS. Without it the gadget runs — stm32prog reaches its DFU loop and
-	 * answers Ctrl-C normally — but never asserts the D+ pull-up, so the host
-	 * never enumerates it and the flashing tool times out waiting for a device
-	 * that is sitting there. U-Boot only; TF-A's own USB stack does not use it,
-	 * which is why the ROM stage enumerates on the same port.
-	 */
-	u-boot,force-b-session-valid;
-
 	/* USER CODE END usbotg_hs */
 };
 
@@ -1119,10 +1173,10 @@
 
 /*
  * I2C4 is secure (DECPROT_S_RW), so the PMIC belongs to OP-TEE and there is no
- * stpmic node here to define the regulator labels. U-Boot reaches the same rails
- * through SCMI voltage domains instead; the labels below are what the consumers
- * in this file (&v3v3, &vdd_usb, &vbus_sw, &vdd, &vddcore) bind to. Rail
- * assignment matches the PMIC node in the OP-TEE device tree.
+ * stpmic node in this device tree to define the regulator labels. Linux reaches
+ * the same rails through SCMI voltage domains instead; the labels below are what
+ * the consumers in this file (&v3v3, &vdd_usb, &vbus_sw, &vdd, &vddcore) bind to.
+ * Rail assignment matches the PMIC node in the OP-TEE device tree.
  */
 &scmi {
 	scmi_voltd: protocol@17 {
