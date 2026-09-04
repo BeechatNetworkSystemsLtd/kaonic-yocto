@@ -1049,6 +1049,8 @@
 	/* usb-role-switch; */
 	dr_mode = "peripheral";
 
+	u-boot,force-b-session-valid;
+
 	/* USER CODE END usbotg_hs */
 };
 

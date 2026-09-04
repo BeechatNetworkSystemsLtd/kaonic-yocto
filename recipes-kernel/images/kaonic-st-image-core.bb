@@ -51,7 +51,7 @@ IMAGE_INSTALL:remove = "st-hostname"
 TOOLCHAIN_HOST_TASK += "\
     nativesdk-grpc \
     nativesdk-grpc-dev \
-    python3-cryptography \
+    nativesdk-python3-cryptography \
 "
 
 TOOLCHAIN_TARGET_TASK += "protobuf-staticdev"
