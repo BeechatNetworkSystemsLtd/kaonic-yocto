@@ -124,11 +124,12 @@ def main():
         update_hostapd_conf(f"Kaonic /{serial_suffix}/")
         save_serial(serial)
 
-    update_hostname(f"kaonic1s-{serial_suffix}")
-
     with open(MACHINE_FILE, "r") as f:
         machine = f.read().strip()
         print(f"Kaonic Machine = {machine}")
+
+    model = "kaonic1x" if "kaonic1x" in machine else "kaonic1s"
+    update_hostname(f"{model}-{serial_suffix}")
 
 if __name__ == "__main__":
     main()

@@ -11,6 +11,7 @@ on top of ST's `meta-st` BSP.
 | --- | --- | --- |
 | `stm32mp1-kaonic1s-r24` | SD card | USB, or writing the raw image to a card |
 | `stm32mp1-kaonic1s-r30` | eMMC | USB |
+| `stm32mp1-kaonic1x-r09` | eMMC | USB |
 
 Both boot from the SoC's ROM over USB when the `BOOT SEL` switches are strapped
 that way, which is how an image is written in either case. The two revisions do
@@ -29,6 +30,7 @@ pictogram in `kaonic-flash`, which is generated per machine for that reason.
     * `cd ~/yocto/`
     * `./layers/meta-st/meta-kaonic/scripts/build-image.sh --machine stm32mp1-kaonic1s-r24`
     * `./layers/meta-st/meta-kaonic/scripts/build-image.sh --machine stm32mp1-kaonic1s-r30`
+    * `./layers/meta-st/meta-kaonic/scripts/build-image.sh --machine stm32mp1-kaonic1x-r09`
 
 ### Options
 
@@ -50,7 +52,7 @@ The medium is in the name because it decides what an operator does with the file
 
 | Kind | Board | What it is |
 | --- | --- | --- |
-| `emmc` | r30 | Flashlayout and binaries, written over USB |
+| `emmc` | r30, r09 | Flashlayout and binaries, written over USB |
 | `sdcard-usb` | r24 | Flashlayout and binaries, written to the card over USB |
 | `sdcard-raw` | r24 | The raw SD card image, for a card reader |
 

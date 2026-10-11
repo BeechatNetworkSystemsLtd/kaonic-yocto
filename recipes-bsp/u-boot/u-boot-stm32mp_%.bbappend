@@ -2,6 +2,8 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI:append:stm32mp1-kaonic1s-r30 = " file://kaonic-dfu-button.cfg"
 SRC_URI:append:stm32mp1-kaonic1s-r30 = " file://0001-gpio-keep-devicetree-bias-flags.patch"
+SRC_URI:append:stm32mp1-kaonic1x-r09 = " file://kaonic-dfu-button.cfg"
+SRC_URI:append:stm32mp1-kaonic1x-r09 = " file://0001-gpio-keep-devicetree-bias-flags.patch"
 
 do_configure:append() {
     fragment="${WORKDIR}/kaonic-dfu-button.cfg"

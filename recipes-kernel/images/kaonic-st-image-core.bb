@@ -45,6 +45,7 @@ IMAGE_INSTALL:append = " \
 IMAGE_INSTALL:append = " kaonic-init kaonic-comm kaonic-gateway"
 IMAGE_INSTALL:append:stm32mp1-kaonic1s-r24 = " kaonic-audio-defaults"
 IMAGE_INSTALL:append:stm32mp1-kaonic1s-r30 = " kaonic-audio-defaults"
+IMAGE_INSTALL:append:stm32mp1-kaonic1x-r09 = " kaonic-audio-defaults"
 
 IMAGE_INSTALL:remove = "st-hostname"
 

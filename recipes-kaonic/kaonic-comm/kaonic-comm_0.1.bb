@@ -16,9 +16,9 @@ INSANE_SKIP:${PN} += "already-stripped"
 
 inherit cargo_bin systemd pkgconfig
 
-PR = "r2" 
-SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-radio.git;protocol=https;branch=main;"
-SRCREV = "9a7dcce0368e65653e406019a6c9b0f88dc7c085"
+PR = "r3" 
+SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-radio.git;protocol=https;branch=feature/board-kaonic1x-r09;"
+SRCREV = "df56c818a32513f9dbeb2df7c69528105d6b861e"
 
 SRC_URI += " \
     file://wifi_connect.sh \
