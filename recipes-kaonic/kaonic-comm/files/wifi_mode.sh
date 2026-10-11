@@ -1,4 +1,5 @@
 #!/bin/sh
+# Source of truth: kaonic-gateway/kaonic-gateway/system/wifi_mode.sh (the gateway refreshes this file at start)
 
 set -eu
 
@@ -12,9 +13,126 @@ WLAN_IFACE="wlan0"
 ANTENNA_GPIOCHIP="8"
 ANTENNA_GPIOLINE="0"
 
+# USB uplink: the phone on the USB port shares its internet (Android
+# "Ethernet tethering") and this node takes an address and a default route
+# from it. usb0 then leaves the bridge, so the phone's DHCP server never
+# reaches the node's own Wi-Fi and USB clients.
+USB_UPLINK_FILE="/etc/kaonic/usb-uplink"
+USB0_OVERRIDE="/etc/systemd/network/61-usb0.network"
+USB_IFACE="usb0"
+# Not 192.168.10.0/24: that stays on br0 for the Wi-Fi and USB clients.
+USB_UPLINK_FALLBACK_ADDR="192.168.11.1/24"
+# The node's own DHCP server on br0 (192.168.10.0/24). Off when something
+# else on that network is meant to hand out addresses.
+DHCP_SERVER_FILE="/etc/kaonic/dhcp-server"
+BR0_DHCP_DROPIN="/etc/systemd/network/60-br0.network.d/kaonic-dhcp.conf"
+# Push routes: DHCP moves from systemd-networkd to dnsmasq, which can hand
+# clients classless static routes (option 121) for the other Kaonics'
+# networks. The gateway keeps the route list in DHCP_OPTS_FILE current.
+PUSH_ROUTES_FILE="/etc/kaonic/push-routes"
+DNSMASQ_DHCP_CONF="/etc/dnsmasq.d/kaonic-dhcp.conf"
+DNSMASQ_BASE_CONF="/etc/dnsmasq.d/hostapd-dns.conf"
+DHCP_OPTS_FILE="/run/kaonic-dhcp-opts"
+BR0_ADDR="192.168.10.1"
+# Short lease: a phone learns within minutes that a route appeared or went.
+BR0_RANGE="192.168.10.10,192.168.10.109,10m"
+
 usage() {
-    echo "Usage: $0 ap | sta <ssid> <passphrase> | antenna <internal|external> | apply | status" >&2
+    echo "Usage: $0 ap | sta <ssid> <passphrase> | antenna <internal|external> | usb-uplink <on|off> | dhcp-server <on|off> | push-routes <on|off> | apply | status" >&2
     exit 1
+}
+
+current_usb_uplink() {
+    if [ -f "$USB_UPLINK_FILE" ]; then sed -n '1p' "$USB_UPLINK_FILE"; else echo "off"; fi
+}
+
+current_dhcp_server() {
+    if [ -f "$DHCP_SERVER_FILE" ]; then sed -n '1p' "$DHCP_SERVER_FILE"; else echo "on"; fi
+}
+
+current_push_routes() {
+    if [ -f "$PUSH_ROUTES_FILE" ]; then sed -n '1p' "$PUSH_ROUTES_FILE"; else echo "off"; fi
+}
+
+# dnsmasq serves DHCP on br0 (networkd's server off) only while routes are
+# pushed and the DHCP server is on; otherwise its DHCP stays disabled as the
+# image ships it.
+apply_dnsmasq_dhcp() {
+    if [ "$(current_dhcp_server)" = "on" ] && [ "$(current_push_routes)" = "on" ]; then
+        install -d /etc/dnsmasq.d
+        [ -s "$DHCP_OPTS_FILE" ] || printf 'option:router\noption:dns-server\n' > "$DHCP_OPTS_FILE"
+        [ -f "$DNSMASQ_BASE_CONF" ] && sed -i 's/^no-dhcp-interface=br0/#no-dhcp-interface=br0 (dhcp by kaonic-dhcp.conf)/' "$DNSMASQ_BASE_CONF"
+        cat > "$DNSMASQ_DHCP_CONF" <<EOF
+# Written by kaonic-wifi-mode: DHCP for br0 served here so clients also get
+# routes to the other Kaonics' networks (option 121, from $DHCP_OPTS_FILE).
+dhcp-range=$BR0_RANGE
+# No router/DNS here: the gateway adds them to the optsfile only while this
+# node can forward somewhere, so a laptop with its own Wi-Fi keeps it.
+dhcp-optsfile=$DHCP_OPTS_FILE
+dhcp-authoritative
+EOF
+    else
+        rm -f "$DNSMASQ_DHCP_CONF"
+        [ -f "$DNSMASQ_BASE_CONF" ] && sed -i 's/^#no-dhcp-interface=br0 (dhcp by kaonic-dhcp.conf)/no-dhcp-interface=br0/' "$DNSMASQ_BASE_CONF"
+    fi
+    systemctl restart dnsmasq.service 2>/dev/null || true
+}
+
+apply_usb_uplink() {
+    case "$(current_usb_uplink)" in
+        on)
+            install -d /etc/systemd/network
+            cat > "$USB0_OVERRIDE" <<EOF
+[Match]
+Name=$USB_IFACE
+Type=gadget
+
+[Network]
+# Written by kaonic-wifi-mode: USB uplink. The phone tethers to us, so usb0
+# is a client here, not a bridge port.
+DHCP=ipv4
+IPv6AcceptRA=no
+# A fixed fallback address as well, so the node can always be reached over
+# USB at $USB_UPLINK_FALLBACK_ADDR even when nothing on the other end serves DHCP.
+Address=$USB_UPLINK_FALLBACK_ADDR
+# Link-local stays on: with no DHCP server on the other end the node is
+# still reachable as <codename>.local over the USB link, so switching this
+# on can never lock the operator out.
+LinkLocalAddressing=yes
+
+[DHCPv4]
+# Beats the Wi-Fi station's default route (1024) whenever the phone offers one.
+RouteMetric=512
+UseDNS=yes
+EOF
+            ip link set "$USB_IFACE" nomaster 2>/dev/null || true
+            ;;
+        *)
+            rm -f "$USB0_OVERRIDE"
+            ;;
+    esac
+    networkctl reload 2>/dev/null || true
+    networkctl reconfigure "$USB_IFACE" 2>/dev/null || true
+}
+
+apply_dhcp_server() {
+    apply_dnsmasq_dhcp
+    case "$(current_dhcp_server):$(current_push_routes)" in
+        on:off)
+            rm -f "$BR0_DHCP_DROPIN"
+            ;;
+        *)
+            install -d "$(dirname "$BR0_DHCP_DROPIN")"
+            cat > "$BR0_DHCP_DROPIN" <<EOF
+[Network]
+# Written by kaonic-wifi-mode: networkd's DHCP server is off (the node's
+# DHCP is either switched off, or served by dnsmasq to push routes).
+DHCPServer=no
+EOF
+            ;;
+    esac
+    networkctl reload 2>/dev/null || true
+    networkctl reconfigure br0 2>/dev/null || true
 }
 
 wifi_iface_present() {
@@ -157,6 +275,10 @@ apply_antenna() {
 show_status() {
     echo "mode: $(current_mode)"
     echo "antenna: $(current_antenna)"
+    echo "usb-uplink: $(current_usb_uplink)$( ip -4 addr show dev "$USB_IFACE" 2>/dev/null | awk '/inet / { printf " (%s)", $2 }' )"
+    echo "dhcp-server: $(current_dhcp_server)"
+    echo "push-routes: $(current_push_routes)$( [ -s "$DHCP_OPTS_FILE" ] && printf ' (%s)' "$(head -1 "$DHCP_OPTS_FILE")" )"
+    echo "default-route: $(ip -4 route show default 2>/dev/null | head -1)"
     echo "hostapd: $(systemctl is-active hostapd.service 2>/dev/null || true)"
 
     if [ -f "$WPA_PID_FILE" ]; then
@@ -195,6 +317,27 @@ case "$cmd" in
         write_antenna "$2"
         apply_antenna
         ;;
+    usb-uplink)
+        [ "$#" -eq 2 ] || usage
+        case "$2" in on|off) ;; *) usage ;; esac
+        install -d /etc/kaonic
+        printf '%s\n' "$2" > "$USB_UPLINK_FILE"
+        apply_usb_uplink
+        ;;
+    dhcp-server)
+        [ "$#" -eq 2 ] || usage
+        case "$2" in on|off) ;; *) usage ;; esac
+        install -d /etc/kaonic
+        printf '%s\n' "$2" > "$DHCP_SERVER_FILE"
+        apply_dhcp_server
+        ;;
+    push-routes)
+        [ "$#" -eq 2 ] || usage
+        case "$2" in on|off) ;; *) usage ;; esac
+        install -d /etc/kaonic
+        printf '%s\n' "$2" > "$PUSH_ROUTES_FILE"
+        apply_dhcp_server
+        ;;
     apply)
         [ "$#" -eq 1 ] || usage
         case "$(current_mode)" in
@@ -203,6 +346,8 @@ case "$cmd" in
             *) echo "Unknown WiFi mode in $MODE_FILE" >&2; exit 1 ;;
         esac
         apply_antenna
+        apply_usb_uplink
+        apply_dhcp_server
         ;;
     status)
         [ "$#" -eq 1 ] || usage

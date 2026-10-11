@@ -13,7 +13,13 @@ DHCPServer=yes
 [DHCPServer]
 PoolOffset=10
 PoolSize=100
-EmitRouter=yes
-EmitDNS=yes
-# Hand out this board as the resolver, which is what dnsmasq answers on.
-DNS=192.168.10.1
+# The board is not a gateway by default (IPMasquerade is off above) and its
+# dnsmasq has no upstream, so a client told to route through it loses the
+# internet it had over its own WiFi or Ethernet. Clients still reach the board
+# at 192.168.10.1 over the on-link route, which is all the USB link is for.
+#
+# The gateway turns DHCP over to dnsmasq when it has an upstream to share
+# ("push routes"), and that path advertises a router and resolver itself, so
+# internet sharing is unaffected by these being off here.
+EmitRouter=no
+EmitDNS=no
