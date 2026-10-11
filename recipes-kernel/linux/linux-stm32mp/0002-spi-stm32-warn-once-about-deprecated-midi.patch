@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Kaonic Build <build@beechat.network>
+Date: Thu, 18 Sep 2026 12:00:00 +0000
+Subject: [PATCH] spi: stm32: warn once, not per transfer, about st,spi-midi-ns
+
+stm32h7_spi_data_idleness() uses spi->cur_midi for two different things:
+the value read from the deprecated DT property, and the value currently in
+force. Once a transfer's word_delay sets it, every later transfer sees a
+non-zero cur_midi, concludes the value came from DT, and logs two warnings.
+
+That is per transfer, not per device. Driving an AT86RF215 radio it amounts
+to roughly a thousand messages a second, and on a serial console each costs
+milliseconds - enough to make a transfer that should take microseconds take
+tens of milliseconds, which looks like the inter-byte delay itself being
+expensive.
+
+The delay is needed for real here: the AT86RF215 requires 125 ns between
+bytes (tSPI_5), so any SPI clock above 8 MHz has to insert it.
+
+Warn once per device instead. Upstream reworked this area in v6.17; this is
+the minimal fix for the 6.6 tree.
+
+Signed-off-by: Kaonic Build <build@beechat.network>
+---
+ drivers/spi/spi-stm32.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/spi/spi-stm32.c b/drivers/spi/spi-stm32.c
+--- a/drivers/spi/spi-stm32.c
++++ b/drivers/spi/spi-stm32.c
+@@ -1813,10 +1813,11 @@ static void stm32h7_spi_data_idleness(struct stm32_spi *spi, struct spi_transfer
+ 	spi_delay_ns = spi_delay_to_ns(&xfer->word_delay, xfer);
+ 
+ 	if (spi->cur_midi != 0) {
+-		dev_warn(spi->dev, "st,spi-midi-ns DT property is deprecated\n");
++		dev_warn_once(spi->dev, "st,spi-midi-ns DT property is deprecated\n");
+ 		if (spi_delay_ns) {
+-			dev_warn(spi->dev, "Overriding st,spi-midi-ns with word_delay_ns %d\n",
+-				 spi_delay_ns);
++			dev_warn_once(spi->dev,
++				      "Overriding st,spi-midi-ns with word_delay_ns %d\n",
++				      spi_delay_ns);
+ 				spi->cur_midi = spi_delay_ns;
+ 			}
+ 	} else {

@@ -1,0 +1,40 @@
+From: Kaonic <dev@beechat.network>
+Subject: [PATCH] clk: stm32mp1: keep pll3_q and pll4_q running for the SCMI-owned SPI6
+
+SPI6 sits in the secure domain: Linux enables its kernel clock through
+SCMI (CK_SCMI_SPI6) and never sees the parent that OP-TEE selected for it.
+When that parent is a PLL output, nothing in Linux holds it, so the late
+clk_disable_unused pass gates it and SPI6 is left with no clock at all. The
+first register access to the controller then hangs the bus - reproduced as a
+kernel livelock on insmod of the RF215 driver, independent of the SPI rate,
+on pll3_q and pll4_q alike.
+
+HSI works only because it is always on, and it limits SPI6 to 16 MHz. Mark
+both PLL Q outputs critical, the way pll2_r already is, so a PLL-sourced
+SPI6 keeps its clock and can run at 25 MHz whichever of the two OP-TEE
+picks (pll3_q = 100 MHz is the one in use).
+
+---
+ drivers/clk/stm32/clk-stm32mp1.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- a/drivers/clk/stm32/clk-stm32mp1.c
++++ b/drivers/clk/stm32/clk-stm32mp1.c
+@@ -1932,7 +1932,7 @@ static const struct clock_config stm32mp1_clock_cfg[] = {
+ 		  _NO_MUX,
+ 		  _DIV(RCC_PLL3CFGR2, 0, 7, 0, NULL)),
+ 
+-	COMPOSITE(PLL3_Q, "pll3_q", PARENT("pll3"), 0,
++	COMPOSITE(PLL3_Q, "pll3_q", PARENT("pll3"), CLK_IS_CRITICAL,
+ 		  _GATE(RCC_PLL3CR, 5, 0),
+ 		  _NO_MUX,
+ 		  _DIV_DUTY_CYCLE(RCC_PLL3CFGR2, 8, 7, 0, NULL)),
+@@ -1947,7 +1947,7 @@ static const struct clock_config stm32mp1_clock_cfg[] = {
+ 		  _NO_MUX,
+ 		  _DIV(RCC_PLL4CFGR2, 0, 7, 0, NULL)),
+ 
+-	COMPOSITE(PLL4_Q, "pll4_q", PARENT("pll4"), 0,
++	COMPOSITE(PLL4_Q, "pll4_q", PARENT("pll4"), CLK_IS_CRITICAL,
+ 		  _GATE(RCC_PLL4CR, 5, 0),
+ 		  _NO_MUX,
+ 		  _DIV(RCC_PLL4CFGR2, 8, 7, 0, NULL)),
