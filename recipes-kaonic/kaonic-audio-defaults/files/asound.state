@@ -2,8 +2,8 @@ state.0 {
 	control.1 {
 		iface MIXER
 		name 'Capture Volume'
-		value.0 50
-		value.1 50
+		value.0 47
+		value.1 47
 		comment {
 			access 'read write'
 			type INTEGER
@@ -95,7 +95,7 @@ state.0 {
 	control.19 {
 		iface MIXER
 		name 'ADC High Pass Filter Switch'
-		value true
+		value false
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -129,8 +129,8 @@ state.0 {
 	control.36 {
 		iface MIXER
 		name 'ADC PCM Capture Volume'
-		value.0 220
-		value.1 220
+		value.0 195
+		value.1 195
 		comment {
 			access 'read write'
 			type INTEGER
@@ -217,8 +217,8 @@ state.Audio {
 	control.1 {
 		iface MIXER
 		name 'Capture Volume'
-		value.0 63
-		value.1 63
+		value.0 47
+		value.1 47
 		comment {
 			access 'read write'
 			type INTEGER
@@ -226,8 +226,8 @@ state.Audio {
 			range '0 - 63'
 			dbmin -1725
 			dbmax 3000
-			dbvalue.0 3000
-			dbvalue.1 3000
+			dbvalue.0 1800
+			dbvalue.1 1800
 		}
 	}
 	control.2 {
@@ -269,7 +269,7 @@ state.Audio {
 	control.5 {
 		iface MIXER
 		name 'Left Input Boost Mixer LINPUT2 Volume'
-		value 7
+		value 0
 		comment {
 			access 'read write'
 			type INTEGER
@@ -283,7 +283,7 @@ state.Audio {
 	control.6 {
 		iface MIXER
 		name 'Right Input Boost Mixer RINPUT3 Volume'
-		value 7
+		value 0
 		comment {
 			access 'read write'
 			type INTEGER
@@ -291,13 +291,13 @@ state.Audio {
 			range '0 - 7'
 			dbmin -9999999
 			dbmax 600
-			dbvalue.0 600
+			dbvalue.0 -9999999
 		}
 	}
 	control.7 {
 		iface MIXER
 		name 'Right Input Boost Mixer RINPUT2 Volume'
-		value 7
+		value 0
 		comment {
 			access 'read write'
 			type INTEGER
@@ -305,26 +305,12 @@ state.Audio {
 			range '0 - 7'
 			dbmin -9999999
 			dbmax 600
-			dbvalue.0 600
+			dbvalue.0 -9999999
 		}
 	}
 	control.8 {
 		iface MIXER
 		name 'Right Input Boost Mixer RINPUT1 Volume'
-		value 3
-		comment {
-			access 'read write'
-			type INTEGER
-			count 1
-			range '0 - 3'
-			dbmin 0
-			dbmax 2900
-			dbvalue.0 2900
-		}
-	}
-	control.9 {
-		iface MIXER
-		name 'Left Input Boost Mixer LINPUT1 Volume'
 		value 0
 		comment {
 			access 'read write'
@@ -334,6 +320,20 @@ state.Audio {
 			dbmin 0
 			dbmax 2900
 			dbvalue.0 0
+		}
+	}
+	control.9 {
+		iface MIXER
+		name 'Left Input Boost Mixer LINPUT1 Volume'
+		value 2
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '0 - 3'
+			dbmin 0
+			dbmax 2900
+			dbvalue.0 2000
 		}
 	}
 	control.10 {
@@ -382,8 +382,8 @@ state.Audio {
 	control.13 {
 		iface MIXER
 		name 'Speaker Playback Volume'
-		value.0 127
-		value.1 127
+		value.0 107
+		value.1 107
 		comment {
 			access 'read write'
 			type INTEGER
@@ -391,8 +391,8 @@ state.Audio {
 			range '0 - 127'
 			dbmin -9999999
 			dbmax 600
-			dbvalue.0 600
-			dbvalue.1 600
+			dbvalue.0 -1400
+			dbvalue.1 -1400
 		}
 	}
 	control.14 {
@@ -409,7 +409,7 @@ state.Audio {
 	control.15 {
 		iface MIXER
 		name 'Speaker DC Volume'
-		value 5
+		value 0
 		comment {
 			access 'read write'
 			type INTEGER
@@ -420,7 +420,7 @@ state.Audio {
 	control.16 {
 		iface MIXER
 		name 'Speaker AC Volume'
-		value 5
+		value 0
 		comment {
 			access 'read write'
 			type INTEGER
@@ -534,7 +534,7 @@ state.Audio {
 	control.26 {
 		iface MIXER
 		name 'ALC Function'
-		value 'Left'
+		value Off
 		comment {
 			access 'read write'
 			type ENUMERATED
@@ -647,8 +647,8 @@ state.Audio {
 	control.36 {
 		iface MIXER
 		name 'ADC PCM Capture Volume'
-		value.0 255
-		value.1 255
+		value.0 195
+		value.1 195
 		comment {
 			access 'read write'
 			type INTEGER
@@ -656,8 +656,8 @@ state.Audio {
 			range '0 - 255'
 			dbmin -9999999
 			dbmax 3000
-			dbvalue.0 3000
-			dbvalue.1 3000
+			dbvalue.0 0
+			dbvalue.1 0
 		}
 	}
 	control.37 {
@@ -807,7 +807,7 @@ state.Audio {
 	control.49 {
 		iface MIXER
 		name 'Right Boost Mixer RINPUT1 Switch'
-		value true
+		value false
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -827,7 +827,7 @@ state.Audio {
 	control.51 {
 		iface MIXER
 		name 'Right Input Mixer Boost Switch'
-		value true
+		value false
 		comment {
 			access 'read write'
 			type BOOLEAN
