@@ -4,8 +4,8 @@ Name=wlan0
 [Network]
 # Deliberately no Bridge= and no addressing: hostapd owns this interface.
 #
-# This file only applies in AP mode — wifi_mode.sh drops an override of the same
-# name into /etc/systemd/network for station mode, and /etc wins over /usr/lib.
+# This file only applies in AP mode. For station mode the hub writes a network
+# file under /run/systemd/network that sorts before this one.
 # In AP mode hostapd sets the interface type and then adds it to br0 itself
 # (bridge=br0 in hostapd.conf). Enslaving it from here as well used to look
 # correct and then silently come undone: networkd attached the port, hostapd

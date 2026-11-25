@@ -18,8 +18,8 @@ PoolSize=100
 # internet it had over its own WiFi or Ethernet. Clients still reach the board
 # at 192.168.10.1 over the on-link route, which is all the USB link is for.
 #
-# The gateway turns DHCP over to dnsmasq when it has an upstream to share
-# ("push routes"), and that path advertises a router and resolver itself, so
-# internet sharing is unaffected by these being off here.
+# The hub turns DHCP over to dnsmasq for its client networks, and that path
+# advertises routes (and a router and resolver when there is an upstream)
+# itself, so internet sharing is unaffected by these being off here.
 EmitRouter=no
 EmitDNS=no

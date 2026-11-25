@@ -10,12 +10,12 @@ do_install:append () {
     #
     # networkd can enslave wlan0 from a .network file, but hostapd switches the
     # interface into AP mode *after* that and the type change drops the
-    # membership — leaving a board with a configured bridge, a running DHCP
+    # membership. That leaves a board with a configured bridge, a running DHCP
     # server, and wlan0 sitting outside it, so clients associate and never get a
     # lease. Adding the port here happens after the mode switch, so it sticks,
     # and hostapd removes it again when the service stops. That is also what the
     # AP/STA switch needs: in station mode hostapd is not running, so wlan0 is
-    # free to take an address from upstream (see wifi_mode.sh).
+    # free to take an address from upstream (the hub's Wi-Fi client mode).
     conf="${D}${sysconfdir}/hostapd.conf"
     if [ ! -f "$conf" ]; then
         bbfatal "expected hostapd.conf at $conf; the bridge setting has nowhere to go"
