@@ -1,8 +1,12 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
-SRC_URI:append:stm32mp1-kaonic1s-r30 = " file://kaonic-dfu-button.cfg"
 SRC_URI:append:stm32mp1-kaonic1s-r30 = " file://0001-gpio-keep-devicetree-bias-flags.patch"
 SRC_URI:append:stm32mp1-kaonic1x-r09 = " file://0001-gpio-keep-devicetree-bias-flags.patch"
+
+# USB programming: every mmc boot waits a few seconds for a programmer
+# before carrying on. See kaonic-dfu-window.cfg.
+SRC_URI:append = " file://0003-stm32prog-optional-wait-for-a-USB-programmer.patch"
+SRC_URI:append = " file://kaonic-dfu-window.cfg"
 
 # A/B slots: the boot script that picks a slot, and the command it restarts
 # the board with when neither can be booted. See conf/machine/include/kaonic-ab-slots.inc.

@@ -1,0 +1,159 @@
+From: Kaonic <dev@beechat.network>
+Subject: [PATCH] stm32prog: optional wait for a USB programmer
+
+Setting stm32prog_wait=<seconds> makes "stm32prog usb" give up and return if
+no DFU request arrives in that time, so it can run on every boot. A boot that
+does not get a request is left as it was: no stale flash layout is parsed, the
+console is not changed and the variable does not survive to an "env save".
+
+The DFU timeout is now only cancelled by class requests. The composite layer
+also hands this single-interface gadget device-level vendor requests, and one
+of those from an ordinary host would otherwise hold the board in DFU forever.
+
+Upstream-Status: Inappropriate [Kaonic boot flow]
+
+diff --git a/arch/arm/mach-stm32mp/cmd_stm32prog/Kconfig b/arch/arm/mach-stm32mp/cmd_stm32prog/Kconfig
+index 490097e9..2089d17f 100644
+--- a/arch/arm/mach-stm32mp/cmd_stm32prog/Kconfig
++++ b/arch/arm/mach-stm32mp/cmd_stm32prog/Kconfig
+@@ -2,6 +2,7 @@ config CMD_STM32PROG
+ 	bool "command stm32prog for STM32CudeProgrammer"
+ 	select DFU
+ 	select DFU_RAM
++	select DFU_TIMEOUT
+ 	select DFU_VIRT
+ 	select PARTITION_TYPE_GUID
+ 	imply CMD_GPT if MMC
+diff --git a/arch/arm/mach-stm32mp/cmd_stm32prog/cmd_stm32prog.c b/arch/arm/mach-stm32mp/cmd_stm32prog/cmd_stm32prog.c
+index 9f3bc19d..fc8fb80f 100644
+--- a/arch/arm/mach-stm32mp/cmd_stm32prog/cmd_stm32prog.c
++++ b/arch/arm/mach-stm32mp/cmd_stm32prog/cmd_stm32prog.c
+@@ -6,6 +6,7 @@
+ #include <common.h>
+ #include <command.h>
+ #include <dfu.h>
++#include <env.h>
+ #include <image.h>
+ #include <asm/arch/stm32prog.h>
+ #include "stm32prog.h"
+@@ -36,6 +37,21 @@ static void enable_vidconsole(void)
+ 	}
+ }
+ 
++/*
++ * With stm32prog_wait=<seconds> set, USB programming is only offered for that
++ * long: if no DFU request arrives the command returns and the boot carries on.
++ * The variable is consumed here so that a later "env save" cannot persist it.
++ */
++static ulong stm32prog_take_wait(void)
++{
++	ulong wait = env_get_ulong("stm32prog_wait", 10, 0);
++
++	if (wait)
++		env_set("stm32prog_wait", NULL);
++
++	return wait;
++}
++
+ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
+ 			char * const argv[])
+ {
+@@ -45,6 +61,8 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
+ 	bool reset = false;
+ 	struct image_header_s header;
+ 	struct stm32prog_data *data;
++	ulong wait = 0;
++	bool timed_out = false;
+ 
+ 	if (argc < 3 ||  argc > 5)
+ 		return CMD_RET_USAGE;
+@@ -71,6 +89,17 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
+ 	if (argc > 4)
+ 		size = hextoul(argv[4], NULL);
+ 
++	if (link == LINK_USB)
++		wait = stm32prog_take_wait();
++
++	/*
++	 * RAM survives a warm reset, and a layout left behind by an earlier
++	 * programming session would be parsed and its GPT written to the device
++	 * before any host has asked for anything.
++	 */
++	if (wait)
++		*(u32 *)addr = 0;
++
+ 	/* check STM32IMAGE presence */
+ 	if (size == 0) {
+ 		stm32prog_header_check(addr, &header);
+@@ -79,7 +108,8 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
+ 		}
+ 	}
+ 
+-	if (IS_ENABLED(CONFIG_VIDEO))
++	/* The console change would outlive this command: the boot carries on. */
++	if (IS_ENABLED(CONFIG_VIDEO) && !wait)
+ 		enable_vidconsole();
+ 
+ 	data = (struct stm32prog_data *)malloc(sizeof(*data));
+@@ -107,7 +137,14 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
+ 		reset = stm32prog_serial_loop(data);
+ 		break;
+ 	case LINK_USB:
++		if (wait) {
++			printf("Waiting %lus for a USB programmer\n", wait);
++			dfu_set_timeout(wait * 1000);
++		}
+ 		reset = stm32prog_usb_loop(data, dev);
++		/* still armed: no DFU request was ever received */
++		timed_out = wait && dfu_get_timeout();
++		dfu_set_timeout(0);
+ 		break;
+ 	default:
+ 		goto cleanup;
+@@ -117,7 +154,10 @@ static int do_stm32prog(struct cmd_tbl *cmdtp, int flag, int argc,
+ 	free(stm32prog_data);
+ 	stm32prog_data = NULL;
+ 
+-	puts("Download done\n");
++	if (timed_out)
++		puts("No USB programmer, continuing to boot\n");
++	else
++		puts("Download done\n");
+ 
+ 	if (data->uimage) {
+ 		char boot_addr_start[20];
+diff --git a/arch/arm/mach-stm32mp/cmd_stm32prog/stm32prog_usb.c b/arch/arm/mach-stm32mp/cmd_stm32prog/stm32prog_usb.c
+index be38ff23..eb7d5767 100644
+--- a/arch/arm/mach-stm32mp/cmd_stm32prog/stm32prog_usb.c
++++ b/arch/arm/mach-stm32mp/cmd_stm32prog/stm32prog_usb.c
+@@ -212,6 +212,9 @@ bool stm32prog_usb_loop(struct stm32prog_data *data, int dev)
+ 		/* DFU reset received, no error or CtrlC */
+ 		if (ret || stm32prog_data->phase != PHASE_FLASHLAYOUT || had_ctrlc())
+ 			return ret; /* true = reset on DFU error */
++		/* the wait expired: there is no second enumeration to prepare */
++		if (dfu_get_timeout())
++			return false;
+ 		/* prepare the second enumeration with the FlashLayout */
+ 		stm32prog_dfu_init(data);
+ 	}
+diff --git a/drivers/usb/gadget/f_dfu.c b/drivers/usb/gadget/f_dfu.c
+index 44877df4..8bbee741 100644
+--- a/drivers/usb/gadget/f_dfu.c
++++ b/drivers/usb/gadget/f_dfu.c
+@@ -616,8 +616,14 @@ dfu_handle(struct usb_function *f, const struct usb_ctrlrequest *ctrl)
+ 	       req_type, ctrl->bRequest, f_dfu->dfu_state);
+ 
+ #ifdef CONFIG_DFU_TIMEOUT
+-	/* Forbid aborting by timeout. Next dfu command may update this */
+-	dfu_set_timeout(0);
++	/*
++	 * Forbid aborting by timeout. Next dfu command may update this.
++	 * Class requests only: with a single interface the composite layer also
++	 * routes a host's device-level vendor requests here, and those do not
++	 * mean that a DFU tool is present.
++	 */
++	if (req_type == USB_TYPE_CLASS)
++		dfu_set_timeout(0);
+ #endif
+ 
+ 	if (req_type == USB_TYPE_STANDARD) {
