@@ -8,7 +8,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 PR = "r0"
 
-COMPATIBLE_MACHINE = "stm32mp1-kaonic1s"
+COMPATIBLE_MACHINE = "stm32mp1-kaonic1[sx]"
 
 SRC_URI = " \
     file://asound.state \
