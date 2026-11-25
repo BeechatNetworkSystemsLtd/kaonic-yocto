@@ -20,6 +20,7 @@
 /* USER CODE BEGIN includes */
 
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/mfd/st,stpmic1.h>
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/regulator/st,stm32mp15-regulator.h>
@@ -922,12 +923,29 @@
 
 	cs-gpios= <&gpiob 13 0>;
 
-	spidev0: spidev0@0 {
-		compatible = "rohm,dh2228fv";
-        reg = <0>;
-        spi-max-frequency = <64000000>;
-        status = "okay";
-    };
+	/*
+	 * AT86RF215 radio B (RSTN_B, IRQ_B), driven by the kaonic_rf215 driver.
+	 *
+	 * spi-max-frequency is only a ceiling. The STM32 divides the SPI kernel
+	 * clock by a power of two, rounding down. SPI2/3 is clocked from PLL3_Q
+	 * at 100 MHz (set in the OP-TEE device tree), so the bus runs at 25 MHz.
+	 * Above 8 MHz the chip needs 125 ns between bytes (tSPI_5). The driver
+	 * asks the controller for that gap, and without the kernel's spi-stm32
+	 * warn-once patch every transfer logs a warning about it.
+	 *
+	 * The chip keeps IRQ asserted until all four status registers have been
+	 * read, so the interrupt has to be level triggered. With an edge
+	 * trigger, any interrupt raised during a read-out would be lost.
+	 */
+	rf215_b: radio@0 {
+		compatible = "beechat,rf215";
+		reg = <0>;
+		spi-max-frequency = <25000000>;
+		interrupt-parent = <&gpioe>;
+		interrupts = <15 IRQ_TYPE_LEVEL_HIGH>;
+		reset-gpios = <&gpioe 13 GPIO_ACTIVE_LOW>;
+		status = "okay";
+	};
 	/* USER CODE END spi3 */
 };
 
@@ -949,12 +967,33 @@
 
 	/* USER CODE BEGIN spi6 */
 	cs-gpios= <&gpiog 8 0>;
-	spidev1: spidev1@0 {
-		compatible = "rohm,dh2228fv";
-        reg = <0>;
-        spi-max-frequency = <64000000>;
-        status = "okay";
-    };
+	/*
+	 * AT86RF215 radio A (RSTN_A, IRQ_A), driven by the kaonic_rf215 driver.
+	 *
+	 * spi-max-frequency is only a ceiling. The STM32 divides the SPI kernel
+	 * clock by a power of two, rounding down. SPI6 is clocked from PLL3_Q at
+	 * 100 MHz (set in the OP-TEE device tree), so the bus runs at 25 MHz.
+	 * That clock goes through SCMI, so Linux can't hold the PLL output on by
+	 * itself. A kernel patch (0003-clk-stm32mp1-keep-pll3_q-pll4_q-running)
+	 * keeps it running; without it the controller has no clock and its
+	 * first access hangs the board.
+	 * Above 8 MHz the chip needs 125 ns between bytes (tSPI_5). The driver
+	 * asks the controller for that gap, and without the kernel's spi-stm32
+	 * warn-once patch every transfer logs a warning about it.
+	 *
+	 * The chip keeps IRQ asserted until all four status registers have been
+	 * read, so the interrupt has to be level triggered. With an edge
+	 * trigger, any interrupt raised during a read-out would be lost.
+	 */
+	rf215_a: radio@0 {
+		compatible = "beechat,rf215";
+		reg = <0>;
+		spi-max-frequency = <25000000>;
+		interrupt-parent = <&gpiod>;
+		interrupts = <9 IRQ_TYPE_LEVEL_HIGH>;
+		reset-gpios = <&gpiod 8 GPIO_ACTIVE_LOW>;
+		status = "okay";
+	};
 	/* USER CODE END spi6 */
 };
 

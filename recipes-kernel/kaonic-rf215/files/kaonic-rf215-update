@@ -1,0 +1,124 @@
+#!/bin/sh
+# Swaps the RF215 kernel driver on a running board, so trying a new build
+# doesn't need a new image.
+#
+#   kaonic-rf215-update <kaonic_rf215.ko>   install a new build and load it
+#   kaonic-rf215-update --revert            put back the driver the image shipped
+#   kaonic-rf215-update --reload            unload and load the installed driver
+#   kaonic-rf215-update --status            report what is installed and loaded
+#
+# The new module must be built for the kernel this board runs
+# (`bitbake kaonic-rf215` for the same machine does that). A mismatch is
+# refused up front rather than left to fail at load time.
+
+set -e
+
+MODULE="kaonic_rf215"
+KREL="$(uname -r)"
+SERVICE="kaonic-commd"
+
+say() { echo "==> $*"; }
+die() { echo "error: $*" >&2; exit 1; }
+
+# Path of the installed driver. modinfo knows it once depmod has run;
+# otherwise use the path the image installs it to.
+installed_path() {
+    path="$(modinfo -n "$MODULE" 2>/dev/null || true)"
+    [ -n "$path" ] || path="/lib/modules/${KREL}/updates/${MODULE}.ko"
+    echo "$path"
+}
+
+status() {
+    path="$(installed_path)"
+    echo "kernel      ${KREL}"
+    if [ -f "$path" ]; then
+        echo "installed   ${path} ($(modinfo -F version "$path" 2>/dev/null))"
+    else
+        echo "installed   none"
+    fi
+    if [ -f "${path}.stock" ]; then
+        echo "stock kept  ${path}.stock ($(modinfo -F version "${path}.stock" 2>/dev/null))"
+    fi
+    if [ -d "/sys/module/${MODULE}" ]; then
+        echo "loaded      yes ($(cat "/sys/module/${MODULE}/version" 2>/dev/null))"
+    else
+        echo "loaded      no"
+    fi
+    echo "interfaces  $(ls /sys/class/net 2>/dev/null | grep -E '^rf(09|24)_' | tr '\n' ' ')"
+}
+
+# commd holds the radio interfaces open, so stop it before the swap and
+# start it again afterwards, but only if it was running.
+reload() {
+    was_active=0
+    if systemctl is-active --quiet "$SERVICE" 2>/dev/null; then
+        was_active=1
+        say "stopping ${SERVICE}"
+        systemctl stop "$SERVICE"
+    fi
+
+    if [ -d "/sys/module/${MODULE}" ]; then
+        say "unloading ${MODULE}"
+        rmmod "$MODULE" || die "could not unload ${MODULE}; something still uses it"
+    fi
+
+    say "loading ${MODULE}"
+    modprobe "$MODULE"
+
+    if [ "$was_active" = "1" ]; then
+        say "starting ${SERVICE}"
+        systemctl start "$SERVICE"
+    fi
+}
+
+install_module() {
+    new="$1"
+    [ -f "$new" ] || die "no such file: ${new}"
+
+    have="$(modinfo -F vermagic "$new" 2>/dev/null | awk '{print $1}')"
+    [ -n "$have" ] || die "${new} is not a kernel module"
+    [ "$have" = "$KREL" ] || die "${new} is built for ${have}, this board runs ${KREL}"
+
+    name="$(modinfo -F name "$new" 2>/dev/null)"
+    [ "$name" = "$MODULE" ] || die "${new} is ${name:-unnamed}, not ${MODULE}"
+
+    path="$(installed_path)"
+    # The first time, save the driver the image shipped so --revert can put
+    # it back. The .stock suffix stops depmod from picking it up.
+    if [ -f "$path" ] && [ ! -f "${path}.stock" ]; then
+        say "keeping the shipped driver as ${path}.stock"
+        cp -p "$path" "${path}.stock"
+    fi
+
+    say "installing $(modinfo -F version "$new" 2>/dev/null) to ${path}"
+    install -D -m 0644 "$new" "${path}.new"
+    mv "${path}.new" "$path"
+    depmod -a "$KREL"
+
+    reload
+    echo
+    status
+}
+
+revert() {
+    path="$(installed_path)"
+    [ -f "${path}.stock" ] || die "no shipped driver kept; nothing was replaced"
+
+    say "restoring the shipped driver"
+    mv "${path}.stock" "$path"
+    depmod -a "$KREL"
+
+    reload
+    echo
+    status
+}
+
+[ "$(id -u)" = "0" ] || die "run as root"
+
+case "${1:-}" in
+    --status) status ;;
+    --reload) reload ;;
+    --revert) revert ;;
+    ""|-h|--help|--*) die "usage: $0 <${MODULE}.ko> | --revert | --reload | --status" ;;
+    *) install_module "$1" ;;
+esac

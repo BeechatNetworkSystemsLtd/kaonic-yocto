@@ -1,0 +1,10 @@
+SUBSYSTEM!="net", GOTO="kaonic_rf215_end"
+ACTION!="add", GOTO="kaonic_rf215_end"
+KERNEL!="rf[0-9]*", GOTO="kaonic_rf215_end"
+
+KERNELS=="@SPI_A@", DRIVERS=="kaonic_rf215", ATTR{dev_port}=="0", NAME="rf09_a"
+KERNELS=="@SPI_A@", DRIVERS=="kaonic_rf215", ATTR{dev_port}=="1", NAME="rf24_a"
+KERNELS=="@SPI_B@", DRIVERS=="kaonic_rf215", ATTR{dev_port}=="0", NAME="rf09_b"
+KERNELS=="@SPI_B@", DRIVERS=="kaonic_rf215", ATTR{dev_port}=="1", NAME="rf24_b"
+
+LABEL="kaonic_rf215_end"
