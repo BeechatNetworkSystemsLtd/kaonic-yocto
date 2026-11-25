@@ -1,0 +1,3 @@
+# Members of the sudo group (the admin user) administer the system.
+Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+%sudo ALL=(ALL:ALL) NOPASSWD: ALL
