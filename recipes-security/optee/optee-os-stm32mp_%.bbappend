@@ -14,4 +14,5 @@ OPTEE_NO_CRYPTO_FLAGS = " \
 
 EXTRA_OEMAKE:append:stm32mp1-kaonic1s-r30 = "${OPTEE_NO_CRYPTO_FLAGS}"
 EXTRA_OEMAKE:append:stm32mp1-kaonic1s-r24 = "${OPTEE_NO_CRYPTO_FLAGS}"
+EXTRA_OEMAKE:append:stm32mp1-kaonic1x-r09 = "${OPTEE_NO_CRYPTO_FLAGS}"
 

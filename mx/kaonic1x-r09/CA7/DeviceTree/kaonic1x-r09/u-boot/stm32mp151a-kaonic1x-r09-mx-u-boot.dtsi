@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * Copyright (C) 2026, STMicroelectronics - All Rights Reserved
+ * Author: STM32CubeMX code generation for STMicroelectronics.
+ */
+
+/* For more information on Device Tree configuration, please refer to
+ * https://wiki.st.com/stm32mpu/wiki/Category:Device_tree_configuration
+ */
+
+/* USER CODE BEGIN includes */
+#include "stm32mp15-scmi-u-boot.dtsi"
+/* USER CODE END includes */
+
+/ {
+
+	/* USER CODE BEGIN root */
+	config {
+		u-boot,boot-led = "heartbeat";
+		u-boot,error-led = "error";
+		u-boot,mmc-env-partition = "u-boot-env";
+	};
+	/* USER CODE END root */
+
+}; /*root*/
+
+/* USER CODE BEGIN addons */
+
+&usart6{
+	u-boot,dm-pre-reloc;
+};
+
+/*
+ * PE1: hold at power-on to enter USB programming mode instead of booting Linux.
+ *
+ * The pull-up comes from the GPIO flags, not a pinctrl group: U-Boot's STM32
+ * pinctrl requests any pin it muxes as GPIO, so a group here would own PE1 and
+ * the button's own request would fail with -EBUSY.
+ *
+ * U-Boot only. Does not replace the BOOT pins, which the ROM samples first.
+ */
+/ {
+	dfu-button {
+		compatible = "gpio-keys";
+
+		button-dfu {
+			label = "dfu";
+			gpios = <&gpioe 1 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+			/* Required: button_gpio_probe() returns the result of reading it. */
+			linux,code = <KEY_PROG1>;
+		};
+	};
+};
+
+/* USER CODE END addons */
+
