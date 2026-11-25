@@ -1,0 +1,23 @@
+#!/bin/sh
+# Marks the booted A/B slot good: gives it back the boot attempts U-Boot
+# spends on each boot, so a slot that keeps reaching this point is never
+# abandoned. Run once the system is up; a slot that fails before then keeps
+# losing attempts until U-Boot falls back to the other one.
+set -e
+
+CONFIG=/etc/fw_env.config.mmc
+ATTEMPTS=3
+
+slot=$(sed -n 's/.*kaonic\.slot=\([ab]\).*/\1/p' /proc/cmdline)
+
+case "$slot" in
+    a) var=BOOT_A_LEFT ;;
+    b) var=BOOT_B_LEFT ;;
+    *) echo "kaonic-slot-good: no kaonic.slot on the kernel command line" >&2; exit 0 ;;
+esac
+
+if [ "$(fw_printenv -n -c "$CONFIG" "$var" 2>/dev/null)" != "$ATTEMPTS" ]; then
+    fw_setenv -c "$CONFIG" "$var" "$ATTEMPTS"
+fi
+
+echo "kaonic-slot-good: slot $slot, $var=$ATTEMPTS"

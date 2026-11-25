@@ -1,0 +1,12 @@
+[Unit]
+Description=Mark the booted A/B slot good
+# What "healthy" means for now: the radio daemon and the hub came up.
+After=kaonic-commd.service kaonic-hub.service
+Wants=kaonic-commd.service kaonic-hub.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/kaonic-slot-good
+
+[Install]
+WantedBy=multi-user.target

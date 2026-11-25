@@ -461,6 +461,9 @@ IMAGE_FILENAME=${MACHINE}-v${KAONIC_VERSION}-sdcard.raw
 FLASHLAYOUT_RAW=$(basename "${FLASHLAYOUT_TSV%.tsv}.raw")
 
 rm -f "$FLASHLAYOUT_RAW"
+# The A/B layout puts userfs past 8 GB; the raw image must reach it. Sparse,
+# so the file costs what the partitions hold, not what they span.
+export SDCARD_SIZE="${SDCARD_SIZE:-8704}"
 ./scripts/create_sdcard_from_flashlayout.sh "$FLASHLAYOUT_TSV"
 
 mv "$FLASHLAYOUT_RAW" ./${IMAGE_FILENAME}

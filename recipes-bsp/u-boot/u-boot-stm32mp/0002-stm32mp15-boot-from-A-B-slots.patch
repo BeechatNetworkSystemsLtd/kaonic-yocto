@@ -1,0 +1,83 @@
+From: Kaonic <dev@beechat.network>
+Subject: [PATCH] stm32mp15: boot from A/B slots on mmc
+
+On an mmc boot device the bootfs_a/rootfs_a and bootfs_b/rootfs_b pairs
+are tried in the order BOOT_ORDER gives, each for as many boots as
+BOOT_<X>_LEFT allows. The chosen slot is handed to extlinux.conf through
+kaonic_root and kaonic_slot.
+
+Upstream-Status: Inappropriate [Kaonic partition layout]
+
+--- a/include/configs/stm32mp15_st_common.h	2026-10-12 21:56:27
++++ b/include/configs/stm32mp15_st_common.h	2026-10-13 00:29:38
+@@ -23,9 +23,44 @@
+ 
+ #ifdef CFG_EXTRA_ENV_SETTINGS
+ /*
++ * Boots one of two slots. Each slot is a bootfs_<x>/rootfs_<x> pair; the
++ * environment says which to try first (BOOT_ORDER) and how many boots each
++ * may still fail (BOOT_<X>_LEFT). An attempt is spent before the kernel is
++ * loaded and given back by the running system once it is healthy, so a slot
++ * that never gets that far is abandoned after three tries.
++ *
++ * The slot's bootfs is found by partition label and booted through the usual
++ * distro boot, with kaonic_root and kaonic_slot filled in for extlinux.conf.
++ * Everything is set with "env set", never as a shell variable: a shell
++ * assignment does not override an environment variable of the same name, and
++ * setexpr and env save leave these in the environment. extlinux also expands
++ * its APPEND line from the environment.
++ */
++#define KAONIC_SLOT_BOOT "kaonic_slot_boot=" \
++	"if test ${slot} = A;" \
++	"then env set left ${BOOT_A_LEFT}; env set kaonic_slot a;" \
++	"else env set left ${BOOT_B_LEFT}; env set kaonic_slot b; fi;" \
++	"if test ${left} -gt 0;" \
++	"then " \
++		"setexpr left ${left} - 1;" \
++		"if test ${slot} = A;" \
++		"then env set BOOT_A_LEFT ${left};" \
++		"else env set BOOT_B_LEFT ${left}; fi;" \
++		"env save;" \
++		"env set kaonic_root rootfs_${kaonic_slot};" \
++		"if part number mmc ${boot_instance} bootfs_${kaonic_slot} distro_bootpart;" \
++		"then " \
++			"echo \"Booting slot ${slot}, ${left} attempts left\";" \
++			"env set devtype mmc; env set devnum ${boot_instance};" \
++			"run scan_dev_for_boot;" \
++		"fi;" \
++	"fi\0"
++
++/*
+  * default bootcmd for stm32mp1 STMicroelectronics boards:
+  * for serial/usb: execute the stm32prog command
+- * for mmc boot (eMMC, SD card), distro boot on the same mmc device
++ * for mmc boot (eMMC, SD card), boot the A/B slots on the same mmc device;
++ * with no slot left to try the attempts are reset and the board restarts
+  * for nand or spi-nand boot, distro boot with ubifs on UBI partition or
+  * sdcard
+  * for nor boot, distro boot on SD card = mmc0 ONLY !
+@@ -37,7 +72,15 @@
+ 	"else " \
+ 		"run env_check;" \
+ 		"if test ${boot_device} = mmc;" \
+-		"then env set boot_targets \"mmc${boot_instance}\"; fi;" \
++		"then " \
++			"env exists BOOT_ORDER || env set BOOT_ORDER A B;" \
++			"env exists BOOT_A_LEFT || env set BOOT_A_LEFT 3;" \
++			"env exists BOOT_B_LEFT || env set BOOT_B_LEFT 3;" \
++			"for slot in \"${BOOT_ORDER}\"; do run kaonic_slot_boot; done;" \
++			"echo \"No slot booted: resetting the attempts and restarting\";" \
++			"env set BOOT_A_LEFT 3; env set BOOT_B_LEFT 3; env save;" \
++			"reset;" \
++		"fi;" \
+ 		"if test ${boot_device} = nand ||" \
+ 		  " test ${boot_device} = spi-nand ;" \
+ 		"then env set boot_targets ubifs0 mmc0; fi;" \
+@@ -51,6 +94,7 @@
+ #undef CFG_EXTRA_ENV_SETTINGS
+ #define CFG_EXTRA_ENV_SETTINGS \
+ 	STM32MP_MEM_LAYOUT \
++	KAONIC_SLOT_BOOT \
+ 	ST_STM32MP1_BOOTCMD \
+ 	ST_STM32MP1_ALTBOOTCMD \
+ 	BOOTENV \
