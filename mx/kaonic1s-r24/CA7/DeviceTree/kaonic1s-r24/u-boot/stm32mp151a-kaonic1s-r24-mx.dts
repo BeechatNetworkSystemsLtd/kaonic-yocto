@@ -20,6 +20,7 @@
 /* USER CODE BEGIN includes */
 
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/mfd/st,stpmic1.h>
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/regulator/st,stm32mp15-regulator.h>
@@ -787,6 +788,18 @@
 		status = "okay";
 	};
 
+	pa_temp_a: temperature-sensor@48 {
+		compatible = "ti,tmp1075";
+		reg = <0x48>;
+		status = "okay";
+	};
+
+	pa_temp_b: temperature-sensor@49 {
+		compatible = "ti,tmp1075";
+		reg = <0x49>;
+		status = "okay";
+	};
+
 	/* USER CODE END i2c2 */
 };
 
@@ -922,12 +935,15 @@
 
 	cs-gpios= <&gpiob 13 0>;
 
-	spidev0: spidev0@0 {
-		compatible = "rohm,dh2228fv";
-        reg = <0>;
-        spi-max-frequency = <64000000>;
-        status = "okay";
-    };
+	rf215_b: radio@0 {
+		compatible = "beechat,rf215";
+		reg = <0>;
+		spi-max-frequency = <25000000>;
+		interrupt-parent = <&gpioe>;
+		interrupts = <15 IRQ_TYPE_LEVEL_HIGH>;
+		reset-gpios = <&gpioe 13 GPIO_ACTIVE_LOW>;
+		status = "okay";
+	};
 	/* USER CODE END spi3 */
 };
 
@@ -949,12 +965,15 @@
 
 	/* USER CODE BEGIN spi6 */
 	cs-gpios= <&gpiog 8 0>;
-	spidev1: spidev1@0 {
-		compatible = "rohm,dh2228fv";
-        reg = <0>;
-        spi-max-frequency = <64000000>;
-        status = "okay";
-    };
+	rf215_a: radio@0 {
+		compatible = "beechat,rf215";
+		reg = <0>;
+		spi-max-frequency = <25000000>;
+		interrupt-parent = <&gpiod>;
+		interrupts = <9 IRQ_TYPE_LEVEL_HIGH>;
+		reset-gpios = <&gpiod 8 GPIO_ACTIVE_LOW>;
+		status = "okay";
+	};
 	/* USER CODE END spi6 */
 };
 

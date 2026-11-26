@@ -134,6 +134,18 @@
 		enable-active-high;
 	};
 
+	vbus_ext_usb: vbus-ext-usb {
+		compatible = "regulator-fixed";
+		regulator-name = "VBUS EXT USB";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		regulator-boot-on;
+		vin-supply = <&vin>;
+		gpio = <&gpio_exp1 4 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+
 	wifi_pwrseq: wifi-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		reset-gpios = <&gpiog 7 GPIO_ACTIVE_LOW>;
@@ -723,6 +735,19 @@
 	status = "okay";
 
 	/* USER CODE BEGIN fmc */
+	#address-cells = <2>;
+	#size-cells = <1>;
+
+	fpga@1,0 {
+		compatible = "beechat,kaonic1s-fpga";
+		reg = <1 0x00000000 0x00040000>;
+		bank-width = <1>;
+
+		st,fmc2-ebi-cs-transaction-type = <1>;
+		st,fmc2-ebi-cs-address-setup-ns = <30>;
+		st,fmc2-ebi-cs-data-setup-ns = <40>;
+		st,fmc2-ebi-cs-bus-turnaround-ns = <15>;
+	};
 	/* USER CODE END fmc */
 };
 
@@ -789,6 +814,18 @@
 
 		#gpio-cells = <2>;
 		gpio-controller;
+		status = "okay";
+	};
+
+	pa_temp_a: temperature-sensor@48 {
+		compatible = "ti,tmp1075";
+		reg = <0x48>;
+		status = "okay";
+	};
+
+	pa_temp_b: temperature-sensor@49 {
+		compatible = "ti,tmp1075";
+		reg = <0x49>;
 		status = "okay";
 	};
 
@@ -1078,7 +1115,7 @@
 	phys = <&usbphyc_port0>;
 	phy-names = "usb";
 
-	vbus-supply = <&vbus_sw>;
+	vbus-supply = <&vbus_ext_usb>;
 
 	#address-cells = <1>;
 	#size-cells = <0>;
@@ -1135,11 +1172,11 @@
 	st,phy-tuning = <&usb_phy_tuning>;
 
 	phy-supply = <&vdd_usb>;
-    vbus-supply = <&vbus_sw>;
+	vbus-supply = <&vbus_ext_usb>;
 
 	connector {
 		compatible = "usb-a-connector";
-		vbus-supply = <&vbus_sw>;
+		vbus-supply = <&vbus_ext_usb>;
 	};
 	/* USER CODE END usbphyc_port0 */
 };
@@ -1201,6 +1238,10 @@
 &cpu0 {
 	clocks = <&scmi_clk CK_SCMI_MPU>;
 	cpu-supply = <&vddcore>;
+};
+
+&crc1 {
+	status = "okay";
 };
 
 &gpioa {
