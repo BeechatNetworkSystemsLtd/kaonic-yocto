@@ -303,8 +303,16 @@ cd $KAONIC_REPO
 
 git config --global --add safe.directory $KAONIC_REPO
 
-KAONIC_VERSION=$(git describe --tags | cut -d '-' -f1 | sed 's/^v//')
-
+# The image version lives in VERSION at the layer root, not in git tags, so a
+# build from any commit or a dirty tree reports the version it is meant to be.
+KAONIC_VERSION=$(tr -d '[:space:]' < "$KAONIC_REPO/VERSION" 2>/dev/null || true)
+if [[ -z "$KAONIC_VERSION" ]]; then
+    echo "Error: $KAONIC_REPO/VERSION is missing or empty."
+    if [ "$SCRIPT_SOURCED" = true ]; then
+        return 1
+    fi
+    exit 1
+fi
 echo "Kaonic machine: $MACHINE"
 echo "Kaonic version: $KAONIC_VERSION"
 echo "Build directory: $KAONIC_BUILD_DIR"
