@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Kaonic Build <build@beechat.network>
+From: Kaonic <dev@beechat.network>
 Date: Thu, 18 Sep 2026 12:00:00 +0000
 Subject: [PATCH] spi: stm32: warn once, not per transfer, about st,spi-midi-ns
 
@@ -20,7 +20,7 @@ bytes (tSPI_5), so any SPI clock above 8 MHz has to insert it.
 Warn once per device instead. Upstream reworked this area in v6.17; this is
 the minimal fix for the 6.6 tree.
 
-Signed-off-by: Kaonic Build <build@beechat.network>
+Signed-off-by: Kaonic <dev@beechat.network>
 ---
  drivers/spi/spi-stm32.c | 7 ++++---
  1 file changed, 4 insertions(+), 3 deletions(-)

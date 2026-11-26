@@ -1,5 +1,5 @@
 From 7fcdda69982100985f386ee2508ad1220bf0df59 Mon Sep 17 00:00:00 2001
-From: Yocto Build <yocto-build@beechat.network>
+From: Kaonic <dev@beechat.network>
 Date: Thu, 30 Jan 2025 21:04:19 +0000
 Subject: [PATCH] fix cpufreq crash for kaonic
 

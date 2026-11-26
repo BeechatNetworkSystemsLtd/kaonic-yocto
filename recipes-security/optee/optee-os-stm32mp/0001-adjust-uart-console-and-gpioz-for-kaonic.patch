@@ -1,5 +1,5 @@
 From d02b62cc0640fa1f8b61ddd3507a102f26fdb1e6 Mon Sep 17 00:00:00 2001
-From: Yocto Build <yocto-build@beechat.network>
+From: Kaonic <dev@beechat.network>
 Date: Sun, 26 Jan 2025 13:39:22 +0000
 Subject: [PATCH] adjust uart console and gpioz for kaonic
 

@@ -1,5 +1,5 @@
 From 4d94af4e5c40df704d5c69f67e6b6770ff685d19 Mon Sep 17 00:00:00 2001
-From: Yocto Build <yocto-build@beechat.network>
+From: Kaonic <dev@beechat.network>
 Date: Mon, 25 May 2026 19:28:09 +0000
 Subject: [PATCH] feat: change uart to 6
 
