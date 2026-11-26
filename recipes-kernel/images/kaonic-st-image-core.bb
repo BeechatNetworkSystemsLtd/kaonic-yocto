@@ -26,8 +26,7 @@ IMAGE_INSTALL:append = " \
     alsa-state \
     alsa-plugins \
 "
-# kaonic-hub's push-to-talk loads libopus.so.0 at run time (dlopen); without it PTT reports
-# the codec missing and cannot talk or play.
+# Push-to-talk loads libopus at run time.
 IMAGE_INSTALL:append = " libopus"
 
 # Testing, Development and Runtime
@@ -45,7 +44,6 @@ IMAGE_INSTALL:append = " \
 "
 
 # Kaonic Applications
-# kaonic-hub (web UI built in) and kaonic-hub-installer, both built by the kaonic-hub recipe.
 IMAGE_INSTALL:append = " kaonic-init kaonic-comm kaonic-hub kaonic-hub-installer"
 IMAGE_INSTALL:append = " kaonic-rf215"
 IMAGE_INSTALL:append = " kaonic-slot"
@@ -79,6 +77,19 @@ CORE_IMAGE_EXTRA_INSTALL += " \
     kernel-modules \
     tcpdump \
     "
+
+# ST's userfs image is too small for resize2fs to grow on first boot: rebuild it
+# at a size it can grow from.
+KAONIC_USERFS_IMAGE_SIZE ?= "32M"
+
+IMAGE_CMD:stsplitpartitions:append () {
+    for img in ${IMGDEPLOYDIR}/*.splitted-userfs*.ext4; do
+        [ -f "${img}" ] && [ ! -L "${img}" ] || continue
+        bbnote "rebuilding $(basename ${img}) at ${KAONIC_USERFS_IMAGE_SIZE}"
+        rm -f "${img}"
+        mkfs.ext4 -F -q -L userfs -d ${IMAGE_ROOTFS}/usr/local "${img}" ${KAONIC_USERFS_IMAGE_SIZE}
+    done
+}
 
 kaonic_install_alsa_state() {
     if [ -f ${IMAGE_ROOTFS}${sysconfdir}/alsa/kaonic-asound.state ]; then
