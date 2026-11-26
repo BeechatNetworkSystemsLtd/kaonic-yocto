@@ -1,0 +1,16 @@
+[Unit]
+Description=Kaonic hub: web UI, API, Wi-Fi, mesh and plugins
+Wants=kaonic-commd.service kaonic-hub-installer.service
+After=kaonic-commd.service kaonic-hub-installer.service network.target
+# Its state (keystore, database) lives on userfs.
+RequiresMountsFor=/usr/local
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/kaonic-hub
+Restart=always
+RestartSec=2
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target

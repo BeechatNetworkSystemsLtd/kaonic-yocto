@@ -1,0 +1,14 @@
+[Unit]
+Description=Kaonic hub installer: plugins and hub updates
+# Plugins and its state live on userfs.
+RequiresMountsFor=/usr/local
+Before=kaonic-hub.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kaonic-hub-installer
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

@@ -26,6 +26,9 @@ IMAGE_INSTALL:append = " \
     alsa-state \
     alsa-plugins \
 "
+# kaonic-hub's push-to-talk loads libopus.so.0 at run time (dlopen); without it PTT reports
+# the codec missing and cannot talk or play.
+IMAGE_INSTALL:append = " libopus"
 
 # Testing, Development and Runtime
 IMAGE_INSTALL:append = " spidev-test devmem2 evtest sqlite3"
@@ -42,10 +45,11 @@ IMAGE_INSTALL:append = " \
 "
 
 # Kaonic Applications
-IMAGE_INSTALL:append = " kaonic-init kaonic-comm kaonic-gateway"
+# kaonic-hub (web UI built in) and kaonic-hub-installer, both built by the kaonic-hub recipe.
+IMAGE_INSTALL:append = " kaonic-init kaonic-comm kaonic-hub kaonic-hub-installer"
+IMAGE_INSTALL:append = " kaonic-rf215"
 IMAGE_INSTALL:append = " kaonic-slot"
 IMAGE_INSTALL:append = " kaonic-user"
-IMAGE_INSTALL:append = " kaonic-rf215"
 IMAGE_INSTALL:append:stm32mp1-kaonic1s-r24 = " kaonic-audio-defaults"
 IMAGE_INSTALL:append:stm32mp1-kaonic1s-r30 = " kaonic-audio-defaults"
 IMAGE_INSTALL:append:stm32mp1-kaonic1x-r09 = " kaonic-audio-defaults"
