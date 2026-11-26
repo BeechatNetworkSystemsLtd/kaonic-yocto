@@ -24,3 +24,4 @@ mx/kaonic*/CA7/DeviceTree/kaonic*/**/Makefile
 scripts-local
 deploy
 
+scripts-local/
