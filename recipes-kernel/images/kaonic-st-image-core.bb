@@ -5,7 +5,17 @@ include recipes-st/images/st-image.inc
 
 inherit core-image
 
-ROOTFS_POSTPROCESS_COMMAND += "kaonic_install_alsa_state; "
+ROOTFS_POSTPROCESS_COMMAND += "kaonic_install_alsa_state; kaonic_write_image_version; "
+
+# The image version from VERSION at the layer root; the recipe is parsed again when it changes.
+def kaonic_image_version(d):
+    import os
+    path = os.path.normpath(os.path.join(d.getVar('FILE_DIRNAME'), '..', '..', 'VERSION'))
+    bb.parse.mark_dependency(d, path)
+    with open(path) as file:
+        return file.read().strip()
+
+KAONIC_IMAGE_VERSION := "${@kaonic_image_version(d)}"
 
 IMAGE_LINGUAS = "en-us"
 
@@ -97,4 +107,9 @@ kaonic_install_alsa_state() {
         install -m 0644 ${IMAGE_ROOTFS}${sysconfdir}/alsa/kaonic-asound.state \
             ${IMAGE_ROOTFS}${localstatedir}/lib/alsa/asound.state
     fi
+}
+
+kaonic_write_image_version() {
+    install -d ${IMAGE_ROOTFS}${sysconfdir}/kaonic
+    echo "${KAONIC_IMAGE_VERSION}" > ${IMAGE_ROOTFS}${sysconfdir}/kaonic/image.version
 }
