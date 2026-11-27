@@ -31,6 +31,9 @@ KAONIC_VIEWER_PASSWORD ?= ""
 
 # Banner copyright year.
 KAONIC_BUILD_YEAR = "${@d.getVar('DATE')[0:4]}"
+# Only the year counts: a build crossing midnight keeps the same signature.
+KAONIC_BUILD_YEAR[vardepsexclude] = "DATE"
+KAONIC_BUILD_YEAR[vardepvalue] = "${KAONIC_BUILD_YEAR}"
 
 inherit useradd
 
