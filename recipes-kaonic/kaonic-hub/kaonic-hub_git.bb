@@ -15,7 +15,7 @@ SRC_URI = " \
     file://kaonic-hub.service \
     file://kaonic-hub-installer.service \
 "
-SRCREV = "8c8bda5874690d8f1f0a78596fba8e491f7ea13b"
+SRCREV = "dcca27a60aa9a4f7cf406d0ad449c0d1c6f79bc8"
 
 PV = "0.3.0+git"
 
