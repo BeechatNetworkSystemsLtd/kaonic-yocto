@@ -16,10 +16,10 @@ INSANE_SKIP:${PN} += "already-stripped"
 
 inherit cargo_bin systemd pkgconfig
 
-PV = "0.1+git"
+PV = "0.2.5+git"
 PR = "r5"
 SRC_URI = "gitsm://github.com/BeechatNetworkSystemsLtd/kaonic-radio.git;protocol=https;branch=main;"
-SRCREV = "3b1a75842a974fc700508205bfb3858428320a2c"
+SRCREV = "5f268fcb5beab4b3481081e7b66364b42de829a2"
 
 do_compile[network] = "1"
 

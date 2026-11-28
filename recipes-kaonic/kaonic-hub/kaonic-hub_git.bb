@@ -15,9 +15,9 @@ SRC_URI = " \
     file://kaonic-hub.service \
     file://kaonic-hub-installer.service \
 "
-SRCREV = "dcca27a60aa9a4f7cf406d0ad449c0d1c6f79bc8"
+SRCREV = "3c74d2d5460b38c15536440a87ea1408a8c7f29c"
 
-PV = "0.3.0+git"
+PV = "0.3.2+git"
 
 S = "${WORKDIR}/git"
 WEBUI = "${S}/resources/kaonic-webui"
